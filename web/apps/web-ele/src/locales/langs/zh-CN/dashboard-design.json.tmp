@@ -1,0 +1,218 @@
+{
+  "title": "仪表盘设计",
+  "preview": "预览",
+  "save": "保存",
+  "saveSuccess": "保存成功",
+  "clear": "清空",
+  "clearConfirm": "确定要清空画布吗？此操作不可撤销。",
+  "clearSuccess": "已清空",
+  "export": "导出",
+  "exportSuccess": "导出成功",
+  "import": "导入",
+  "importTitle": "导入配置",
+  "importPlaceholder": "请粘贴 JSON 配置内容...",
+  "importSuccess": "导入成功",
+  "importError": "配置格式错误",
+  "importEmpty": "请输入配置内容",
+  "viewCode": "查看代码",
+  "jsonPreview": "JSON 预览",
+  "copyCode": "复制代码",
+  "copySuccess": "已复制到剪贴板",
+  "copyError": "复制失败",
+  "undoSuccess": "已撤销",
+  "redoSuccess": "已重做",
+  "copyWidgetSuccess": "已复制",
+  "pasteWidgetSuccess": "已粘贴",
+  "deleteWidgetSuccess": "已删除",
+  "noWidgetsTip": "请先添加组件",
+  "noConfigTip": "暂无仪表盘配置",
+  "loadingData": "数据加载中...",
+  "loadDataError": "数据加载失败",
+  "unknownWidget": "未知组件类型",
+  "widgetCount": "{count} 个组件",
+  "dragTip": "从左侧拖拽组件到此处",
+  "canvas": {
+    "title": "设计画布",
+    "adaptive": "自适应",
+    "actualSize": "实际尺寸",
+    "settings": "画布设置"
+  },
+  "material": {
+    "title": "组件库",
+    "search": "搜索组件...",
+    "category": {
+      "common": "通用",
+      "chart": "图表",
+      "map": "地图",
+      "media": "多媒体",
+      "other": "其他"
+    }
+  },
+  "attribute": {
+    "title": "属性面板",
+    "canvasConfig": "画布配置",
+    "widgetConfig": "组件配置",
+    "styleConfig": "样式配置",
+    "dataConfig": "数据配置",
+    "globalSettings": "仪表盘全局设置",
+    "dashboardName": "仪表盘名称",
+    "gridLayout": "网格布局",
+    "columns": "列数",
+    "rowHeight": "行高 (px)",
+    "widgetMargin": "组件间距 (px)",
+    "horizontal": "水平",
+    "vertical": "垂直",
+    "background": "背景",
+    "backgroundColor": "背景颜色",
+    "reset": "重置",
+    "display": "显示",
+    "outerMargin": "四周边距",
+    "outerMarginTip": "渲染时显示四周边距",
+    "widgetTitle": "标题",
+    "layout": "布局",
+    "widthGrid": "宽度 (格)",
+    "heightGrid": "高度 (格)",
+    "layoutTip": "提示：直接在画布上拖拽调整组件大小",
+    "iconConfig": "图标配置",
+    "icon": "图标",
+    "iconColor": "图标颜色",
+    "status": "状态",
+    "strokeWidth": "线条宽度",
+    "placeholder": {
+      "name": "请输入名称",
+      "title": "请输入标题",
+      "remark": "请输入表单说明",
+      "category": "请选择分类",
+      "description": "请输入页面说明"
+    },
+    "iconOptions": {
+      "trending": "趋势",
+      "creditCard": "信用卡",
+      "users": "用户",
+      "activity": "活动",
+      "bell": "铃铛",
+      "award": "奖杯"
+    },
+    "progressStatus": {
+      "default": "默认",
+      "success": "成功",
+      "warning": "警告",
+      "exception": "异常"
+    },
+    "colorTheme": {
+      "default": "默认",
+      "fresh": "清新",
+      "business": "商务",
+      "tech": "科技",
+      "warm": "暖色"
+    },
+    "resultType": {
+      "list": "列表",
+      "tree": "树形",
+      "object": "对象",
+      "value": "单值",
+      "chartAxis": "轴向图表",
+      "chartPie": "饼图",
+      "chartGauge": "仪表盘",
+      "chartRadar": "雷达图",
+      "chartScatter": "散点图",
+      "chartHeatmap": "热力图"
+    },
+    "borderStyle": {
+      "solid": "实线",
+      "dashed": "虚线",
+      "dotted": "点线",
+      "none": "无"
+    }
+  },
+  "widgets": {
+    "announcement": {
+      "markAllRead": "全部已读",
+      "top": "置顶",
+      "noData": "暂无公告",
+      "loading": "加载中...",
+      "noContent": "暂无详细内容",
+      "publisher": "发布者：",
+      "priority": {
+        "normal": "普通",
+        "important": "重要",
+        "urgent": "紧急"
+      },
+      "time": {
+        "justNow": "刚刚",
+        "minutesAgo": "分钟前",
+        "hoursAgo": "小时前",
+        "daysAgo": "天前"
+      }
+    },
+    "weather": {
+      "city": "城市",
+      "humidity": "湿度",
+      "wind": "风力"
+    },
+    "chart": {
+      "visits": "访问量"
+    },
+    "iframe": {
+      "refresh": "刷新",
+      "openNew": "新窗口打开",
+      "placeholder": "iframe 嵌入",
+      "noUrl": "未设置 URL",
+      "loading": "加载中...",
+      "loadFailed": "加载失败",
+      "retry": "点击重试"
+    },
+    "todo": {
+      "title": "待办事项",
+      "noData": "暂无待办",
+      "priority": {
+        "high": "高",
+        "medium": "中",
+        "low": "低"
+      }
+    },
+    "dataTable": {
+      "status": {
+        "normal": "正常",
+        "warning": "警告",
+        "error": "异常",
+        "success": "成功",
+        "failed": "失败",
+        "processing": "进行中"
+      }
+    },
+    "welcome": {
+      "greeting": {
+        "night": "夜深了",
+        "morning": "早上好",
+        "morning2": "上午好",
+        "noon": "中午好",
+        "afternoon": "下午好",
+        "evening": "晚上好"
+      }
+    },
+    "countdown": {
+      "day": "天",
+      "hour": "时",
+      "minute": "分",
+      "second": "秒",
+      "finished": "已结束"
+    },
+    "video": {
+      "placeholder": "视频播放器"
+    },
+    "ranking": {
+      "tenThousand": "万"
+    },
+    "clock": {
+      "weekdays": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+      "year": "年",
+      "month": "月",
+      "day": "日"
+    },
+    "image": {
+      "title": "图片",
+      "noData": "暂无图片"
+    }
+  }
+}

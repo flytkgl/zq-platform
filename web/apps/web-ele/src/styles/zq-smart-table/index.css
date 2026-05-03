@@ -1,0 +1,454 @@
+@import "./theme.css";
+
+/* ========== Cell editing: mainstream airtable-style inline editing ========== */
+
+/* Active cell outline */
+.zq-cell-editing {
+  outline: 2px solid var(--zq-brand-color) !important;
+  outline-offset: -1px;
+  padding: 0 !important;
+  z-index: 2;
+  position: relative;
+}
+
+/* --- el-input / el-input-number wrappers --- */
+.zq-cell-editing .el-input__wrapper,
+.zq-cell-editing .el-input-number .el-input__wrapper {
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 6px !important;
+}
+
+.zq-cell-editing .el-input__wrapper:hover,
+.zq-cell-editing .el-input__wrapper.is-focus {
+  box-shadow: none !important;
+}
+
+.zq-cell-editing .el-input__inner {
+  height: 100%;
+  font-size: 12px;
+  color: var(--zq-text-primary);
+}
+
+/* --- el-select (Element Plus 2.4+) --- */
+.zq-cell-editing .el-select {
+  width: 100% !important;
+}
+
+.zq-cell-editing .el-select__wrapper {
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 6px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  line-height: 22px !important;
+  gap: 2px !important;
+}
+
+.zq-cell-editing .el-select__wrapper:hover,
+.zq-cell-editing .el-select__wrapper.is-focused,
+.zq-cell-editing .el-select__wrapper.is-hovering {
+  box-shadow: none !important;
+}
+
+/* Hide the select arrow / suffix */
+.zq-cell-editing .el-select__suffix {
+  display: none !important;
+}
+
+.zq-cell-editing .el-select__caret {
+  display: none !important;
+}
+
+/* Select placeholder text */
+.zq-cell-editing .el-select__placeholder {
+  font-size: 12px;
+}
+
+/* Multi-select tags inside cell */
+.zq-cell-editing .el-select .el-tag {
+  max-height: 20px;
+  font-size: 11px;
+}
+
+/* --- el-input-number: hide +/- controls --- */
+.zq-cell-editing .el-input-number {
+  width: 100% !important;
+}
+
+.zq-cell-editing .el-input-number__decrease,
+.zq-cell-editing .el-input-number__increase {
+  display: none !important;
+}
+
+/* --- el-date-picker --- */
+.zq-cell-editing .el-date-editor.el-input,
+.zq-cell-editing .el-date-editor {
+  width: 100% !important;
+}
+
+.zq-cell-editing .el-date-editor .el-input__wrapper {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 6px !important;
+}
+
+/* Hide date prefix icon */
+.zq-cell-editing .el-input__prefix {
+  display: none !important;
+}
+
+/* ========== Table cell display enhancements ========== */
+
+/* First data column (title) bold text */
+.zq-cell-title {
+  font-weight: 600 !important;
+  color: var(--zq-text-primary);
+}
+
+/* Empty cell placeholder */
+.zq-cell-placeholder {
+  color: var(--zq-text-placeholder);
+  font-style: normal;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+td:hover .zq-cell-placeholder {
+  opacity: 1;
+}
+
+/* Sticky left columns (checkbox, row number, expand) */
+.zq-sticky-col {
+  position: sticky !important;
+  z-index: 3;
+  background: var(--zq-bg-cell);
+}
+
+/* Row hover highlight */
+tr:hover .zq-sticky-col {
+  background: var(--zq-bg-cell-hover) !important;
+}
+
+/* Selected row sticky column */
+tr.zq-row-selected .zq-sticky-col {
+  background: var(--zq-brand-color-light) !important;
+}
+
+/* ========== Select dropdown fix: ensure popper below cell ========== */
+.zq-cell-editing .el-select {
+  --el-select-input-focus-border-color: transparent !important;
+}
+
+/* Force select popper to appear below the trigger with correct offset */
+.zq-select-popper {
+  margin-top: 10px !important;
+}
+
+/* ========== Row number / actions toggle ========== */
+.zq-row-num-cell .zq-row-num {
+  display: block;
+}
+.zq-row-num-cell .zq-row-actions {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+tr:hover .zq-row-num-cell .zq-row-num {
+  display: none;
+}
+tr:hover .zq-row-num-cell .zq-row-actions {
+  display: flex;
+}
+
+/* ========== Header arrow & filter hover ========== */
+.zq-header-arrow:hover,
+.zq-header-filter:hover {
+  background: var(--zq-border-color-light);
+}
+
+/* ========== Right-click context menu ========== */
+.zq-ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--zq-text-primary);
+  transition: background 0.15s;
+}
+
+.zq-ctx-item:hover {
+  background: var(--zq-bg-cell-hover);
+}
+
+.zq-ctx-danger {
+  color: var(--zq-danger-color) !important;
+}
+
+.zq-ctx-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--zq-border-color-light);
+}
+
+/* ========== Field config popover ========== */
+.zq-field-popover {
+  padding: 0 !important;
+  border-radius: 8px !important;
+}
+
+.zq-field-popover .el-popover__title {
+  display: none;
+}
+
+/* ========== Frozen columns ========== */
+.zq-frozen-col {
+  position: sticky;
+  z-index: 4;
+  background: inherit;
+}
+
+.zq-frozen-col-last {
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+}
+
+thead .zq-frozen-col {
+  z-index: 21;
+}
+
+/* ========== Focused cell (keyboard nav) ========== */
+.zq-cell-focused {
+  outline: 2px solid var(--zq-brand-color) !important;
+  outline-offset: -2px;
+}
+
+/* ========== Region selection ========== */
+.zq-cell-in-selection {
+  background: var(--zq-brand-color-light) !important;
+  position: relative;
+}
+
+.zq-cell-in-selection::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: -1px;
+  bottom: -1px;
+  pointer-events: none;
+  border: 0 solid var(--zq-brand-color);
+  z-index: 5;
+}
+.zq-sel-top::after    { border-top-width: 2px !important; }
+.zq-sel-bottom::after { border-bottom-width: 2px !important; }
+.zq-sel-left::after   { border-left-width: 2px !important; }
+.zq-sel-right::after  { border-right-width: 2px !important; }
+
+/* ========== Search highlight ========== */
+.zq-cell-search-hit {
+  background: rgba(255, 196, 0, 0.18) !important;
+}
+
+/* ========== Validation error ========== */
+.zq-cell-error {
+  outline: 2px solid #f54a45 !important;
+  outline-offset: -1px;
+  background: rgba(245, 74, 69, 0.06) !important;
+}
+
+/* ========== Column drag reorder ========== */
+.zq-col-drag-over {
+  border-left: 2px solid var(--zq-brand-color) !important;
+}
+
+/* ========== Row drag reorder ========== */
+.zq-row-drag-over td {
+  border-top: 2px solid var(--zq-brand-color) !important;
+}
+
+/* ========== Drawer field icon ========== */
+.zq-drawer-field-icon {
+  color: var(--zq-text-placeholder);
+  flex-shrink: 0;
+}
+
+/* ========== Checkbox check animation ========== */
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  animation: zq-check-bounce 0.25s ease;
+}
+@keyframes zq-check-bounce {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ========== Row fade-in ========== */
+.zq-row-enter-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.zq-row-enter-from {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* ========== Custom scrollbar ========== */
+.zq-table-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.zq-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.zq-table-scroll::-webkit-scrollbar-thumb {
+  background: var(--zq-border-color);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.zq-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--zq-text-placeholder);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.zq-table-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ========== Scroll shadow indicators ========== */
+.zq-scroll-shadow-left {
+  box-shadow: inset 12px 0 8px -8px rgba(0,0,0,0.08);
+}
+.zq-scroll-shadow-right {
+  box-shadow: inset -12px 0 8px -8px rgba(0,0,0,0.08);
+}
+.zq-scroll-shadow-both {
+  box-shadow: inset 12px 0 8px -8px rgba(0,0,0,0.08), inset -12px 0 8px -8px rgba(0,0,0,0.08);
+}
+
+/* ========== Keyboard shortcut badge ========== */
+.zq-kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.4;
+  color: var(--zq-text-secondary);
+  background: var(--zq-bg-secondary);
+  border: 1px solid var(--zq-border-color-light);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--zq-border-color-light);
+}
+
+/* ========== Row left indicator ========== */
+.zq-row-indicator td:first-child {
+  position: relative;
+}
+.zq-row-indicator td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+  transition: background 0.15s;
+}
+.zq-row-indicator:hover td:first-child::before {
+  background: var(--zq-brand-color);
+  opacity: 0.4;
+}
+.zq-row-selected td:first-child::before {
+  background: var(--zq-brand-color) !important;
+  opacity: 1 !important;
+}
+
+/* ========== Zebra stripes (alternating rows) ========== */
+.zq-table-zebra tbody tr:nth-child(even) td {
+  background: var(--zq-bg-secondary) !important;
+}
+
+/* ========== Group collapse / subtotal ========== */
+.zq-group-header td {
+  transition: background 0.15s;
+}
+.zq-group-header:hover td {
+  background: var(--zq-bg-cell-hover) !important;
+}
+.zq-group-chevron {
+  transition: transform 0.2s ease;
+  color: var(--zq-text-secondary);
+  flex-shrink: 0;
+}
+.zq-group-chevron.rotate-90 {
+  transform: rotate(90deg);
+}
+.zq-group-subtotal td {
+  background: var(--zq-bg-secondary);
+}
+
+/* ========== Summary row (fixed at bottom) ========== */
+.zq-summary-row {
+  position: relative;
+  z-index: 5;
+}
+.zq-summary-sticky-col {
+  position: sticky !important;
+  left: 0;
+  z-index: 3;
+  background: var(--zq-bg-header);
+}
+
+/* ========== Print styles ========== */
+@media print {
+  body { background: #fff !important; }
+  .zq-table-scroll { overflow: visible !important; max-height: none !important; }
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
+  .zq-sticky-col, .zq-frozen-col { position: static !important; }
+  .el-drawer, .el-overlay, .el-message, .el-message-box { display: none !important; }
+  .zq-frozen-col-last { box-shadow: none !important; }
+}
+
+/* ========== Scrollbar styling ========== */
+.zq-table-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.zq-table-scroll::-webkit-scrollbar-thumb {
+  background: var(--zq-border-color);
+  border-radius: 3px;
+}
+
+.zq-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--zq-text-placeholder);
+}
+
+/* ========== Record drawer: comment panel full height ========== */
+.zq-drawer-body:has(.zq-drawer-with-comment) {
+  padding: 0 !important;
+}
+.zq-drawer-body:has(.zq-drawer-with-comment) > .el-scrollbar {
+  height: 100%;
+}
+.zq-drawer-body:has(.zq-drawer-with-comment) .el-scrollbar__wrap {
+  overflow: hidden !important;
+}
+.zq-drawer-body:has(.zq-drawer-with-comment) .el-scrollbar__view,
+.zq-drawer-body:has(.zq-drawer-with-comment) .el-scrollbar__view > div {
+  height: 100%;
+  padding: 0 !important;
+}
+
+/* Comment input focus ring */
+.zq-comment-input-wrap:focus-within {
+  border-color: var(--zq-brand-color) !important;
+}

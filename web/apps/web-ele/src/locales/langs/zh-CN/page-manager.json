@@ -1,0 +1,106 @@
+{
+  "applicationName": "所属应用",
+  "name": "页面名称",
+  "code": "页面编码",
+  "status": "状态",
+  "description": "描述",
+  "createTime": "创建时间",
+  "updateTime": "更新时间",
+  "actions": "操作",
+  "placeholder": {
+    "name": "请输入页面名称",
+    "code": "请输入页面编码",
+    "status": "请选择状态",
+    "remark": "请输入表单说明",
+    "category": "请选择分类",
+    "description": "请输入页面说明"
+  },
+  "categoryMap": {
+    "dashboard": "仪表盘",
+    "portal": "门户页面",
+    "databoard": "数据看板",
+    "other": "其他"
+  },
+  "statusMap": {
+    "all": "全部",
+    "published": "已发布",
+    "draft": "草稿"
+  },
+  "create": "新建页面",
+  "batchDelete": "批量删除",
+  "batchDeleteWithCount": "批量删除 ({count})",
+  "deleteConfirm": "确定要删除页面 \"{name}\" 吗？",
+  "deleteConfirmTitle": "删除确认",
+  "deleteSuccess": "已删除页面: {name}",
+  "batchDeleteConfirm": "确定要删除选中的 {count} 个页面吗？",
+  "batchDeleteConfirmTitle": "批量删除确认",
+  "batchDeleteSuccess": "已删除 {count} 个页面",
+  "unpublishSuccess": "页面 \"{name}\" 已取消发布",
+  "unpublishFailed": "取消发布失败",
+  "copyCodePlaceholder": "请输入新页面编码",
+  "copyTitle": "复制页面",
+  "copyCodeRule": "编码只能包含字母、数字、下划线和横线",
+  "codeFormatError": "编码必须以字母开头，只能包含字母、数字和下划线",
+  "copySuccess": "复制成功",
+  "design": "设计",
+  "editInfo": "编辑信息",
+  "saveSuccess": "页面保存成功",
+  "preview": "预览",
+  "publish": "发布",
+  "unpublish": "取消发布",
+  "copy": "复制",
+  "setAsHome": "设为首页",
+  "setAsHomeTitle": "设为默认首页",
+  "setAsHomeConfirm": "确定要将页面「{name}」设为默认首页吗？",
+  "setAsHomePath": "首页路径",
+  "setAsHomeTip": "设置后，用户登录系统将默认跳转到此页面。",
+  "setAsHomeAppTip": "此页面属于应用「{app}」，将更新该应用的首页配置。",
+  "setHomeSuccess": "已设为默认首页",
+  "setHomeFailed": "设置首页失败",
+  "more": "更多",
+  "category": "页面分类",
+  "editor": {
+    "title": "在线开发",
+    "create": "创建页面",
+    "edit": "编辑页面",
+    "createSuccess": "创建成功",
+    "steps": {
+      "basic": "基础信息",
+      "design": "页面设计",
+      "preview": "页面预览"
+    },
+    "loadFailed": "加载页面数据失败",
+    "validate": {
+      "basic": "基础信息验证：名称、编码必填",
+      "perfectDesign": "请完善页面设计"
+    },
+    "autoSave": {
+      "saving": "保存中...",
+      "saved": "已保存",
+      "unsaved": "未保存"
+    }
+  },
+  "previewDialog": {
+    "title": "页面预览",
+    "loadFailed": "加载页面配置失败",
+    "verifySuccess": "验证通过",
+    "realtimeData": "实时数据 (v-model):",
+    "noConfig": "暂无页面配置",
+    "close": "关闭",
+    "verifySubmit": "验证提交",
+    "verifyFailed": "页面验证失败"
+  },
+  "publishDialog": {
+    "title": "页面发布",
+    "success": "发布成功",
+    "failed": "发布失败",
+    "menuConfig": "菜单配置",
+    "menuName": "菜单名称",
+    "parentMenu": "上级菜单",
+    "parentMenuPlaceholder": "请选择上级菜单（不选则为顶级）",
+    "menuIcon": "菜单图标",
+    "routeInfo": "路由信息",
+    "accessPath": "访问路径",
+    "confirmPublish": "确认发布"
+  }
+}

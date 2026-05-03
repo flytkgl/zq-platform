@@ -1,0 +1,234 @@
+/* ========== 圆角表格样式 ========== */
+
+/* 表格外层圆角 + 去除四周边框 */
+.el-table {
+  overflow: hidden;
+  border: none !important;
+  border-radius: 8px;
+}
+
+.el-table__inner-wrapper {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.el-table__inner-wrapper::before {
+  bottom: 0;
+  left: 0;
+  height: 0 !important;
+}
+
+/* 去除 border 模式下的四周边框 */
+.el-table--border {
+  border: none !important;
+}
+
+.el-table--border::before,
+.el-table--border::after {
+  display: none !important;
+}
+
+.el-table--border .el-table__inner-wrapper::after {
+  display: none !important;
+}
+
+/* 去除所有单元格的右边框 */
+.el-table--border .el-table__cell {
+  border-right: none !important;
+}
+
+/* 去除表头顶部边框（原来有，现在去掉） */
+.el-table--border .el-table__header th.el-table__cell {
+  position: relative;
+  border-top: none !important;
+}
+
+/* 表头短竖线用于拖拽调整列宽 */
+.el-table--border .el-table__header th.el-table__cell::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 1px;
+  height: 50%;
+  content: '';
+  background-color: var(--el-border-color-lighter);
+  transform: translateY(-50%);
+}
+
+/* 最后一列不需要竖线 */
+.el-table--border .el-table__header th.el-table__cell:last-child::after {
+  display: none;
+}
+
+.el-table td.el-table__cell,
+.el-table th.el-table__cell.is-leaf {
+  border-bottom: none !important;
+}
+
+/* 表头圆角 - 左上角 */
+.el-table__header-wrapper {
+  overflow: hidden;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.el-table__header tr:first-child th:first-child {
+  border-top-left-radius: 8px;
+}
+
+/* 表头圆角 - 右上角 */
+.el-table__header tr:first-child th:last-child {
+  border-top-right-radius: 8px;
+}
+
+/* 表体圆角 - 底部 */
+.el-table__body-wrapper {
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+/* 最后一行圆角 */
+.el-table__body tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+.el-table__body tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+/* 去除表格底部边框线 */
+.el-table__body tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* 固定列的圆角处理 */
+.el-table__fixed-left {
+  overflow: hidden;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.el-table__fixed-right {
+  overflow: hidden;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* 去除固定列的阴影边框 */
+.el-table__fixed-right-patch,
+.el-table__border-left-patch {
+  display: none !important;
+}
+
+/* el-table 表头行样式 - 全局生效 */
+.el-table__header th.el-table__cell {
+  color: hsl(var(--muted-foreground)) !important;
+  background-color: hsl(var(--background-deep)) !important;
+}
+
+.zq-table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+/* Override Element Plus Table V2 styles if needed */
+.el-table-v2__header-cell {
+  font-weight: bold;
+  color: var(--el-text-color-primary);
+  background-color: var(--el-fill-color-light);
+}
+
+/* zq-table-fullscreen */
+.zq-table-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 2000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 16px !important;
+  background-color: hsl(var(--background)) !important;
+}
+
+/* 刷新按钮旋转动画 */
+.zq-spin {
+  animation: zq-spin 1s linear infinite;
+}
+
+@keyframes zq-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 表尾统计多行样式 */
+.summary-footer {
+  background-color: hsl(var(--background-deep));
+}
+
+.summary-footer table {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.summary-row {
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-cell {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: hsl(var(--foreground));
+}
+
+.summary-cell:first-child {
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ========== 自定义过滤弹窗样式 ========== */
+.zq-filter-popover {
+  padding: 4px;
+}
+
+.zq-filter-popover .el-checkbox {
+  display: flex;
+  width: 100%;
+}
+
+.zq-filter-popover .el-checkbox__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 自定义表头单元格样式 - 让过滤图标和排序图标在同一行 */
+.zq-table-header-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zq-table-header-label {
+  white-space: nowrap;
+}
+
+.zq-filter-icon {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.zq-filter-icon:hover {
+  color: var(--el-color-primary);
+}

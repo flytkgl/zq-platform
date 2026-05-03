@@ -1,0 +1,125 @@
+{
+  "email": {
+    "title": "邮箱管理",
+    "composeBtn": "撰写邮件",
+    "refresh": "同步",
+    "syncing": "同步中...",
+    "search": "搜索邮件...",
+    "selectAccount": "选择账号",
+    "addAccount": "添加账号",
+    "manageAccount": "管理账号",
+    "folders": {
+      "inbox": "收件箱",
+      "sent": "已发送",
+      "drafts": "草稿箱",
+      "trash": "垃圾箱",
+      "spam": "垃圾邮件",
+      "archive": "归档"
+    },
+    "list": {
+      "noEmails": "暂无邮件",
+      "noSubject": "(无主题)",
+      "emails": "封邮件"
+    },
+    "detail": {
+      "selectEmail": "选择一封邮件查看详情",
+      "from": "发件人",
+      "to": "收件人",
+      "reply": "回复",
+      "forward": "转发",
+      "delete": "删除",
+      "deleteConfirm": "确认删除这封邮件吗？",
+      "deleteSuccess": "删除成功",
+      "deleteFailed": "删除失败",
+      "attachments": "附件",
+      "loadFailed": "加载邮件详情失败"
+    },
+    "composeModal": {
+      "new": "撰写邮件",
+      "reply": "回复邮件",
+      "forward": "转发邮件",
+      "to": "收件人",
+      "cc": "抄送",
+      "subject": "主题",
+      "content": "内容",
+      "attachments": "附件",
+      "addAttachment": "添加附件",
+      "cancel": "取消",
+      "saveDraft": "保存草稿",
+      "send": "发送",
+      "sendSuccess": "发送成功",
+      "sendFailed": "发送失败",
+      "fillRequired": "请填写收件人、主题和内容",
+      "toPlaceholder": "多个收件人用逗号分隔",
+      "ccPlaceholder": "多个抄送人用逗号分隔",
+      "subjectPlaceholder": "邮件主题",
+      "contentPlaceholder": "邮件正文（富文本编辑器待集成）",
+      "draftSaved": "草稿保存功能待实现"
+    },
+    "account": {
+      "add": "添加邮箱账号",
+      "edit": "编辑邮箱账号",
+      "name": "账号名称",
+      "namePlaceholder": "如：工作邮箱",
+      "provider": "邮件服务商",
+      "providerSelect": "选择邮件服务商",
+      "email": "邮箱地址",
+      "emailPlaceholder": "your@email.com",
+      "password": "密码/授权码",
+      "passwordPlaceholder": "输入邮箱密码或授权码",
+      "advancedSettings": "高级设置",
+      "imapServer": "IMAP服务器",
+      "imapServerPlaceholder": "imap.example.com",
+      "imapPort": "IMAP端口",
+      "smtpServer": "SMTP服务器",
+      "smtpServerPlaceholder": "smtp.example.com",
+      "smtpPort": "SMTP端口",
+      "autoSync": "自动同步",
+      "syncInterval": "同步间隔",
+      "cancel": "取消",
+      "test": "测试连接",
+      "save": "保存",
+      "testSuccess": "连接测试成功！",
+      "testFailed": "连接测试失败",
+      "saveSuccess": "保存成功",
+      "updateSuccess": "更新成功",
+      "saveFailed": "保存失败",
+      "validation": {
+        "nameRequired": "请输入账号名称",
+        "providerRequired": "请选择邮件服务商",
+        "emailRequired": "请输入邮箱地址",
+        "emailInvalid": "请输入正确的邮箱地址",
+        "passwordRequired": "请输入密码或授权码"
+      }
+    },
+    "sync": {
+      "notSynced": "未同步",
+      "syncing": "同步中",
+      "success": "同步成功",
+      "failed": "同步失败",
+      "justNow": "刚刚",
+      "minutesAgo": "分钟前",
+      "hoursAgo": "小时前",
+      "daysAgo": "天前",
+      "syncSuccess": "同步成功，收到 {count} 封新邮件",
+      "syncFailed": "同步失败",
+      "selectAccountFirst": "请先选择邮箱账号"
+    },
+    "stats": {
+      "loadFailed": "加载统计失败"
+    },
+    "providers": {
+      "outlook": "Microsoft Outlook",
+      "163": "网易163邮箱",
+      "qq": "QQ邮箱",
+      "gmail": "Gmail",
+      "enterprise": "企业邮箱",
+      "notes": {
+        "163": "需要使用授权码，不是登录密码",
+        "qq": "需要使用授权码，不是QQ密码",
+        "gmail": "需要开启允许不够安全的应用或使用应用专用密码",
+        "enterprise": "请联系IT管理员获取邮件服务器配置"
+      }
+    }
+  }
+}

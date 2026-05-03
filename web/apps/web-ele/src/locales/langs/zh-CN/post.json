@@ -1,0 +1,34 @@
+{
+  "name": "岗位",
+  "title": "岗位管理",
+  "postName": "岗位名称",
+  "postCode": "岗位编码",
+  "postType": "岗位类型",
+  "postLevel": "岗位级别",
+  "department": "所属部门",
+  "description": "岗位描述",
+  "status": "状态",
+  "operation": "操作",
+  "edit": "编辑",
+  "codeFormatError": "岗位编码只能包含字母、数字、下划线和横线",
+  "selectDepartment": "请选择所属部门",
+  "descriptionPlaceholder": "请输入岗位描述/职责",
+  "selectUsersFirst": "请先选择用户",
+  "addUsersSuccess": "添加成功",
+  "removeUsersConfirm": "确定要删除选中的 {0} 个用户吗？",
+  "removeUsersSuccess": "删除成功",
+  "removeUsersFailed": "删除失败",
+  "types": {
+    "management": "管理岗",
+    "technical": "技术岗",
+    "business": "业务岗",
+    "functional": "职能岗",
+    "other": "其他"
+  },
+  "levels": {
+    "senior": "高层",
+    "middle": "中层",
+    "basic": "基层",
+    "staff": "一般员工"
+  }
+}

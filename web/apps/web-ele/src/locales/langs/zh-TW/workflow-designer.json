@@ -1,0 +1,673 @@
+{
+  "designer": {
+    "title": "流程設計器",
+    "flowName": "流程名稱",
+    "flowNamePlaceholder": "請輸入流程名稱",
+    "save": "保存",
+    "preview": "預覽",
+    "publish": "發布",
+    "undo": "撤銷",
+    "redo": "重做",
+    "saveFirst": "請先保存流程",
+    "isDirty": "有未保存的更改",
+    "saveSuccess": "保存成功",
+    "publishSuccess": "發布成功",
+    "previewInfo": "預覽功能開發中",
+    "deleteNodeConfirm": "確定要刪除此節點嗎？",
+    "deleteBranchConfirm": "確定要刪除此條件分支嗎？",
+    "tips": "提示",
+    "readonlyTip": "唯讀模式，不可編輯",
+    "embeddedTip": "嵌入模式",
+    "minimap": "縮略圖"
+  },
+  "preview": {
+    "title": "流程預覽",
+    "unnamedFlow": "未命名流程",
+    "relatedForm": "關聯表單",
+    "nodeDetail": "節點詳情",
+    "statistics": {
+      "approval": "個審批",
+      "copy": "個抄送",
+      "branch": "個分支"
+    },
+    "assigneeTypes": {
+      "user": "指定成員",
+      "role": "指定角色",
+      "department": "指定部門",
+      "formField": "表單欄位",
+      "initiator": "發起人自己",
+      "manager": "直屬經理",
+      "superior": "上級主管"
+    },
+    "multiApproval": {
+      "sequential": "依次審批",
+      "parallel": "會簽（所有人通過）",
+      "any": "或簽（一人通過即可）"
+    },
+    "multiHandle": {
+      "sequential": "依次辦理",
+      "all": "全部辦理",
+      "any": "任一辦理"
+    },
+    "sections": {
+      "approvalSettings": "審批人設置",
+      "handleSettings": "辦理人設置",
+      "copySettings": "抄送人設置",
+      "delaySettings": "延時設置",
+      "notifySettings": "通知設置",
+      "serviceSettings": "服務調用設置",
+      "subflowSettings": "子流程設置",
+      "dataUpdateSettings": "欄位更新設置",
+      "formPermissions": "表單欄位權限",
+      "conditionBranches": "條件分支",
+      "parallelBranches": "並行分支"
+    },
+    "labels": {
+      "approverType": "審批人類型",
+      "approvers": "審批人",
+      "handlerType": "辦理人類型",
+      "handlers": "辦理人",
+      "copyType": "抄送人類型",
+      "copyRecipients": "抄送人",
+      "specifiedRole": "指定角色",
+      "specifiedDept": "指定部門",
+      "superiorLevel": "上級層級",
+      "level": "第",
+      "levelSuffix": "級",
+      "superior": "主管",
+      "manager": "經理",
+      "multiApproval": "多人審批",
+      "multiHandle": "多人辦理方式",
+      "timeoutSettings": "超時設置",
+      "hoursLater": "小時後",
+      "autoApprove": "自動通過",
+      "autoReject": "自動拒絕",
+      "waitDuration": "等待時長",
+      "notifyRecipient": "通知對象",
+      "notifyChannel": "通知渠道",
+      "notifyTitle": "通知標題",
+      "notSet": "未設置",
+      "serviceName": "服務名稱",
+      "requestMethod": "請求方法",
+      "requestUrl": "請求地址",
+      "timeoutDuration": "超時時間",
+      "seconds": "秒",
+      "subflow": "子流程",
+      "executionMode": "執行方式",
+      "syncExecution": "同步執行",
+      "asyncExecution": "異步執行",
+      "variablePass": "變量傳遞",
+      "passAllVariables": "傳遞所有變量",
+      "passSelectedVariables": "選擇傳遞",
+      "noVariablePass": "不傳遞",
+      "branchCount": "分支數量",
+      "nodeType": "節點類型",
+      "description": "說明"
+    },
+    "permissions": {
+      "editable": "可編輯",
+      "readonly": "唯讀",
+      "hidden": "隱藏"
+    },
+    "descriptions": {
+      "delay": "流程將在此節點暫停，等待指定時間後自動繼續執行",
+      "notify": "流程到達此節點時將自動發送通知",
+      "service": "流程到達此節點時將自動調用配置的服務",
+      "subflow": "流程到達此節點時將調用子流程",
+      "data_update": "流程到達此節點時將自動更新表單欄位值"
+    },
+    "conditionConfigured": "已配置{count}個條件組",
+    "conditionNotConfigured": "未配置條件",
+    "branchCountValue": "{count}個分支",
+    "parallelExecutionDesc": "所有分支同時執行，全部完成後繼續",
+    "branch": "分支",
+    "startNodeDesc": "所有人可發起流程",
+    "endNodeDesc": "流程結束"
+  },
+  "nodes": {
+    "start": {
+      "name": "發起人",
+      "title": "發起人",
+      "desc": "流程發起人",
+      "placeholder": "所有人"
+    },
+    "approval": {
+      "name": "審批人",
+      "title": "審批人",
+      "desc": "添加審批人節點",
+      "placeholder": "請設置審批人",
+      "multiApproval": {
+        "sequential": "依次審批",
+        "parallel": "會簽",
+        "any": "或簽"
+      },
+      "summary": {
+        "department": "個部門",
+        "formField": "表單欄位",
+        "initiator": "發起人",
+        "manager": "級經理",
+        "role": "個角色",
+        "superior": "級主管",
+        "user": "位成員",
+        "prefix": "第"
+      }
+    },
+    "handle": {
+      "name": "辦理人",
+      "title": "辦理人",
+      "desc": "添加辦理人節點",
+      "placeholder": "請設置辦理人",
+      "multiHandle": {
+        "sequential": "依次辦理",
+        "all": "全部辦理",
+        "any": "任一辦理"
+      },
+      "summary": {
+        "department": "個部門",
+        "formField": "表單欄位",
+        "initiator": "發起人",
+        "manager": "級經理",
+        "role": "個角色",
+        "superior": "級主管",
+        "user": "位成員",
+        "prefix": "第"
+      }
+    },
+    "copy": {
+      "name": "抄送人",
+      "title": "抄送人",
+      "desc": "添加抄送人節點",
+      "placeholder": "請設置抄送人",
+      "summary": {
+        "department": "個部門",
+        "formField": "表單欄位",
+        "initiator": "發起人",
+        "role": "個角色",
+        "user": "位成員"
+      }
+    },
+    "delay": {
+      "name": "延時等待",
+      "title": "延時等待",
+      "desc": "等待指定時間後繼續",
+      "placeholder": "請設置延時時長",
+      "summary": {
+        "minute": "分鐘",
+        "hour": "小時",
+        "day": "天",
+        "workday": "工作日",
+        "wait": "等待"
+      }
+    },
+    "notify": {
+      "name": "發送通知",
+      "title": "發送通知",
+      "desc": "發送消息通知",
+      "placeholder": "請設置通知對象",
+      "summary": {
+        "department": "個部門",
+        "formField": "表單欄位",
+        "initiator": "發起人",
+        "role": "個角色",
+        "user": "位成員",
+        "channels": "通知渠道"
+      }
+    },
+    "service": {
+      "name": "服務調用",
+      "title": "服務調用",
+      "desc": "調用外部服務或API",
+      "placeholder": "請配置服務調用",
+      "summary": {
+        "url": "請求地址",
+        "notConfigured": "未配置"
+      }
+    },
+    "subflow": {
+      "name": "子流程",
+      "title": "子流程",
+      "desc": "調用其他流程",
+      "placeholder": "請選擇子流程",
+      "summary": {
+        "notSelected": "未選擇",
+        "sync": "同步",
+        "async": "異步"
+      }
+    },
+    "data_update": {
+      "name": "欄位更新",
+      "title": "欄位更新",
+      "desc": "自動更新表單欄位值",
+      "placeholder": "請添加更新規則",
+      "summary": {
+        "ruleCount": "已配置 {count} 條更新規則"
+      }
+    },
+    "condition": {
+      "name": "條件分支",
+      "title": "條件分支",
+      "desc": "添加條件分支",
+      "priority": "優先級",
+      "conditionBranch": "條件{num}",
+      "defaultBranch": "默認條件",
+      "defaultBranchDesc": "其他條件進入此分支",
+      "pleaseSetCondition": "請設置條件",
+      "addCondition": "添加條件"
+    },
+    "parallel": {
+      "name": "并行分支",
+      "desc": "添加并行分支，同時執行"
+    },
+    "end": {
+      "name": "結束",
+      "title": "流程結束",
+      "desc": "流程結束"
+    }
+  },
+  "property": {
+    "title": {
+      "condition": "條件配置",
+      "start": "發起人設置",
+      "approval": "審批人設置",
+      "handle": "辦理人設置",
+      "copy": "抄送人設置",
+      "delay": "延時設置",
+      "notify": "通知設置",
+      "service": "服務調用設置",
+      "subflow": "子流程設置",
+      "dataUpdate": "欄位更新設置",
+      "conditionBranch": "條件分支設置",
+      "end": "結束設置",
+      "node": "節點設置"
+    },
+    "base": {
+      "nodeName": "節點名稱",
+      "nodeNamePlaceholder": "請輸入節點名稱"
+    },
+    "assignee": {
+      "type": "審批人類型",
+      "handleType": "辦理人類型",
+      "copyType": "抄送人類型",
+      "selectUser": "選擇成員",
+      "selectRole": "選擇角色",
+      "selectDept": "選擇部門",
+      "userPlaceholder": "請選擇審批人",
+      "rolePlaceholder": "請選擇角色",
+      "deptPlaceholder": "請選擇部門",
+      "superiorLevel": "上級層級",
+      "superiorHint": "1 = 當前部門領導，2 = 父部門領導，以此類推",
+      "managerHint": "1 = 直屬經理，2 = 經理的經理，以此類推",
+      "initiatorHint": "審批人為流程發起人本人",
+      "copyInitiatorHint": "抄送給流程發起人本人",
+      "handleInitiatorHint": "辦理人為流程發起人本人",
+      "selectField": "選擇字段",
+      "fieldPlaceholder": "請選擇用戶類型的表單字段",
+      "noUserField": "當前表單沒有用戶選擇類型的字段",
+      "types": {
+        "user": "指定成員",
+        "role": "指定角色",
+        "department": "指定部門",
+        "superior": "上級主管",
+        "manager": "直屬經理",
+        "initiator": "發起人自己",
+        "form_field": "表單字段"
+      }
+    },
+    "multiApproval": {
+      "label": "多人審批時",
+      "any": "或簽（一人通過即可）",
+      "parallel": "會簽（所有人通過）",
+      "sequential": "依次審批"
+    },
+    "multiHandle": {
+      "label": "多人辦理時",
+      "any": "任一辦理（一人完成即可）",
+      "all": "全部辦理（所有人完成）",
+      "sequential": "依次辦理"
+    },
+    "timeout": {
+      "label": "超時設置",
+      "enable": "啟用超時處理",
+      "time": "超時時間",
+      "action": "超時處理方式",
+      "notifyType": "通知方式",
+      "unit": {
+        "minute": "分鐘",
+        "hour": "小時",
+        "day": "天",
+        "workday": "工作日"
+      },
+      "actions": {
+        "notify": "僅通知",
+        "auto_approve": "自動通過",
+        "auto_reject": "自動拒絕"
+      }
+    },
+    "notify": {
+      "label": "通知設置",
+      "approver": "通知審批人",
+      "initiator": "通知發起人",
+      "recipient": "通知對象",
+      "recipientType": "通知對象類型",
+      "whenTaskCreated": "任務創建時",
+      "onApprove": "通過時",
+      "onReject": "拒絕時",
+      "onHandleComplete": "辦理完成時",
+      "channels": "通知渠道",
+      "channelPlaceholder": "請選擇通知渠道",
+      "title": "通知標題",
+      "titlePlaceholder": "請輸入通知標題",
+      "content": "通知內容",
+      "contentPlaceholder": "請輸入通知內容，可使用 ${字段名} 引用表單字段",
+      "variableDesc": "變量說明",
+      "initiatorVar": "${發起人} - 流程發起人姓名",
+      "flowNameVar": "${流程名稱} - 當前流程名稱",
+      "fieldVar": "${字段名} - 表單字段值",
+      "channelTypes": {
+        "site": "站內信",
+        "chat": "聊天通知",
+        "email": "郵件",
+        "sms": "短信",
+        "wechat": "微信",
+        "dingtalk": "釘釘",
+        "feishu": "飛書"
+      }
+    },
+    "signature": {
+      "label": "簽名設置",
+      "required": "要求簽名",
+      "hint": "啟用後，審批人通過時必須手寫簽名"
+    },
+    "action": {
+      "label": "操作權限",
+      "hint": "設置審批人在此節點可以執行的操作，可自定義按鈕名稱",
+      "descriptions": {
+        "approve": "同意審批，流程繼續",
+        "reject": "拒絶審批，終止流程",
+        "return": "退回上一步或發起人重新提交",
+        "delegate": "委託他人代為審批，完成后回到自己",
+        "transfer": "轉交他人處理，自己不再參與",
+        "add_sign": "增加審批人，可前加簽或後加簽",
+        "reduce_sign": "減少審批人（僅會簽模式可用）"
+      },
+      "tips": {
+        "title": "操作說明",
+        "approveReject": "通過/拒絶：基礎操作，建議至少保留一個",
+        "return": "駁回：可退回到上一節點或發起人",
+        "delegate": "委派：臨時委託，完成后任務回到委派人",
+        "transfer": "轉辦：永久轉交，自己不再處理",
+        "addSign": "加簽：在當前節點增加審批人",
+        "reduceSign": "減簽：僅會簽模式可用，減少審批人"
+      },
+      "types": {
+        "approve": "通過",
+        "reject": "拒絶",
+        "return": "駁回",
+        "delegate": "委派",
+        "transfer": "轉辦",
+        "add_sign": "加簽",
+        "reduce_sign": "減簽"
+      }
+    },
+    "permission": {
+      "label": "字段權限",
+      "hint": "設置審批人在此節點可以查看和編輯的表單字段"
+    },
+    "segment": {
+      "approver": "審批人",
+      "actions": "操作權限",
+      "permissions": "字段權限",
+      "handler": "辦理人設置"
+    },
+    "delay": {
+      "title": "延時設置",
+      "duration": "延時時長",
+      "hint": "設置流程等待的時間，到達指定時間後自動繼續執行",
+      "urlPlaceholder": "https://api.example.com/endpoint",
+      "method": "請求方法",
+      "headers": "請求頭",
+      "headerName": "Header名稱",
+      "headerValue": "Header值",
+      "addHeader": "添加請求頭",
+      "params": "請求參數",
+      "body": "請求體",
+      "advancedSettings": "高級設置",
+      "timeout": "超時時間（秒）",
+      "retry": "重試次數",
+      "failAction": "失敗處理",
+      "resultVar": "結果存儲變量",
+      "resultVarPlaceholder": "存儲響應結果的變量名（可選）",
+      "resultVarHint": "響應結果將存入此變量，可在後續節點中使用",
+      "variableDesc": "變量說明",
+      "paramFieldVar": "請求參數中可使用 ${字段名} 引用表單字段",
+      "resultVarUsage": "響應結果可通過變量名在條件分支中使用",
+      "failActions": {
+        "continue": "繼續執行",
+        "stop": "終止流程",
+        "retry": "自動重試"
+      }
+    },
+    "subflow": {
+      "title": "子流程設置",
+      "select": "選擇子流程",
+      "selectPlaceholder": "請選擇要調用的子流程",
+      "selectWarning": "請選擇一個子流程",
+      "flowId": "流程ID",
+      "flowName": "流程名稱",
+      "unnamed": "未命名",
+      "varPass": "變量傳遞",
+      "varPassHint": "配置主流程向子流程傳遞的變量數據",
+      "varPassMode": "傳遞方式",
+      "selectVars": "選擇變量",
+      "selectVarsPlaceholder": "請選擇要傳遞的變量",
+      "selectVarsHint": "選擇需要傳遞給子流程的表單字段",
+      "varMapping": "變量映射規則",
+      "mappingRule1": "主流程變量將按名稱自動映射到子流程",
+      "mappingRule2": "同名變量將被覆蓋，不同名變量將被忽略",
+      "executionSettings": "執行設置",
+      "executionMode": "執行模式",
+      "sync": "同步執行",
+      "syncDesc": "等待子流程完成后繼續",
+      "async": "異步執行",
+      "asyncDesc": "啟動子流程後立即繼續",
+      "resultMode": "結果處理",
+      "ignoreResult": "忽略子流程結果",
+      "saveResult": "保存子流程結果",
+      "resultVarName": "結果變量名",
+      "resultVarPlaceholder": "請輸入變量名，如: subflowResult",
+      "resultVarHint": "子流程的審批結果將存入此變量，可在後續節點中使用",
+      "asyncWarning": "異步執行注意事項",
+      "asyncWarning1": "主流程不會等待子流程完成",
+      "asyncWarning2": "無法獲取子流程的執行結果",
+      "asyncWarning3": "子流程失敗不會影響主流程",
+      "varPassModes": {
+        "all": "傳遞所有變量",
+        "selected": "選擇傳遞變量",
+        "none": "不傳遞變量"
+      }
+    },
+    "dataUpdate": {
+      "title": "欄位更新設置",
+      "description": "流程到達此節點時，將按照配置的規則自動更新表單欄位值。",
+      "rulesTitle": "更新規則",
+      "targetField": "目標欄位",
+      "targetFieldPlaceholder": "請選擇要更新的欄位",
+      "valueType": "值類型",
+      "value": "值",
+      "constantPlaceholder": "請輸入常量值",
+      "fieldPlaceholder": "請選擇來源欄位",
+      "formulaPlaceholder": "請輸入運算式，如: {{price}} * {{quantity}}",
+      "formulaHint": "使用 {{欄位名}} 引用表單欄位，支援四則運算（+、-、*、/）",
+      "systemPlaceholder": "請選擇系統變量",
+      "addRule": "添加更新規則",
+      "noRulesHint": "暫無更新規則，請點擊上方按鈕添加。",
+      "valueTypes": {
+        "constant": "常量值",
+        "field": "欄位引用",
+        "formula": "運算式",
+        "system": "系統變量"
+      },
+      "systemVars": {
+        "currentTime": "當前時間",
+        "currentDate": "當前日期",
+        "currentUser": "當前操作人",
+        "initiator": "流程發起人",
+        "instanceNo": "流程編號",
+        "instanceTitle": "流程標題"
+      }
+    }
+  },
+  "condition": {
+    "title": "條件組",
+    "and": "且",
+    "or": "或",
+    "andHint": "組內條件為「且」關係",
+    "addCondition": "添加條件",
+    "addGroup": "添加條件組",
+    "emptyHint": "暫無條件，點擊下方按鈕添加",
+    "selectField": "選擇字段",
+    "selectOperator": "選擇條件",
+    "inputValue": "輸入值",
+    "inputNumber": "輸入數值",
+    "selectDate": "選擇日期",
+    "selectValue": "選擇值",
+    "operators": {
+      "eq": "等於",
+      "ne": "不等於",
+      "gt": "大於",
+      "gte": "大於等於",
+      "lt": "小於",
+      "lte": "小於等於",
+      "contains": "包含",
+      "not_contains": "不包含",
+      "in": "在...中",
+      "not_in": "不在...中",
+      "empty": "為空",
+      "not_empty": "不為空"
+    }
+  },
+  "detail": {
+    "title": "流程詳情",
+    "tabs": {
+      "progress": "流程進度",
+      "form": "表單內容",
+      "flowchart": "流程圖",
+      "flowProgress": "審批路徑"
+    },
+    "currentPending": "當前待辦",
+    "flowInfo": "流程資訊",
+    "approvalRecord": "審批記錄",
+    "flowTitle": "流程標題",
+    "flowType": "流程類型",
+    "flowStatus": "流程狀態",
+    "flowNo": "流程編號",
+    "initiator": "發起人",
+    "currentNode": "當前節點",
+    "startTime": "發起時間",
+    "completeTime": "完成時間",
+    "duration": "流程耗時",
+    "unknownNode": "未知節點",
+    "start": "開始",
+    "noData": "暫無資料",
+    "noApprovalRecord": "暫無審批記錄",
+    "noFormContent": "暫無表單內容",
+    "loadDataFailed": "載入資料失敗",
+    "loadFormDataFailed": "載入表單資料失敗",
+    "systemAuto": "系統自動",
+    "person": "人",
+    "timeout": "已超時",
+    "waiting": "等待中",
+    "daysLater": "天後",
+    "hoursLater": "小時",
+    "minutesLater": "分鐘",
+    "days": "天",
+    "hours": "小時",
+    "minutes": "分鐘",
+    "status": {
+      "pending": "審批中",
+      "approved": "已通過",
+      "rejected": "已拒絕",
+      "cancelled": "已撤回"
+    },
+    "actions": {
+      "start": "發起流程",
+      "approve": "審批通過",
+      "reject": "審批拒絕",
+      "return": "駁回",
+      "transfer": "轉辦",
+      "delegate": "委派",
+      "add_sign": "加簽",
+      "revise": "重新提交",
+      "cancel": "撤回",
+      "copy": "抄送",
+      "handle": "辦理",
+      "urge": "催辦",
+      "task_timeout": "任務超時",
+      "task_timeout_notify": "超時提醒",
+      "task_auto_approve": "超時自動通過",
+      "task_auto_reject": "超時自動拒絕",
+      "delay_start": "開始延時",
+      "delay_complete": "延時結束",
+      "delay_skip": "延時跳過",
+      "notify": "發送通知",
+      "parallel_start": "進入並行",
+      "parallel_complete": "並行完成",
+      "subflow_start": "啟動子流程",
+      "subflow_complete": "子流程完成",
+      "data_update": "欄位更新",
+      "condition": "條件分支"
+    },
+    "flowProgress": {
+      "returnRecords": "駁回記錄",
+      "noData": "暫無流程進度資料",
+      "loadFailed": "載入流程進度失敗",
+      "delayWaiting": "延時等待中，預計恢復時間：",
+      "pending": "待處理",
+      "waiting": "等待中",
+      "skipped": "已跳過",
+      "copied": "已抄送",
+      "nodeTypes": {
+        "start": "開始",
+        "end": "結束",
+        "approval": "審批",
+        "handle": "辦理",
+        "copy": "抄送",
+        "condition": "條件",
+        "parallel": "並行",
+        "delay": "延時",
+        "notify": "通知",
+        "service": "服務",
+        "subflow": "子流程",
+        "data_update": "欄位更新"
+      },
+      "nodeStatus": {
+        "completed": "已完成",
+        "active": "進行中",
+        "pending": "待執行",
+        "skipped": "已跳過",
+        "rejected": "已拒絕"
+      },
+      "actions": {
+        "approve": "通過",
+        "reject": "拒絕",
+        "return": "駁回",
+        "transfer": "轉交",
+        "delegate": "委派",
+        "handle": "辦理",
+        "add_sign": "加簽"
+      },
+      "signTypes": {
+        "before": "前加簽",
+        "after": "後加簽",
+        "parallel": "並行加簽"
+      },
+      "extraActions": {
+        "add_sign": "加簽",
+        "reduce_sign": "減簽",
+        "transfer": "轉交",
+        "delegate": "委派",
+        "return": "駁回"
+      }
+    }
+  }
+}

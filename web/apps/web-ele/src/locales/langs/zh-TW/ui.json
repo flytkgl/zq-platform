@@ -1,0 +1,15 @@
+{
+  "layout": {
+    "poweredBy": "由 ZQ-Platform 提供"
+  },
+  "actionMessage": {
+    "createSuccess": "創建成功",
+    "createError": "創建失敗",
+    "updateSuccess": "更新成功",
+    "updateError": "更新失敗",
+    "deleteSuccess": "刪除成功",
+    "deleteConfirm": "確定要刪除 {0} 嗎？",
+    "deleteError": "刪除失敗",
+    "loadError": "加載失敗"
+  }
+}

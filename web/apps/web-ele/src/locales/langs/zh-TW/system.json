@@ -1,0 +1,10 @@
+{
+  "title": "系統管理",
+  "tool": "系統工具",
+  "user": {
+    "selectPost": "選擇崗位",
+    "selectDept": "選擇部門",
+    "selectRole": "選擇角色",
+    "allDept": "全部部門"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "layout": {
+    "poweredBy": "Powered by ZQ-Platform"
+  },
+  "actionMessage": {
+    "createSuccess": "Created successfully",
+    "createError": "Failed to create",
+    "updateSuccess": "Updated successfully",
+    "updateError": "Failed to update",
+    "deleteSuccess": "Deleted successfully",
+    "deleteConfirm": "Are you sure to delete {0}?",
+    "deleteError": "Failed to delete",
+    "loadError": "Failed to load"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "orgChart": {
+    "title": "组织架构",
+    "description": "点击节点展开或收起下属成员",
+    "empty": "暂无组织架构数据",
+    "focusMode": "切换聚焦模式",
+    "expandMode": "切换展开模式",
+    "showAll": "显示全部同级"
+  }
+}

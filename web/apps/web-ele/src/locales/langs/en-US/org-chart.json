@@ -1,0 +1,10 @@
+{
+  "orgChart": {
+    "title": "Organization Chart",
+    "description": "Click on a node to expand or collapse subordinates",
+    "empty": "No organization data available",
+    "focusMode": "Switch to Focus Mode",
+    "expandMode": "Switch to Expand Mode",
+    "showAll": "Show all siblings"
+  }
+}

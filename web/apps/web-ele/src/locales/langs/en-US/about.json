@@ -1,0 +1,15 @@
+{
+  "title": "About Project",
+  "basicInfo": "Basic Information",
+  "productionDependencies": "Production Dependencies",
+  "devDependencies": "Development Dependencies",
+  "version": "Version",
+  "license": "License",
+  "buildTime": "Build Time",
+  "homepage": "Homepage",
+  "docUrl": "Documentation",
+  "previewUrl": "Preview",
+  "github": "Github",
+  "author": "Author",
+  "viewDetails": "View Details"
+}

@@ -1,0 +1,45 @@
+:root {
+  --zq-bg-primary: #ffffff;
+  --zq-bg-secondary: #f5f7fa;
+  --zq-bg-sidebar: #f0f2f5;
+  --zq-bg-toolbar: #ffffff;
+  --zq-bg-cell: #ffffff;
+  --zq-bg-cell-hover: #f5f7fa;
+  --zq-bg-header: #fafafa;
+  --zq-text-primary: #1f2329;
+  --zq-text-secondary: #646a73;
+  --zq-text-placeholder: #bbbfc4;
+  --zq-border-color: #dee0e3;
+  --zq-border-color-light: #e8eaed;
+  --zq-brand-color: #3370ff;
+  --zq-brand-color-hover: #4e83fd;
+  --zq-brand-color-light: #e1eaff;
+  --zq-success-color: #34c724;
+  --zq-warning-color: #ff7d00;
+  --zq-danger-color: #f54a45;
+  --zq-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --zq-shadow-lg: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+html.dark {
+  --zq-bg-primary: #1a1a1a;
+  --zq-bg-secondary: #232324;
+  --zq-bg-sidebar: #1e1e1f;
+  --zq-bg-toolbar: #252526;
+  --zq-bg-cell: #1e1e1f;
+  --zq-bg-cell-hover: #2a2a2b;
+  --zq-bg-header: #252526;
+  --zq-text-primary: #e0e0e0;
+  --zq-text-secondary: #a0a0a0;
+  --zq-text-placeholder: #5a5a5a;
+  --zq-border-color: #3a3a3c;
+  --zq-border-color-light: #2e2e30;
+  --zq-brand-color: #4e83fd;
+  --zq-brand-color-hover: #6e9bff;
+  --zq-brand-color-light: #1a2744;
+  --zq-success-color: #34c724;
+  --zq-warning-color: #ff7d00;
+  --zq-danger-color: #f54a45;
+  --zq-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --zq-shadow-lg: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+}

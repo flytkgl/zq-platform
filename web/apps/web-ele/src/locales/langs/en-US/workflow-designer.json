@@ -1,0 +1,706 @@
+{
+  "designer": {
+    "title": "Workflow Designer",
+    "flowName": "Workflow Name",
+    "flowNamePlaceholder": "Enter workflow name",
+    "save": "Save",
+    "preview": "Preview",
+    "publish": "Publish",
+    "undo": "Undo",
+    "redo": "Redo",
+    "saveFirst": "Please save the workflow first",
+    "isDirty": "You have unsaved changes",
+    "saveSuccess": "Saved successfully",
+    "publishSuccess": "Published successfully",
+    "previewInfo": "Preview feature is under development",
+    "deleteNodeConfirm": "Are you sure you want to delete this node?",
+    "deleteBranchConfirm": "Are you sure you want to delete this condition branch?",
+    "tips": "Tips",
+    "readonlyTip": "Read-only mode, cannot be edited",
+    "embeddedTip": "Embedded mode",
+    "minimap": "Minimap"
+  },
+  "preview": {
+    "title": "Workflow Preview",
+    "unnamedFlow": "Unnamed Workflow",
+    "relatedForm": "Related Form",
+    "nodeDetail": "Node Details",
+    "statistics": {
+      "approval": " approval(s)",
+      "copy": " CC(s)",
+      "branch": " branch(es)"
+    },
+    "assigneeTypes": {
+      "user": "Specified Members",
+      "role": "Specified Roles",
+      "department": "Specified Departments",
+      "formField": "Form Field",
+      "initiator": "Initiator",
+      "manager": "Direct Manager",
+      "superior": "Superior"
+    },
+    "multiApproval": {
+      "sequential": "Sequential",
+      "parallel": "Countersign (All approve)",
+      "any": "Any (One approves)"
+    },
+    "multiHandle": {
+      "sequential": "Sequential",
+      "all": "All",
+      "any": "Any"
+    },
+    "sections": {
+      "approvalSettings": "Approver Settings",
+      "handleSettings": "Handler Settings",
+      "copySettings": "CC Settings",
+      "delaySettings": "Delay Settings",
+      "notifySettings": "Notification Settings",
+      "serviceSettings": "Service Settings",
+      "subflowSettings": "Subflow Settings",
+      "dataUpdateSettings": "Field Update Settings",
+      "formPermissions": "Form Field Permissions",
+      "conditionBranches": "Condition Branches",
+      "parallelBranches": "Parallel Branches"
+    },
+    "labels": {
+      "approverType": "Approver Type",
+      "approvers": "Approvers",
+      "handlerType": "Handler Type",
+      "handlers": "Handlers",
+      "copyType": "CC Type",
+      "copyRecipients": "CC Recipients",
+      "specifiedRole": "Specified Roles",
+      "specifiedDept": "Specified Departments",
+      "superiorLevel": "Superior Level",
+      "level": "Level ",
+      "levelSuffix": "",
+      "superior": " Superior",
+      "manager": " Manager",
+      "multiApproval": "Multi-Approval",
+      "multiHandle": "Multi-Handle Mode",
+      "timeoutSettings": "Timeout Settings",
+      "hoursLater": " hours later",
+      "autoApprove": "Auto Approve",
+      "autoReject": "Auto Reject",
+      "waitDuration": "Wait Duration",
+      "notifyRecipient": "Recipients",
+      "notifyChannel": "Channels",
+      "notifyTitle": "Title",
+      "notSet": "Not Set",
+      "serviceName": "Service Name",
+      "requestMethod": "Method",
+      "requestUrl": "URL",
+      "timeoutDuration": "Timeout",
+      "seconds": " seconds",
+      "subflow": "Subflow",
+      "executionMode": "Execution Mode",
+      "syncExecution": "Synchronous",
+      "asyncExecution": "Asynchronous",
+      "variablePass": "Variable Passing",
+      "passAllVariables": "Pass all variables",
+      "passSelectedVariables": "Pass selected",
+      "noVariablePass": "No pass",
+      "branchCount": "Branch Count",
+      "nodeType": "Node Type",
+      "description": "Description"
+    },
+    "permissions": {
+      "editable": "Editable",
+      "readonly": "Read-only",
+      "hidden": "Hidden"
+    },
+    "descriptions": {
+      "delay": "The workflow will pause at this node and continue automatically after the specified time",
+      "notify": "Notifications will be sent automatically when the workflow reaches this node",
+      "service": "The configured service will be called automatically when the workflow reaches this node",
+      "subflow": "The subflow will be invoked when the workflow reaches this node",
+      "data_update": "Form field values will be updated automatically when the workflow reaches this node"
+    },
+    "conditionConfigured": "{count} condition group(s) configured",
+    "conditionNotConfigured": "Condition not configured",
+    "branchCountValue": "{count} branch(es)",
+    "parallelExecutionDesc": "All branches execute simultaneously and continue after all are completed",
+    "branch": "Branch ",
+    "startNodeDesc": "Everyone can initiate the workflow",
+    "endNodeDesc": "Workflow ends"
+  },
+  "nodes": {
+    "start": {
+      "name": "Initiator",
+      "title": "Initiator",
+      "desc": "Workflow initiator",
+      "placeholder": "Everyone"
+    },
+    "approval": {
+      "name": "Approver",
+      "title": "Approver",
+      "desc": "Add approver node",
+      "placeholder": "Please set approver",
+      "multiApproval": {
+        "sequential": "Sequential",
+        "parallel": "Countersign",
+        "any": "Any"
+      },
+      "summary": {
+        "department": " dept(s)",
+        "formField": "Form Field",
+        "initiator": "Initiator",
+        "manager": " level manager",
+        "role": " role(s)",
+        "superior": " level superior",
+        "user": " member(s)",
+        "prefix": "Level "
+      }
+    },
+    "handle": {
+      "name": "Handler",
+      "title": "Handler",
+      "desc": "Add handler node",
+      "placeholder": "Please set handler",
+      "multiHandle": {
+        "sequential": "Sequential",
+        "all": "All",
+        "any": "Any"
+      },
+      "summary": {
+        "department": " dept(s)",
+        "formField": "Form Field",
+        "initiator": "Initiator",
+        "manager": " level manager",
+        "role": " role(s)",
+        "superior": " level superior",
+        "user": " member(s)",
+        "prefix": "Level "
+      }
+    },
+    "copy": {
+      "name": "CC",
+      "title": "CC",
+      "desc": "Add CC node",
+      "placeholder": "Please set CC recipients",
+      "summary": {
+        "department": " dept(s)",
+        "formField": "Form Field",
+        "initiator": "Initiator",
+        "role": " role(s)",
+        "user": " member(s)"
+      }
+    },
+    "delay": {
+      "name": "Delay",
+      "title": "Delay",
+      "desc": "Wait for specified time",
+      "placeholder": "Please set delay duration",
+      "summary": {
+        "minute": " minute(s)",
+        "hour": " hour(s)",
+        "day": " day(s)",
+        "workday": " workday(s)",
+        "wait": "Wait "
+      }
+    },
+    "notify": {
+      "name": "Notify",
+      "title": "Notify",
+      "desc": "Send notification",
+      "placeholder": "Please set notification recipients",
+      "summary": {
+        "department": " dept(s)",
+        "formField": "Form Field",
+        "initiator": "Initiator",
+        "role": " role(s)",
+        "user": " member(s)",
+        "channels": "Channels"
+      }
+    },
+    "service": {
+      "name": "Service",
+      "title": "Service",
+      "desc": "Call external service or API",
+      "placeholder": "Please configure service call",
+      "summary": {
+        "url": "URL",
+        "notConfigured": "Not configured"
+      }
+    },
+    "subflow": {
+      "name": "Subflow",
+      "title": "Subflow",
+      "desc": "Call another workflow",
+      "placeholder": "Please select subflow",
+      "summary": {
+        "notSelected": "Not selected",
+        "sync": "Sync",
+        "async": "Async"
+      }
+    },
+    "data_update": {
+      "name": "Field Update",
+      "title": "Field Update",
+      "desc": "Auto update form field values",
+      "placeholder": "Please add update rules",
+      "summary": {
+        "ruleCount": "{count} update rule(s) configured"
+      }
+    },
+    "condition": {
+      "name": "Condition",
+      "title": "Condition",
+      "desc": "Add condition branch",
+      "priority": "Priority ",
+      "conditionBranch": "Condition {num}",
+      "defaultBranch": "Default",
+      "defaultBranchDesc": "Other conditions enter this branch",
+      "pleaseSetCondition": "Please set condition",
+      "addCondition": "Add Condition"
+    },
+    "parallel": {
+      "name": "Parallel",
+      "title": "Parallel",
+      "desc": "Add parallel branches"
+    },
+    "end": {
+      "name": "End",
+      "title": "End",
+      "desc": "Workflow end"
+    }
+  },
+  "property": {
+    "title": {
+      "condition": "Condition Settings",
+      "start": "Initiator Settings",
+      "approval": "Approver Settings",
+      "handle": "Handler Settings",
+      "copy": "CC Settings",
+      "delay": "Delay Settings",
+      "notify": "Notification Settings",
+      "service": "Service Settings",
+      "subflow": "Subflow Settings",
+      "dataUpdate": "Field Update Settings",
+      "conditionBranch": "Branch Settings",
+      "end": "End Settings",
+      "node": "Node Settings"
+    },
+    "base": {
+      "nodeName": "Node Name",
+      "nodeNamePlaceholder": "Please enter node name"
+    },
+    "assignee": {
+      "type": "Approver Type",
+      "handleType": "Handler Type",
+      "copyType": "CC Type",
+      "selectUser": "Select Members",
+      "selectRole": "Select Roles",
+      "selectDept": "Select Departments",
+      "userPlaceholder": "Please select approvers",
+      "rolePlaceholder": "Please select roles",
+      "deptPlaceholder": "Please select departments",
+      "superiorLevel": "Superior Level",
+      "superiorHint": "1 = Direct supervisor, 2 = Supervisor's supervisor, etc.",
+      "superiorLevelHint": "Superior level (1 for direct supervisor)",
+      "managerHint": "1 = Direct manager, 2 = Manager's manager, etc.",
+      "initiatorHint": "The approver is the workflow initiator",
+      "copyInitiatorHint": "CC to the workflow initiator",
+      "handleInitiatorHint": "The handler is the workflow initiator",
+      "selectField": "Select Field",
+      "fieldPlaceholder": "Please select a user-type form field",
+      "noUserField": "No user-type fields found in the current form",
+      "types": {
+        "user": "Members",
+        "role": "Roles",
+        "department": "Departments",
+        "superior": "Supervisor",
+        "manager": "Manager",
+        "initiator": "Initiator",
+        "form_field": "Form Field"
+      }
+    },
+    "multiApproval": {
+      "label": "Multi-person Approval",
+      "any": "Or-sign (Any one approves)",
+      "parallel": "And-sign (Everyone approves)",
+      "sequential": "Sequential"
+    },
+    "multiHandle": {
+      "label": "Multi-person Handling",
+      "any": "Any (Any one completes)",
+      "all": "All (Everyone completes)",
+      "sequential": "Sequential"
+    },
+    "timeout": {
+      "label": "Timeout Settings",
+      "enable": "Enable Timeout Handling",
+      "time": "Timeout Duration",
+      "action": "Timeout Action",
+      "notifyType": "Notification Type",
+      "unit": {
+        "minute": "Minutes",
+        "hour": "Hours",
+        "day": "Days",
+        "workday": "Workdays"
+      },
+      "actions": {
+        "notify": "Notify only",
+        "auto_approve": "Auto Approve",
+        "auto_reject": "Auto Reject"
+      }
+    },
+    "notify": {
+      "label": "Notification Settings",
+      "approver": "Notify Approver",
+      "initiator": "Notify Initiator",
+      "recipient": "Recipient",
+      "recipientType": "Recipient Type",
+      "whenTaskCreated": "When task is created",
+      "onApprove": "When approved",
+      "onReject": "When rejected",
+      "onHandleComplete": "When completed",
+      "channels": "Channels",
+      "channelPlaceholder": "Select channels",
+      "title": "Title",
+      "titlePlaceholder": "Please enter title",
+      "content": "Content",
+      "contentPlaceholder": "Please enter content, use ${field} to reference form fields",
+      "variableDesc": "Variable Guide",
+      "initiatorVar": "${Initiator} - Initiator Name",
+      "flowNameVar": "${Workflow} - Workflow Name",
+      "fieldVar": "${Field} - Field Value",
+      "channelTypes": {
+        "site": "In-site",
+        "chat": "Chat",
+        "email": "Email",
+        "sms": "SMS",
+        "wechat": "WeChat",
+        "dingtalk": "DingTalk",
+        "feishu": "Feishu"
+      }
+    },
+    "signature": {
+      "label": "Signature Settings",
+      "required": "Require Signature",
+      "hint": "When enabled, approvers must sign when approving"
+    },
+    "action": {
+      "label": "Actions",
+      "hint": "Set available actions for approvers at this node",
+      "descriptions": {
+        "approve": "Approve, workflow continues",
+        "reject": "Reject, terminate workflow",
+        "return": "Return to previous node or initiator",
+        "delegate": "Delegate to others, return to self after completion",
+        "transfer": "Transfer to others, self no longer involved",
+        "add_sign": "Add approvers",
+        "reduce_sign": "Remove approvers (And-sign mode only)"
+      },
+      "tips": {
+        "title": "Action Guide",
+        "approveReject": "Approve/Reject: Basic actions, at least one is recommended",
+        "return": "Return: Can return to previous node or initiator",
+        "delegate": "Delegate: Temporary delegation, returns to delegatee",
+        "transfer": "Transfer: Permanent transfer, self no longer handles",
+        "addSign": "Add Sign: Add approvers at the current node",
+        "reduceSign": "Reduce Sign: Only available in And-sign mode"
+      },
+      "types": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "return": "Return",
+        "delegate": "Delegate",
+        "transfer": "Transfer",
+        "add_sign": "Add Sign",
+        "reduce_sign": "Reduce Sign"
+      }
+    },
+    "permission": {
+      "label": "Field Permissions",
+      "hint": "Set form fields that can be viewed or edited at this node"
+    },
+    "segment": {
+      "approver": "Approver",
+      "actions": "Actions",
+      "permissions": "Permissions",
+      "handler": "Handler"
+    },
+    "delay": {
+      "title": "Delay Settings",
+      "duration": "Duration",
+      "hint": "Set the time to wait, and the process will automatically continue when the specified time is reached",
+      "minuteTip": "Calculated by natural minutes",
+      "hourTip": "Calculated by natural hours",
+      "dayTip": "Calculated by natural days (24 hours)",
+      "workdayTip": "Only workdays are calculated, skipping weekends and holidays"
+    },
+    "conditionBranch": {
+      "title": "Branch Settings",
+      "name": "Condition Name",
+      "namePlaceholder": "Please enter condition name",
+      "hint": "Set conditions to enter this branch",
+      "hintSub": "Condition groups are linked by 'OR', while conditions within a group are linked by 'AND'",
+      "noFormHint": "Please link a form first to configure conditions",
+      "defaultTitle": "Default Branch",
+      "defaultHint": "This branch is taken when no other conditions are met"
+    },
+    "startNode": {
+      "title": "Initiator Node",
+      "hint": "All authorized users can initiate this process"
+    },
+    "service": {
+      "title": "Service Settings",
+      "baseSettings": "Base Settings",
+      "name": "Service Name",
+      "namePlaceholder": "Please enter service name (optional)",
+      "url": "URL",
+      "urlPlaceholder": "https://api.example.com/endpoint",
+      "method": "Method",
+      "headers": "Headers",
+      "headerName": "Header Name",
+      "headerValue": "Header Value",
+      "addHeader": "Add Header",
+      "params": "Params",
+      "body": "Body",
+      "advancedSettings": "Advanced Settings",
+      "timeout": "Timeout (s)",
+      "retry": "Retries",
+      "failAction": "On Failure",
+      "resultVar": "Result Variable",
+      "resultVarPlaceholder": "Variable name to store response (optional)",
+      "resultVarHint": "Response result will be stored in this variable for later use",
+      "variableDesc": "Variable Guide",
+      "paramFieldVar": "Use ${field} to reference form fields in parameters",
+      "resultVarUsage": "Response results can be used in branches via variable name",
+      "failActions": {
+        "continue": "Continue",
+        "stop": "Terminate",
+        "retry": "Auto Retry"
+      }
+    },
+    "subflow": {
+      "title": "Subflow Settings",
+      "select": "Select Subflow",
+      "selectPlaceholder": "Please select a subflow",
+      "selectWarning": "Please select a subflow",
+      "flowId": "Flow ID",
+      "flowName": "Flow Name",
+      "unnamed": "Unnamed",
+      "varPass": "Variable Pass",
+      "varPassHint": "Configure variables passed to the subflow",
+      "varPassMode": "Pass Mode",
+      "selectVars": "Select Variables",
+      "selectVarsPlaceholder": "Please select variables to pass",
+      "selectVarsHint": "Select form fields to be passed to the subflow",
+      "varMapping": "Variable Mapping",
+      "mappingRule1": "Workflow variables will be mapped automatically by name",
+      "mappingRule2": "Same name variables will be overwritten, others ignored",
+      "executionSettings": "Execution Settings",
+      "executionMode": "Execution Mode",
+      "sync": "Sync",
+      "syncDesc": "Wait for completion",
+      "async": "Async",
+      "asyncDesc": "Continue immediately",
+      "resultMode": "Result Handling",
+      "ignoreResult": "Ignore result",
+      "saveResult": "Save result",
+      "resultVarName": "Result Variable Name",
+      "resultVarPlaceholder": "e.g., subflowResult",
+      "resultVarHint": "Approval result will be stored in this variable",
+      "asyncWarning": "Async Execution Notes",
+      "asyncWarning1": "Process won't wait for subflow",
+      "asyncWarning2": "Result cannot be obtained",
+      "asyncWarning3": "Subflow failure won't affect main flow",
+      "skipSubflow": "Skip subflow (treated as passed)",
+      "rejectSubflow": "Reject subflow",
+      "usageTips": "Usage Tips",
+      "usageTip1": "Subflow will inherit main flow initiator information",
+      "usageTip2": "Subflow has independent approval records and status",
+      "usageTip3": "Subsequent processing can be based on subflow results via branches",
+      "varPassModes": {
+        "all": "Pass All",
+        "selected": "Pass Selected",
+        "none": "Pass None"
+      }
+    },
+    "dataUpdate": {
+      "title": "Field Update Settings",
+      "description": "When the workflow reaches this node, form field values will be updated automatically based on the configured rules.",
+      "rulesTitle": "Update Rules",
+      "targetField": "Target Field",
+      "targetFieldPlaceholder": "Select a field to update",
+      "valueType": "Value Type",
+      "value": "Value",
+      "constantPlaceholder": "Enter a constant value",
+      "fieldPlaceholder": "Select a source field",
+      "formulaPlaceholder": "Enter expression, e.g.: {{price}} * {{quantity}}",
+      "formulaHint": "Use {{field_name}} to reference form fields. Supports arithmetic (+, -, *, /)",
+      "systemPlaceholder": "Select a system variable",
+      "addRule": "Add Update Rule",
+      "noRulesHint": "No update rules yet. Click the button above to add one.",
+      "valueTypes": {
+        "constant": "Constant",
+        "field": "Field Reference",
+        "formula": "Expression",
+        "system": "System Variable"
+      },
+      "systemVars": {
+        "currentTime": "Current Time",
+        "currentDate": "Current Date",
+        "currentUser": "Current User",
+        "initiator": "Initiator",
+        "instanceNo": "Instance No.",
+        "instanceTitle": "Instance Title"
+      }
+    }
+  },
+  "condition": {
+    "title": "Condition Group",
+    "and": "AND",
+    "or": "OR",
+    "andHint": "Conditions within group are linked with AND",
+    "addCondition": "Add Condition",
+    "addGroup": "Add Group",
+    "emptyHint": "No conditions yet, click below to add",
+    "selectField": "Select Field",
+    "selectOperator": "Select Operator",
+    "inputValue": "Value",
+    "inputNumber": "Value",
+    "selectDate": "Select Date",
+    "selectValue": "Select Value",
+    "operators": {
+      "eq": "Equals",
+      "ne": "Not Equals",
+      "gt": "Greater Than",
+      "gte": "Greater Than or Equal",
+      "lt": "Less Than",
+      "lte": "Less Than or Equal",
+      "contains": "Contains",
+      "not_contains": "Not Contains",
+      "in": "In",
+      "not_in": "Not In",
+      "empty": "Is Empty",
+      "not_empty": "Is Not Empty"
+    }
+  },
+  "detail": {
+    "title": "Process Details",
+    "tabs": {
+      "progress": "Progress",
+      "form": "Form Content",
+      "flowchart": "Flowchart",
+      "flowProgress": "Approval Path"
+    },
+    "currentPending": "Current Pending",
+    "flowInfo": "Process Info",
+    "approvalRecord": "Approval Record",
+    "flowTitle": "Title",
+    "flowType": "Type",
+    "flowStatus": "Status",
+    "flowNo": "Process No.",
+    "initiator": "Initiator",
+    "currentNode": "Current Node",
+    "startTime": "Start Time",
+    "completeTime": "Complete Time",
+    "duration": "Duration",
+    "unknownNode": "Unknown Node",
+    "start": "Start",
+    "noData": "No Data",
+    "noApprovalRecord": "No Approval Record",
+    "noFormContent": "No Form Content",
+    "loadDataFailed": "Failed to load data",
+    "loadFormDataFailed": "Failed to load form data",
+    "systemAuto": "System Auto",
+    "person": "person(s)",
+    "timeout": "Timeout",
+    "waiting": "Waiting",
+    "daysLater": " days",
+    "hoursLater": " hours",
+    "minutesLater": " minutes",
+    "days": " days ",
+    "hours": " hours ",
+    "minutes": " minutes",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "start": "Start Process",
+      "approve": "Approved",
+      "reject": "Rejected",
+      "return": "Returned",
+      "transfer": "Transferred",
+      "delegate": "Delegated",
+      "add_sign": "Add Sign",
+      "revise": "Resubmit",
+      "cancel": "Cancelled",
+      "copy": "Copied",
+      "handle": "Handled",
+      "urge": "Urged",
+      "task_timeout": "Task Timeout",
+      "task_timeout_notify": "Timeout Notify",
+      "task_auto_approve": "Auto Approved",
+      "task_auto_reject": "Auto Rejected",
+      "delay_start": "Delay Start",
+      "delay_complete": "Delay Complete",
+      "delay_skip": "Delay Skipped",
+      "notify": "Notified",
+      "parallel_start": "Parallel Start",
+      "parallel_complete": "Parallel Complete",
+      "subflow_start": "Subflow Start",
+      "subflow_complete": "Subflow Complete",
+      "data_update": "Field Update",
+      "condition": "Condition Branch"
+    },
+    "flowProgress": {
+      "returnRecords": "Return Records",
+      "noData": "No progress data",
+      "loadFailed": "Failed to load progress",
+      "delayWaiting": "Delay waiting, expected resume at: ",
+      "pending": "Pending",
+      "waiting": "Waiting",
+      "skipped": "Skipped",
+      "copied": "Copied",
+      "nodeTypes": {
+        "start": "Start",
+        "end": "End",
+        "approval": "Approval",
+        "handle": "Handle",
+        "copy": "Copy",
+        "condition": "Condition",
+        "parallel": "Parallel",
+        "delay": "Delay",
+        "notify": "Notify",
+        "service": "Service",
+        "subflow": "Subflow",
+        "data_update": "Field Update"
+      },
+      "nodeStatus": {
+        "completed": "Completed",
+        "active": "In Progress",
+        "pending": "Pending",
+        "skipped": "Skipped",
+        "rejected": "Rejected"
+      },
+      "actions": {
+        "approve": "Approved",
+        "reject": "Rejected",
+        "return": "Returned",
+        "transfer": "Transferred",
+        "delegate": "Delegated",
+        "handle": "Handled",
+        "add_sign": "Add Sign"
+      },
+      "signTypes": {
+        "before": "Before Sign",
+        "after": "After Sign",
+        "parallel": "Parallel Sign"
+      },
+      "extraActions": {
+        "add_sign": "Add Sign",
+        "reduce_sign": "Reduce Sign",
+        "transfer": "Transfer",
+        "delegate": "Delegate",
+        "return": "Return"
+      }
+    }
+  }
+}

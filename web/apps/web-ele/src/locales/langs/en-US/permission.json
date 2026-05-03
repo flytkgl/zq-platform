@@ -1,0 +1,74 @@
+{
+  "name": "Permission",
+  "title": "Permission Management",
+  "permissionName": "Permission Name",
+  "permissionCode": "Permission Code",
+  "permissionType": "Permission Type",
+  "httpMethod": "HTTP Method",
+  "apiPath": "API Path",
+  "dataScope": "Data Scope",
+  "dataScopes": {
+    "all": "All Data",
+    "self": "Self Only",
+    "dept": "Department",
+    "deptAndSub": "Dept & Subordinates",
+    "custom": "Custom"
+  },
+  "description": "Description",
+  "operation": "Operation",
+  "add": "Add Permission",
+  "edit": "Edit Permission",
+  "selectMenuFirst": "Please select a menu first",
+  "searchMenu": "Search Menu",
+  "loadMenuFailed": "Failed to load menu",
+  "loadSubMenuFailed": "Failed to load sub-menu",
+  "searchMenuFailed": "Failed to search menu",
+  "deleteConfirm": "Are you sure you want to delete permission \"{0}\"?",
+  "batchDelete": "Batch Delete",
+  "batchDeleteConfirm": "Are you sure you want to delete {0} permissions?\n{1}",
+  "batchDeleteSuccess": "Successfully deleted {0} permissions",
+  "batchDeleteFailed": "Batch delete failed",
+  "selectToDelete": "Please select permissions to delete",
+  "selectAtLeastOneRoute": "Please select at least one route",
+  "createSuccess": "Successfully created {created} permissions{skipped}",
+  "skipped": ", skipped {count}",
+  "createFailed": "{failed} permissions failed to create: {errors}",
+  "createError": "Failed to create permissions",
+  "getRoutesFailed": "Failed to get routes list",
+  "autoGenerateApi": "Auto Generate API Permissions",
+  "quickAddApiPermission": "Quick Add API Permission",
+  "permissionTypes": {
+    "button": "Button Permission",
+    "api": "API Permission",
+    "data": "Data Permission",
+    "other": "Other Permission",
+    "buttonDesc": "Used to control the display and hiding of buttons, menu items, and other elements on the page",
+    "apiDesc": "Used to control API interfaces that users can access",
+    "dataDesc": "Used to control the data range that users can access",
+    "otherDesc": "Other types of permissions"
+  },
+  "typeLabels": {
+    "button": "Button",
+    "api": "API",
+    "data": "Data",
+    "other": "Other",
+    "unknown": "Unknown"
+  },
+  "helpText": {
+    "code": "Permission code should follow the \"module:action\" format, using letters, numbers, underscores and colons",
+    "apiPath": "Complete API path, e.g. /api/user/create or /api/user/:id/update",
+    "httpMethod": "The HTTP request method corresponding to this permission"
+  },
+  "placeholder": {
+    "name": "e.g.: Create User, View Report, etc.",
+    "code": "e.g.: user:create, report:view, etc.",
+    "apiPath": "/api/user/create"
+  },
+  "validationErrors": {
+    "nameRequired": "Permission name is required",
+    "nameMaxLength": "Permission name can be at most 64 characters",
+    "codeRequired": "Permission code is required",
+    "codeMaxLength": "Permission code can be at most 64 characters",
+    "codeFormat": "Permission code can only contain letters, numbers, underscores and colons"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "email": {
+    "title": "郵箱管理",
+    "composeBtn": "撰寫郵件",
+    "refresh": "同步",
+    "syncing": "同步中...",
+    "search": "搜索郵件...",
+    "selectAccount": "選擇賬號",
+    "addAccount": "添加賬號",
+    "manageAccount": "管理賬號",
+    "folders": {
+      "inbox": "收件箱",
+      "sent": "已發送",
+      "drafts": "草稿箱",
+      "trash": "垃圾箱",
+      "spam": "垃圾郵件",
+      "archive": "歸檔"
+    },
+    "list": {
+      "noEmails": "暫無郵件",
+      "noSubject": "(無主題)",
+      "emails": "封郵件"
+    },
+    "detail": {
+      "selectEmail": "選擇一封郵件查看詳情",
+      "from": "發件人",
+      "to": "收件人",
+      "reply": "回復",
+      "forward": "轉發",
+      "delete": "刪除",
+      "deleteConfirm": "確認刪除這封郵件嗎？",
+      "deleteSuccess": "刪除成功",
+      "deleteFailed": "刪除失敗",
+      "attachments": "附件",
+      "loadFailed": "加載郵件詳情失敗"
+    },
+    "composeModal": {
+      "new": "撰寫郵件",
+      "reply": "回復郵件",
+      "forward": "轉發郵件",
+      "to": "收件人",
+      "cc": "抄送",
+      "subject": "主題",
+      "content": "內容",
+      "attachments": "附件",
+      "addAttachment": "添加附件",
+      "cancel": "取消",
+      "saveDraft": "保存草稿",
+      "send": "發送",
+      "sendSuccess": "發送成功",
+      "sendFailed": "發送失敗",
+      "fillRequired": "請填寫收件人、主題和內容",
+      "toPlaceholder": "多個收件人用逗號分隔",
+      "ccPlaceholder": "多個抄送人用逗號分隔",
+      "subjectPlaceholder": "郵件主題",
+      "contentPlaceholder": "郵件正文（富文本編輯器待集成）",
+      "draftSaved": "草稿保存功能待實現"
+    },
+    "account": {
+      "add": "添加郵箱賬號",
+      "edit": "編輯郵箱賬號",
+      "name": "賬號名稱",
+      "namePlaceholder": "如：工作郵箱",
+      "provider": "郵件服務商",
+      "providerSelect": "選擇郵件服務商",
+      "email": "郵箱地址",
+      "emailPlaceholder": "your@email.com",
+      "password": "密碼/授權碼",
+      "passwordPlaceholder": "輸入郵箱密碼或授權碼",
+      "advancedSettings": "高級設置",
+      "imapServer": "IMAP服務器",
+      "imapServerPlaceholder": "imap.example.com",
+      "imapPort": "IMAP端口",
+      "smtpServer": "SMTP服務器",
+      "smtpServerPlaceholder": "smtp.example.com",
+      "smtpPort": "SMTP端口",
+      "autoSync": "自動同步",
+      "syncInterval": "同步間隔",
+      "cancel": "取消",
+      "test": "測試連接",
+      "save": "保存",
+      "testSuccess": "連接測試成功！",
+      "testFailed": "連接測試失敗",
+      "saveSuccess": "保存成功",
+      "updateSuccess": "更新成功",
+      "saveFailed": "保存失敗",
+      "validation": {
+        "nameRequired": "請輸入賬號名稱",
+        "providerRequired": "請選擇郵件服務商",
+        "emailRequired": "請輸入郵箱地址",
+        "emailInvalid": "請輸入正確的郵箱地址",
+        "passwordRequired": "請輸入密碼或授權碼"
+      }
+    },
+    "sync": {
+      "notSynced": "未同步",
+      "syncing": "同步中",
+      "success": "同步成功",
+      "failed": "同步失敗",
+      "justNow": "剛剛",
+      "minutesAgo": "分鐘前",
+      "hoursAgo": "小時前",
+      "daysAgo": "天前",
+      "syncSuccess": "同步成功，收到 {count} 封新郵件",
+      "syncFailed": "同步失敗",
+      "selectAccountFirst": "請先選擇郵箱賬號"
+    },
+    "stats": {
+      "loadFailed": "加載統計失敗"
+    },
+    "providers": {
+      "outlook": "Microsoft Outlook",
+      "163": "網易163郵箱",
+      "qq": "QQ郵箱",
+      "gmail": "Gmail",
+      "enterprise": "企業郵箱",
+      "notes": {
+        "163": "需要使用授權碼，不是登錄密碼",
+        "qq": "需要使用授權碼，不是QQ密碼",
+        "gmail": "需要開啟允許不夠安全的應用或使用應用專用密碼",
+        "enterprise": "請聯繫IT管理員獲取郵件服務器配置"
+      }
+    }
+  }
+}

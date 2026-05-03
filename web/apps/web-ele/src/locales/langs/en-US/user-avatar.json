@@ -1,0 +1,13 @@
+{
+  "profile": {
+    "overview": "Overview",
+    "organization": "Organization",
+    "email": "Email",
+    "mobile": "Mobile",
+    "department": "Department",
+    "position": "Position",
+    "manager": "Manager",
+    "city": "City",
+    "type": "Type"
+  }
+}

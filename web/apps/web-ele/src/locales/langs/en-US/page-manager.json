@@ -1,0 +1,106 @@
+{
+  "applicationName": "Application",
+  "name": "Page Name",
+  "code": "Page Code",
+  "status": "Status",
+  "description": "Description",
+  "createTime": "Create Time",
+  "updateTime": "Update Time",
+  "actions": "Actions",
+  "placeholder": {
+    "name": "Please enter page name",
+    "remark": "Please enter form description",
+    "category": "Please select category",
+    "code": "Please enter page code",
+    "status": "Please select status",
+    "description": "Please enter page description"
+  },
+  "categoryMap": {
+    "dashboard": "Dashboard",
+    "portal": "Portal Page",
+    "databoard": "Data Board",
+    "other": "Other"
+  },
+  "statusMap": {
+    "all": "All",
+    "published": "Published",
+    "draft": "Draft"
+  },
+  "create": "New Page",
+  "batchDelete": "Batch Delete",
+  "batchDeleteWithCount": "Batch Delete ({count})",
+  "deleteConfirm": "Are you sure you want to delete page \"{name}\"?",
+  "deleteConfirmTitle": "Delete Confirmation",
+  "deleteSuccess": "Page deleted: {name}",
+  "batchDeleteConfirm": "Are you sure you want to delete {count} selected pages?",
+  "batchDeleteConfirmTitle": "Batch Delete Confirmation",
+  "batchDeleteSuccess": "{count} pages deleted",
+  "unpublishSuccess": "Page \"{name}\" unpublished",
+  "unpublishFailed": "Unpublish failed",
+  "copyCodePlaceholder": "Please enter new page code",
+  "copyTitle": "Copy Page",
+  "copyCodeRule": "Code can only contain letters, numbers, underscores, and dashes",
+  "codeFormatError": "Code must start with a letter and contain only letters, numbers and underscores",
+  "copySuccess": "Copied successfully",
+  "design": "Design",
+  "editInfo": "Edit Info",
+  "saveSuccess": "Page saved successfully",
+  "preview": "Preview",
+  "publish": "Publish",
+  "unpublish": "Unpublish",
+  "copy": "Copy",
+  "setAsHome": "Set as Home",
+  "setAsHomeTitle": "Set as Default Home",
+  "setAsHomeConfirm": "Are you sure you want to set page \"{name}\" as the default home page?",
+  "setAsHomePath": "Home Path",
+  "setAsHomeTip": "After setting, users will be redirected to this page by default after login.",
+  "setAsHomeAppTip": "This page belongs to app \"{app}\". The home page config of that app will be updated.",
+  "setHomeSuccess": "Set as default home page successfully",
+  "setHomeFailed": "Failed to set as home page",
+  "more": "More",
+  "category": "Page Category",
+  "editor": {
+    "title": "Online Development",
+    "create": "Create Page",
+    "edit": "Edit Page",
+    "createSuccess": "Created successfully",
+    "steps": {
+      "basic": "Basic Info",
+      "design": "Page Design",
+      "preview": "Page Preview"
+    },
+    "loadFailed": "Failed to load page data",
+    "validate": {
+      "basic": "Validation failed: Name and Code are required",
+      "perfectDesign": "Please complete page design"
+    },
+    "autoSave": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "unsaved": "Unsaved"
+    }
+  },
+  "previewDialog": {
+    "title": "Page Preview",
+    "loadFailed": "Failed to load page configuration",
+    "verifySuccess": "Validation passed",
+    "realtimeData": "Realtime Data (v-model):",
+    "noConfig": "No page configuration",
+    "close": "Close",
+    "verifySubmit": "Verify Submit",
+    "verifyFailed": "Page validation failed"
+  },
+  "publishDialog": {
+    "title": "Page Publish",
+    "success": "Published successfully",
+    "failed": "Publish failed",
+    "menuConfig": "Menu Config",
+    "menuName": "Menu Name",
+    "parentMenu": "Parent Menu",
+    "parentMenuPlaceholder": "Please select parent menu (top level if empty)",
+    "menuIcon": "Menu Icon",
+    "routeInfo": "Route Info",
+    "accessPath": "Access Path",
+    "confirmPublish": "Confirm Publish"
+  }
+}

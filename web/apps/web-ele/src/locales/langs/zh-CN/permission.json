@@ -1,0 +1,74 @@
+{
+  "name": "权限",
+  "title": "权限管理",
+  "permissionName": "权限名称",
+  "permissionCode": "权限编码",
+  "permissionType": "权限类型",
+  "httpMethod": "HTTP 方法",
+  "apiPath": "API 路径",
+  "dataScope": "数据范围",
+  "dataScopes": {
+    "all": "全部数据",
+    "self": "仅本人",
+    "dept": "本部门",
+    "deptAndSub": "本部门及下级",
+    "custom": "自定义"
+  },
+  "description": "描述",
+  "operation": "操作",
+  "add": "新建权限",
+  "edit": "编辑权限",
+  "selectMenuFirst": "请先选择菜单",
+  "searchMenu": "搜索菜单",
+  "loadMenuFailed": "加载菜单失败",
+  "loadSubMenuFailed": "加载子菜单失败",
+  "searchMenuFailed": "搜索菜单失败",
+  "deleteConfirm": "确定删除权限{0}吗？",
+  "batchDelete": "批量删除",
+  "batchDeleteConfirm": "确定删除 {0} 个权限吗？\n{1}",
+  "batchDeleteSuccess": "成功删除 {0} 个权限",
+  "batchDeleteFailed": "批量删除失败",
+  "selectToDelete": "请选择要删除的权限",
+  "selectAtLeastOneRoute": "请选择至少一个路由",
+  "createSuccess": "成功创建 {created} 个权限{skipped}",
+  "skipped": "，跳过 {count} 个",
+  "createFailed": "{failed} 个权限创建失败：{errors}",
+  "createError": "创建权限失败",
+  "getRoutesFailed": "获取路由列表失败",
+  "autoGenerateApi": "自动生成API权限",
+  "quickAddApiPermission": "快速添加API权限",
+  "permissionTypes": {
+    "button": "按钮权限",
+    "api": "API权限",
+    "data": "数据权限",
+    "other": "其他权限",
+    "buttonDesc": "用于控制页面中的按钮、菜单项等元素的显示隐藏",
+    "apiDesc": "用于控制用户可以访问的 API 接口",
+    "dataDesc": "用于控制用户可以访问的数据范围",
+    "otherDesc": "其他类型的权限"
+  },
+  "typeLabels": {
+    "button": "按钮",
+    "api": "API",
+    "data": "数据",
+    "other": "其他",
+    "unknown": "未知"
+  },
+  "helpText": {
+    "code": "权限编码应遵循 \"module:action\" 的格式，使用字母、数字、下划线和冒号",
+    "apiPath": "完整的 API 路径，如 /api/user/create 或 /api/user/:id/update",
+    "httpMethod": "该权限对应的 HTTP 请求方法"
+  },
+  "placeholder": {
+    "name": "如：新建用户、查看报表等",
+    "code": "如：user:create、report:view等",
+    "apiPath": "/api/user/create"
+  },
+  "validationErrors": {
+    "nameRequired": "权限名称不能为空",
+    "nameMaxLength": "权限名称最长64个字符",
+    "codeRequired": "权限编码不能为空",
+    "codeMaxLength": "权限编码最长64个字符",
+    "codeFormat": "权限编码只能包含字母、数字、下划线和冒号"
+  }
+}

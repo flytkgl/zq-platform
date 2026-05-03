@@ -1,0 +1,22 @@
+{
+  "name": "字典",
+  "title": "字典管理",
+  "dictName": "字典名稱",
+  "dictCode": "字典編碼",
+  "remark": "備註",
+  "remarkPlaceholder": "請輸入備註",
+  "status": "狀態",
+  "operation": "操作",
+  "edit": "編輯",
+  "codeFormatError": "字典編碼只能包含字母、數字和下劃線",
+  "selectDictFirst": "請先選擇字典",
+  "noData": "暫無數據",
+  "itemName": "字典項",
+  "itemLabel": "標籤",
+  "itemValue": "值",
+  "itemIcon": "圖標",
+  "sort": "排序",
+  "isGlobal": "全局可見",
+  "globalTag": "全局",
+  "mainApp": "主應用"
+}

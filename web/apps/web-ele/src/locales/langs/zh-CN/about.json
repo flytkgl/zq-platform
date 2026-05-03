@@ -1,0 +1,15 @@
+{
+  "title": "关于项目",
+  "basicInfo": "基本信息",
+  "productionDependencies": "生产环境依赖",
+  "devDependencies": "开发环境依赖",
+  "version": "版本号",
+  "license": "开源许可协议",
+  "buildTime": "最后构建时间",
+  "homepage": "主页",
+  "docUrl": "文档地址",
+  "previewUrl": "预览地址",
+  "github": "Github",
+  "author": "作者",
+  "viewDetails": "点击查看"
+}

@@ -1,0 +1,60 @@
+{
+  "title": "电子签章管理",
+  "create": "新建签章",
+  "createSeal": "新建签章",
+  "editSeal": "编辑签章",
+  "name": "签章名称",
+  "sealTypeLabel": "签章类型",
+  "ownerTypeLabel": "所有者类型",
+  "scopeLabel": "使用范围",
+  "sealImage": "签章图片",
+  "description": "描述",
+  "width": "宽度",
+  "height": "高度",
+  "enable": "启用",
+  "disable": "禁用",
+  "sealType": {
+    "company": "公司章",
+    "department": "部门章",
+    "personal": "个人章",
+    "contract": "合同章",
+    "finance": "财务章"
+  },
+  "status": {
+    "active": "已启用",
+    "disabled": "已禁用"
+  },
+  "ownerType": {
+    "all": "所有人",
+    "dept": "指定部门",
+    "role": "指定角色",
+    "user": "指定用户"
+  },
+  "scope": {
+    "all": "所有模板",
+    "specific": "指定模板"
+  },
+  "placeholder": {
+    "name": "请输入签章名称",
+    "sealType": "请选择签章类型",
+    "ownerType": "请选择所有者类型",
+    "scope": "请选择使用范围",
+    "sealImage": "请上传签章图片",
+    "description": "请输入描述",
+    "selectDept": "请选择部门",
+    "selectRole": "请选择角色",
+    "selectUser": "请选择用户",
+    "selectTemplate": "请选择模板"
+  },
+  "deleteConfirm": "确定要删除签章 \"{name}\" 吗？",
+  "deleteConfirmTitle": "删除确认",
+  "deleteSuccess": "删除成功",
+  "disableConfirm": "确定要禁用此签章吗？禁用后将无法使用。",
+  "disableConfirmTitle": "禁用确认",
+  "disableSuccess": "禁用成功",
+  "enableSuccess": "启用成功",
+  "selectDept": "选择部门",
+  "selectRole": "选择角色",
+  "selectUser": "选择用户",
+  "selectTemplate": "选择模板"
+}

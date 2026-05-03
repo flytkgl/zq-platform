@@ -1,0 +1,119 @@
+ZQ-PLATFORM PUBLIC LICENSE SUPPLEMENTAL TERMS
+Version 1.0
+
+These supplemental terms (the "Supplemental Terms") form an integral part of
+the Apache License, Version 2.0 (the "Apache License") under which the ZQ-
+Platform software is licensed. All capitalized terms not defined herein shall
+have the meanings ascribed to them in the Apache License.
+
+SECTION 1 — SCOPE AND EFFECT
+
+1.1 The rights and permissions granted under the Apache License are expressly
+subject to, and conditioned upon, compliance with the additional obligations
+set forth in these Supplemental Terms. To the extent of any conflict between
+the Apache License and these Supplemental Terms, the latter shall prevail
+with respect to the subject matter hereof.
+
+1.2 These Supplemental Terms apply to the Work as defined in the Apache
+License, including all portions thereof, all Derivative Works, and all
+copies or distributions thereof, whether in Source or Object form.
+
+SECTION 2 — TRADEMARK RESTRICTIONS
+
+2.1 Neither the name "ZQ-Platform" nor any other trademarks, service marks,
+trade names, or logos of the Licensor (collectively, the "ZQ Marks") may be
+used to identify, promote, or endorse any product, service, or activity
+unless expressly authorized in writing by the Licensor.
+
+2.2 Notwithstanding Section 2.1, the limited right to reproduce the ZQ Marks
+as they appear in the original distribution of the Work is granted solely for
+the purpose of complying with the attribution obligations set forth in
+Section 3 of these Supplemental Terms. No other use, reproduction, or display
+of the ZQ Marks is permitted under this license.
+
+SECTION 3 — ATTRIBUTION AND BRANDING OBLIGATIONS
+
+3.1 All distributions of the Work in Source or Object form, including but not
+limited to modified versions and Derivative Works, must display the following
+attribution text in every user-facing interface page:
+
+    "powered by ZQ-Platform"
+
+3.2 The attribution text required under Section 3.1 shall:
+
+    (a) be visible to all users without requiring any interaction, login, or
+        affirmative action;
+
+    (b) appear on every user-facing interface page of the software, including
+        login pages, dashboards, settings panels, and any other page rendered
+        for end users;
+
+    (c) be displayed in a fixed, non-obscurable position with a font size no
+        smaller than the predominant body text size of the surrounding
+        interface;
+
+    (d) function as a hyperlink directing users to https://zq-platform.com
+        (or such other domain as the Licensor may designate from time to
+        time); and
+
+    (e) not be hidden, removed, minimized, or otherwise obscured through CSS,
+        JavaScript, or any other technical means.
+
+3.3 The attribution obligation set forth in this Section 3 is in addition to,
+and not in substitution for, any notices, attribution, or other requirements
+set forth in the Apache License, including but not limited to Section 4
+thereof.
+
+SECTION 4 — PASS-THROUGH OBLIGATIONS
+
+4.1 Any sublicense authorized under Section 2 of the Apache License or any
+other provision thereof must include, as a condition of such sublicense,
+these Supplemental Terms. Each sublicensee shall be subject to the same
+obligations as set forth herein.
+
+4.2 Any distribution or sublicense of the Work by You, whether in Source or
+Object form, shall require Your downstream recipients to comply with all
+terms of these Supplemental Terms. You shall include a copy of these
+Supplemental Terms with any such distribution or sublicense.
+
+SECTION 5 — WAIVER AND EXCEPTIONS
+
+5.1 The Licensor may, in its sole discretion and upon written request via
+email, grant a partial or full waiver of any obligation set forth in these
+Supplemental Terms. Any such waiver must be in writing and signed by an
+authorized representative of the Licensor.
+
+5.2 No failure or delay by the Licensor in exercising any right or remedy
+under these Supplemental Terms shall operate as a waiver thereof, nor shall
+any single or partial exercise of any right or remedy preclude any other or
+further exercise thereof.
+
+SECTION 6 — TERMINATION
+
+6.1 Any breach of these Supplemental Terms by You shall constitute a
+material breach of the Apache License and, unless cured within thirty (30)
+days of written notice from the Licensor, shall result in automatic
+termination of all rights granted to You under the Apache License with
+respect to the Work.
+
+6.2 Upon termination under Section 6.1, You shall immediately cease all use,
+reproduction, and distribution of the Work and shall destroy all copies
+thereof in Your possession or control.
+
+SECTION 7 — MISCELLANEOUS
+
+7.1 These Supplemental Terms, together with the Apache License, constitute
+the entire agreement between You and the Licensor with respect to the Work
+and supersede all prior or contemporaneous understandings regarding such
+subject matter.
+
+7.2 If any provision of these Supplemental Terms is held to be invalid,
+illegal, or unenforceable, the remaining provisions shall continue in full
+force and effect, and such invalid, illegal, or unenforceable provision
+shall be reformed to the minimum extent necessary to make it valid, legal,
+and enforceable.
+
+7.3 These Supplemental Terms are governed by the laws of the People's
+Republic of China, without regard to its conflict of laws principles. Any
+dispute arising out of or relating to these Supplemental Terms shall be
+subject to the exclusive jurisdiction of the courts of Dalian, China.

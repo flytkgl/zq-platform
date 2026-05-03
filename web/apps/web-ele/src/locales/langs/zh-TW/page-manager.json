@@ -1,0 +1,106 @@
+{
+  "applicationName": "所屬應用",
+  "name": "頁面名稱",
+  "code": "頁面編碼",
+  "status": "狀態",
+  "description": "描述",
+  "createTime": "創建時間",
+  "updateTime": "更新時間",
+  "actions": "操作",
+  "placeholder": {
+    "name": "請輸入頁面名稱",
+    "code": "請輸入頁面編碼",
+    "status": "請選擇狀態",
+    "remark": "請輸入表單說明",
+    "category": "請選擇分類",
+    "description": "請輸入頁面說明"
+  },
+  "categoryMap": {
+    "dashboard": "儀表盤",
+    "portal": "門戶頁面",
+    "databoard": "數據看板",
+    "other": "其他"
+  },
+  "statusMap": {
+    "all": "全部",
+    "published": "已發佈",
+    "draft": "草稿"
+  },
+  "create": "新建頁面",
+  "batchDelete": "批量刪除",
+  "batchDeleteWithCount": "批量刪除 ({count})",
+  "deleteConfirm": "確定要刪除頁面 \"{name}\" 嗎？",
+  "deleteConfirmTitle": "刪除確認",
+  "deleteSuccess": "已刪除頁面: {name}",
+  "batchDeleteConfirm": "確定要刪除選中的 {count} 個頁面嗎？",
+  "batchDeleteConfirmTitle": "批量刪除確認",
+  "batchDeleteSuccess": "已刪除 {count} 個頁面",
+  "unpublishSuccess": "頁面 \"{name}\" 已取消發佈",
+  "unpublishFailed": "取消發佈失敗",
+  "copyCodePlaceholder": "請輸入新頁面編碼",
+  "copyTitle": "複製頁面",
+  "copyCodeRule": "編碼只能包含字母、數字、下劃線和橫線",
+  "codeFormatError": "編碼必須以字母開頭，只能包含字母、數字和下劃線",
+  "copySuccess": "複製成功",
+  "design": "設計",
+  "editInfo": "編輯信息",
+  "saveSuccess": "頁面保存成功",
+  "preview": "預覽",
+  "publish": "發佈",
+  "unpublish": "取消發佈",
+  "copy": "複製",
+  "setAsHome": "設為首頁",
+  "setAsHomeTitle": "設為預設首頁",
+  "setAsHomeConfirm": "確定要將頁面「{name}」設為預設首頁嗎？",
+  "setAsHomePath": "首頁路徑",
+  "setAsHomeTip": "設定後，用戶登入系統將預設跳轉到此頁面。",
+  "setAsHomeAppTip": "此頁面屬於應用「{app}」，將更新該應用的首頁配置。",
+  "setHomeSuccess": "已設為預設首頁",
+  "setHomeFailed": "設定首頁失敗",
+  "more": "更多",
+  "category": "頁面分類",
+  "editor": {
+    "title": "在線開發",
+    "create": "創建頁面",
+    "edit": "編輯頁面",
+    "createSuccess": "創建成功",
+    "steps": {
+      "basic": "基礎信息",
+      "design": "頁面設計",
+      "preview": "頁面預覽"
+    },
+    "loadFailed": "加載頁面數據失敗",
+    "validate": {
+      "basic": "基礎信息驗證：名稱、編碼必填",
+      "perfectDesign": "請完善頁面設計"
+    },
+    "autoSave": {
+      "saving": "保存中...",
+      "saved": "已保存",
+      "unsaved": "未保存"
+    }
+  },
+  "previewDialog": {
+    "title": "頁面預覽",
+    "loadFailed": "加載頁面配置失敗",
+    "verifySuccess": "驗證通過",
+    "realtimeData": "實時數據 (v-model):",
+    "noConfig": "暫無頁面配置",
+    "close": "關閉",
+    "verifySubmit": "驗證提交",
+    "verifyFailed": "頁面驗證失敗"
+  },
+  "publishDialog": {
+    "title": "頁面發佈",
+    "success": "發佈成功",
+    "failed": "發佈失敗",
+    "menuConfig": "菜單配置",
+    "menuName": "菜單名稱",
+    "parentMenu": "上級菜單",
+    "parentMenuPlaceholder": "請選擇上級菜單（不選則為頂級）",
+    "menuIcon": "菜單圖標",
+    "routeInfo": "路由信息",
+    "accessPath": "訪問路徑",
+    "confirmPublish": "確認發佈"
+  }
+}

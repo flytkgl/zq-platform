@@ -1,0 +1,15 @@
+{
+  "title": "關於項目",
+  "basicInfo": "基本信息",
+  "productionDependencies": "生產環境依賴",
+  "devDependencies": "開發環境依賴",
+  "version": "版本號",
+  "license": "開源許可協議",
+  "buildTime": "最後構建時間",
+  "homepage": "主頁",
+  "docUrl": "文檔地址",
+  "previewUrl": "預覽地址",
+  "github": "Github",
+  "author": "作者",
+  "viewDetails": "點擊查看"
+}

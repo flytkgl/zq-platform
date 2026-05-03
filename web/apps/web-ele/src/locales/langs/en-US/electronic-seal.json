@@ -1,0 +1,60 @@
+{
+  "title": "Electronic Seal Management",
+  "create": "Create Seal",
+  "createSeal": "Create Seal",
+  "editSeal": "Edit Seal",
+  "name": "Seal Name",
+  "sealTypeLabel": "Seal Type",
+  "ownerTypeLabel": "Owner Type",
+  "scopeLabel": "Scope",
+  "sealImage": "Seal Image",
+  "description": "Description",
+  "width": "Width",
+  "height": "Height",
+  "enable": "Enable",
+  "disable": "Disable",
+  "sealType": {
+    "company": "Company Seal",
+    "department": "Department Seal",
+    "personal": "Personal Seal",
+    "contract": "Contract Seal",
+    "finance": "Finance Seal"
+  },
+  "status": {
+    "active": "Active",
+    "disabled": "Disabled"
+  },
+  "ownerType": {
+    "all": "Everyone",
+    "dept": "Specific Department",
+    "role": "Specific Role",
+    "user": "Specific User"
+  },
+  "scope": {
+    "all": "All Templates",
+    "specific": "Specific Templates"
+  },
+  "placeholder": {
+    "name": "Please enter seal name",
+    "sealType": "Please select seal type",
+    "ownerType": "Please select owner type",
+    "scope": "Please select scope",
+    "sealImage": "Please upload seal image",
+    "description": "Please enter description",
+    "selectDept": "Please select department",
+    "selectRole": "Please select role",
+    "selectUser": "Please select user",
+    "selectTemplate": "Please select template"
+  },
+  "deleteConfirm": "Are you sure you want to delete seal \"{name}\"?",
+  "deleteConfirmTitle": "Delete Confirmation",
+  "deleteSuccess": "Deleted successfully",
+  "disableConfirm": "Are you sure you want to disable this seal? It will not be available after disabled.",
+  "disableConfirmTitle": "Disable Confirmation",
+  "disableSuccess": "Disabled successfully",
+  "enableSuccess": "Enabled successfully",
+  "selectDept": "Select Department",
+  "selectRole": "Select Role",
+  "selectUser": "Select User",
+  "selectTemplate": "Select Template"
+}

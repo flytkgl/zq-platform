@@ -1,0 +1,705 @@
+{
+  "designer": {
+    "title": "流程设计器",
+    "flowName": "流程名称",
+    "flowNamePlaceholder": "请输入流程名称",
+    "save": "保存",
+    "preview": "预览",
+    "publish": "发布",
+    "undo": "撤销",
+    "redo": "重做",
+    "saveFirst": "请先保存流程",
+    "isDirty": "有未保存的更改",
+    "saveSuccess": "保存成功",
+    "publishSuccess": "发布成功",
+    "previewInfo": "预览功能开发中",
+    "deleteNodeConfirm": "确定要删除此节点吗？",
+    "deleteBranchConfirm": "确定要删除此条件分支吗？",
+    "tips": "提示",
+    "readonlyTip": "只读模式，不可编辑",
+    "embeddedTip": "嵌入模式",
+    "minimap": "缩略图"
+  },
+  "preview": {
+    "title": "流程预览",
+    "unnamedFlow": "未命名流程",
+    "relatedForm": "关联表单",
+    "nodeDetail": "节点详情",
+    "statistics": {
+      "approval": "个审批",
+      "copy": "个抄送",
+      "branch": "个分支"
+    },
+    "assigneeTypes": {
+      "user": "指定成员",
+      "role": "指定角色",
+      "department": "指定部门",
+      "formField": "表单字段",
+      "initiator": "发起人自己",
+      "manager": "直属经理",
+      "superior": "上级主管"
+    },
+    "multiApproval": {
+      "sequential": "依次审批",
+      "parallel": "会签（所有人通过）",
+      "any": "或签（一人通过即可）"
+    },
+    "multiHandle": {
+      "sequential": "依次办理",
+      "all": "全部办理",
+      "any": "任一办理"
+    },
+    "sections": {
+      "approvalSettings": "审批人设置",
+      "handleSettings": "办理人设置",
+      "copySettings": "抄送人设置",
+      "delaySettings": "延时设置",
+      "notifySettings": "通知设置",
+      "serviceSettings": "服务调用设置",
+      "subflowSettings": "子流程设置",
+      "dataUpdateSettings": "字段更新设置",
+      "formPermissions": "表单字段权限",
+      "conditionBranches": "条件分支",
+      "parallelBranches": "并行分支"
+    },
+    "labels": {
+      "approverType": "审批人类型",
+      "approvers": "审批人",
+      "handlerType": "办理人类型",
+      "handlers": "办理人",
+      "copyType": "抄送人类型",
+      "copyRecipients": "抄送人",
+      "specifiedRole": "指定角色",
+      "specifiedDept": "指定部门",
+      "superiorLevel": "上级层级",
+      "level": "第",
+      "levelSuffix": "级",
+      "superior": "主管",
+      "manager": "经理",
+      "multiApproval": "多人审批",
+      "multiHandle": "多人办理方式",
+      "timeoutSettings": "超时设置",
+      "hoursLater": "小时后",
+      "autoApprove": "自动通过",
+      "autoReject": "自动拒绝",
+      "waitDuration": "等待时长",
+      "notifyRecipient": "通知对象",
+      "notifyChannel": "通知渠道",
+      "notifyTitle": "通知标题",
+      "notSet": "未设置",
+      "serviceName": "服务名称",
+      "requestMethod": "请求方法",
+      "requestUrl": "请求地址",
+      "timeoutDuration": "超时时间",
+      "seconds": "秒",
+      "subflow": "子流程",
+      "executionMode": "执行方式",
+      "syncExecution": "同步执行",
+      "asyncExecution": "异步执行",
+      "variablePass": "变量传递",
+      "passAllVariables": "传递所有变量",
+      "passSelectedVariables": "选择传递",
+      "noVariablePass": "不传递",
+      "branchCount": "分支数量",
+      "nodeType": "节点类型",
+      "description": "说明"
+    },
+    "permissions": {
+      "editable": "可编辑",
+      "readonly": "只读",
+      "hidden": "隐藏"
+    },
+    "descriptions": {
+      "delay": "流程将在此节点暂停，等待指定时间后自动继续执行",
+      "notify": "流程到达此节点时将自动发送通知",
+      "service": "流程到达此节点时将自动调用配置的服务",
+      "subflow": "流程到达此节点时将调用子流程",
+      "data_update": "流程到达此节点时将自动更新表单字段值"
+    },
+    "conditionConfigured": "已配置{count}个条件组",
+    "conditionNotConfigured": "未配置条件",
+    "branchCountValue": "{count}个分支",
+    "parallelExecutionDesc": "所有分支同时执行，全部完成后继续",
+    "branch": "分支",
+    "startNodeDesc": "所有人可发起流程",
+    "endNodeDesc": "流程结束"
+  },
+  "nodes": {
+    "start": {
+      "name": "发起人",
+      "title": "发起人",
+      "desc": "流程发起人",
+      "placeholder": "所有人"
+    },
+    "approval": {
+      "name": "审批人",
+      "title": "审批人",
+      "desc": "添加审批人节点",
+      "placeholder": "请设置审批人",
+      "multiApproval": {
+        "sequential": "依次审批",
+        "parallel": "会签",
+        "any": "或签"
+      },
+      "summary": {
+        "department": "个部门",
+        "formField": "表单字段",
+        "initiator": "发起人",
+        "manager": "级经理",
+        "role": "个角色",
+        "superior": "级主管",
+        "user": "位成员",
+        "prefix": "第"
+      }
+    },
+    "handle": {
+      "name": "办理人",
+      "title": "办理人",
+      "desc": "添加办理人节点",
+      "placeholder": "请设置办理人",
+      "multiHandle": {
+        "sequential": "依次办理",
+        "all": "全部办理",
+        "any": "任一办理"
+      },
+      "summary": {
+        "department": "个部门",
+        "formField": "表单字段",
+        "initiator": "发起人",
+        "manager": "级经理",
+        "role": "个角色",
+        "superior": "级主管",
+        "user": "位成员",
+        "prefix": "第"
+      }
+    },
+    "copy": {
+      "name": "抄送人",
+      "title": "抄送人",
+      "desc": "添加抄送人节点",
+      "placeholder": "请设置抄送人",
+      "summary": {
+        "department": "个部门",
+        "formField": "表单字段",
+        "initiator": "发起人",
+        "role": "个角色",
+        "user": "位成员"
+      }
+    },
+    "delay": {
+      "name": "延时等待",
+      "title": "延时等待",
+      "desc": "等待指定时间后继续",
+      "placeholder": "请设置延时时长",
+      "summary": {
+        "minute": "分钟",
+        "hour": "小时",
+        "day": "天",
+        "workday": "工作日",
+        "wait": "等待"
+      }
+    },
+    "notify": {
+      "name": "发送通知",
+      "title": "发送通知",
+      "desc": "发送消息通知",
+      "placeholder": "请设置通知对象",
+      "summary": {
+        "department": "个部门",
+        "formField": "表单字段",
+        "initiator": "发起人",
+        "role": "个角色",
+        "user": "位成员",
+        "channels": "通知渠道"
+      }
+    },
+    "service": {
+      "name": "服务调用",
+      "title": "服务调用",
+      "desc": "调用外部服务或API",
+      "placeholder": "请配置服务调用",
+      "summary": {
+        "url": "请求地址",
+        "notConfigured": "未配置"
+      }
+    },
+    "subflow": {
+      "name": "子流程",
+      "title": "子流程",
+      "desc": "调用其他流程",
+      "placeholder": "请选择子流程",
+      "summary": {
+        "notSelected": "未选择",
+        "sync": "同步",
+        "async": "异步"
+      }
+    },
+    "data_update": {
+      "name": "字段更新",
+      "title": "字段更新",
+      "desc": "自动更新表单字段值",
+      "placeholder": "请添加更新规则",
+      "summary": {
+        "ruleCount": "已配置 {count} 条更新规则"
+      }
+    },
+    "condition": {
+      "name": "条件分支",
+      "title": "条件分支",
+      "desc": "添加条件分支",
+      "priority": "优先级",
+      "conditionBranch": "条件{num}",
+      "defaultBranch": "默认条件",
+      "defaultBranchDesc": "其他条件进入此分支",
+      "pleaseSetCondition": "请设置条件",
+      "addCondition": "添加条件"
+    },
+    "parallel": {
+      "name": "并行分支",
+      "desc": "添加并行分支，同时执行"
+    },
+    "end": {
+      "name": "结束",
+      "title": "流程结束",
+      "desc": "流程结束"
+    }
+  },
+  "property": {
+    "title": {
+      "condition": "条件配置",
+      "start": "发起人设置",
+      "approval": "审批人设置",
+      "handle": "办理人设置",
+      "copy": "抄送人设置",
+      "delay": "延时设置",
+      "notify": "通知设置",
+      "service": "服务调用设置",
+      "subflow": "子流程设置",
+      "dataUpdate": "字段更新设置",
+      "conditionBranch": "条件分支设置",
+      "end": "结束设置",
+      "node": "节点设置"
+    },
+    "base": {
+      "nodeName": "节点名称",
+      "nodeNamePlaceholder": "请输入节点名称"
+    },
+    "assignee": {
+      "type": "审批人类型",
+      "handleType": "办理人类型",
+      "copyType": "抄送人类型",
+      "selectUser": "选择成员",
+      "selectRole": "选择角色",
+      "selectDept": "选择部门",
+      "userPlaceholder": "请选择审批人",
+      "rolePlaceholder": "请选择角色",
+      "deptPlaceholder": "请选择部门",
+      "superiorLevel": "上级层级",
+      "superiorHint": "1 = 当前部门领导，2 = 父部门领导，以此类推",
+      "superiorLevelHint": "第几级主管（1为直属主管）",
+      "managerHint": "1 = 直属经理，2 = 经理的经理，以此类推",
+      "initiatorHint": "审批人为流程发起人本人",
+      "copyInitiatorHint": "抄送给流程发起人本人",
+      "handleInitiatorHint": "办理人为流程发起人本人",
+      "selectField": "选择字段",
+      "fieldPlaceholder": "请选择用户类型的表单字段",
+      "noUserField": "当前表单没有用户选择类型的字段",
+      "types": {
+        "user": "指定成员",
+        "role": "指定角色",
+        "department": "指定部门",
+        "superior": "上级主管",
+        "manager": "直属经理",
+        "initiator": "发起人自己",
+        "form_field": "表单字段"
+      }
+    },
+    "multiApproval": {
+      "label": "多人审批时",
+      "any": "或签（一人通过即可）",
+      "parallel": "会签（所有人通过）",
+      "sequential": "依次审批"
+    },
+    "multiHandle": {
+      "label": "多人办理时",
+      "any": "任一办理（一人完成即可）",
+      "all": "全部办理（所有人完成）",
+      "sequential": "依次办理"
+    },
+    "timeout": {
+      "label": "超时设置",
+      "enable": "启用超时处理",
+      "time": "超时时间",
+      "action": "超时处理方式",
+      "notifyType": "通知方式",
+      "unit": {
+        "minute": "分钟",
+        "hour": "小时",
+        "day": "天",
+        "workday": "工作日"
+      },
+      "actions": {
+        "notify": "仅通知",
+        "auto_approve": "自动通过",
+        "auto_reject": "自动拒绝"
+      }
+    },
+    "notify": {
+      "label": "通知设置",
+      "approver": "通知审批人",
+      "initiator": "通知发起人",
+      "recipient": "通知对象",
+      "recipientType": "通知对象类型",
+      "whenTaskCreated": "任务创建时",
+      "onApprove": "通过时",
+      "onReject": "拒绝时",
+      "onHandleComplete": "办理完成时",
+      "channels": "通知渠道",
+      "channelPlaceholder": "请选择通知渠道",
+      "title": "通知标题",
+      "titlePlaceholder": "请输入通知标题",
+      "content": "通知内容",
+      "contentPlaceholder": "请输入通知内容，可使用 ${字段名} 引用表单字段",
+      "variableDesc": "变量说明",
+      "initiatorVar": "${发起人} - 流程发起人姓名",
+      "flowNameVar": "${流程名称} - 当前流程名称",
+      "fieldVar": "${字段名} - 表单字段值",
+      "channelTypes": {
+        "site": "站内信",
+        "chat": "聊天通知",
+        "email": "邮件",
+        "sms": "短信",
+        "wechat": "微信",
+        "dingtalk": "钉钉",
+        "feishu": "飞书"
+      }
+    },
+    "signature": {
+      "label": "签名设置",
+      "required": "要求签名",
+      "hint": "启用后，审批人通过时必须手写签名"
+    },
+    "action": {
+      "label": "操作权限",
+      "hint": "设置审批人在此节点可以执行的操作，可自定义按钮名称",
+      "descriptions": {
+        "approve": "同意审批，流程继续",
+        "reject": "拒绝审批，终止流程",
+        "return": "退回上一步或发起人重新提交",
+        "delegate": "委托他人代为审批，完成后回到自己",
+        "transfer": "转交他人处理，自己不再参与",
+        "add_sign": "增加审批人，可前加签或后加签",
+        "reduce_sign": "减少审批人（仅会签模式可用）"
+      },
+      "tips": {
+        "title": "操作说明",
+        "approveReject": "通过/拒绝：基础操作，建议至少保留一个",
+        "return": "驳回：可退回到上一节点或发起人",
+        "delegate": "委派：临时委托，完成后任务回到委派人",
+        "transfer": "转办：永久转交，自己不再处理",
+        "addSign": "加签：在当前节点增加审批人",
+        "reduceSign": "减签：仅会签模式可用，减少审批人"
+      },
+      "types": {
+        "approve": "通过",
+        "reject": "拒绝",
+        "return": "驳回",
+        "delegate": "委派",
+        "transfer": "转办",
+        "add_sign": "加签",
+        "reduce_sign": "减签"
+      }
+    },
+    "permission": {
+      "label": "字段权限",
+      "hint": "设置审批人在此节点可以查看和编辑的表单字段"
+    },
+    "segment": {
+      "approver": "审批人",
+      "actions": "操作权限",
+      "permissions": "字段权限",
+      "handler": "办理人设置"
+    },
+    "delay": {
+      "title": "延时设置",
+      "duration": "延时时长",
+      "hint": "设置流程等待的时间，到达指定时间后自动继续执行",
+      "minuteTip": "按自然分钟计算",
+      "hourTip": "按自然小时计算",
+      "dayTip": "按自然天计算（24小时）",
+      "workdayTip": "仅计算工作日，跳过周末和节假日"
+    },
+    "conditionBranch": {
+      "title": "条件设置",
+      "name": "条件名称",
+      "namePlaceholder": "请输入条件名称",
+      "hint": "设置进入此分支的条件",
+      "hintSub": "条件组之间为\"或\"关系，组内条件为\"且\"关系",
+      "noFormHint": "请先关联表单，才能配置条件",
+      "defaultTitle": "默认条件分支",
+      "defaultHint": "当其他条件都不满足时，进入此分支"
+    },
+    "startNode": {
+      "title": "发起人节点",
+      "hint": "所有有权限的用户都可以发起此流程"
+    },
+    "service": {
+      "title": "服务调用设置",
+      "baseSettings": "基本设置",
+      "name": "服务名称",
+      "namePlaceholder": "请输入服务名称（可选）",
+      "url": "请求地址",
+      "urlPlaceholder": "https://api.example.com/endpoint",
+      "method": "请求方法",
+      "headers": "请求头",
+      "headerName": "Header名称",
+      "headerValue": "Header值",
+      "addHeader": "添加请求头",
+      "params": "请求参数",
+      "body": "请求体",
+      "advancedSettings": "高级设置",
+      "timeout": "超时时间（秒）",
+      "retry": "重试次数",
+      "failAction": "失败处理",
+      "resultVar": "结果存储变量",
+      "resultVarPlaceholder": "存储响应结果的变量名（可选）",
+      "resultVarHint": "响应结果将存入此变量，可在后续节点中使用",
+      "variableDesc": "变量说明",
+      "paramFieldVar": "请求参数中可使用 ${字段名} 引用表单字段",
+      "resultVarUsage": "响应结果可通过变量名在条件分支中使用",
+      "failActions": {
+        "continue": "继续执行",
+        "stop": "终止流程",
+        "retry": "自动重试"
+      }
+    },
+    "subflow": {
+      "title": "子流程设置",
+      "select": "选择子流程",
+      "selectPlaceholder": "请选择要调用的子流程",
+      "selectWarning": "请选择一个子流程",
+      "flowId": "流程ID",
+      "flowName": "流程名称",
+      "unnamed": "未命名",
+      "varPass": "变量传递",
+      "varPassHint": "配置主流程向子流程传递的变量数据",
+      "varPassMode": "传递方式",
+      "selectVars": "选择变量",
+      "selectVarsPlaceholder": "请选择要传递的变量",
+      "selectVarsHint": "选择需要传递给子流程的表单字段",
+      "varMapping": "变量映射规则",
+      "mappingRule1": "主流程变量将按名称自动映射到子流程",
+      "mappingRule2": "同名变量将被覆盖，不同名变量将被忽略",
+      "executionSettings": "执行设置",
+      "executionMode": "执行模式",
+      "sync": "同步执行",
+      "syncDesc": "等待子流程完成后继续",
+      "async": "异步执行",
+      "asyncDesc": "启动子流程后立即继续",
+      "resultMode": "结果处理",
+      "ignoreResult": "忽略子流程结果",
+      "saveResult": "保存子流程结果",
+      "resultVarName": "结果变量名",
+      "resultVarPlaceholder": "请输入变量名，如: subflowResult",
+      "resultVarHint": "子流程的审批结果将存入此变量，可在后续节点中使用",
+      "asyncWarning": "异步执行注意事项",
+      "asyncWarning1": "主流程不会等待子流程完成",
+      "asyncWarning2": "无法获取子流程的执行结果",
+      "asyncWarning3": "子流程失败不会影响主流程",
+      "skipSubflow": "跳过子流程（视为通过）",
+      "rejectSubflow": "拒绝子流程",
+      "usageTips": "使用说明",
+      "usageTip1": "子流程将继承主流程的发起人信息",
+      "usageTip2": "子流程拥有独立的审批记录和状态",
+      "usageTip3": "可通过条件分支根据子流程结果进行后续处理",
+      "varPassModes": {
+        "all": "传递所有变量",
+        "selected": "选择传递变量",
+        "none": "不传递变量"
+      }
+    },
+    "dataUpdate": {
+      "title": "字段更新设置",
+      "description": "流程到达此节点时，将按照配置的规则自动更新表单字段值。",
+      "rulesTitle": "更新规则",
+      "targetField": "目标字段",
+      "targetFieldPlaceholder": "请选择要更新的字段",
+      "valueType": "值类型",
+      "value": "值",
+      "constantPlaceholder": "请输入常量值",
+      "fieldPlaceholder": "请选择源字段",
+      "formulaPlaceholder": "请输入表达式，如: {{price}} * {{quantity}}",
+      "formulaHint": "使用 {{字段名}} 引用表单字段，支持四则运算（+、-、*、/）",
+      "systemPlaceholder": "请选择系统变量",
+      "addRule": "添加更新规则",
+      "noRulesHint": "暂无更新规则，请点击上方按钮添加。",
+      "valueTypes": {
+        "constant": "常量值",
+        "field": "字段引用",
+        "formula": "表达式",
+        "system": "系统变量"
+      },
+      "systemVars": {
+        "currentTime": "当前时间",
+        "currentDate": "当前日期",
+        "currentUser": "当前操作人",
+        "initiator": "流程发起人",
+        "instanceNo": "流程编号",
+        "instanceTitle": "流程标题"
+      }
+    }
+  },
+  "condition": {
+    "title": "条件组",
+    "and": "且",
+    "or": "或",
+    "andHint": "组内条件为「且」关系",
+    "addCondition": "添加条件",
+    "addGroup": "添加条件组",
+    "emptyHint": "暂无条件，点击下方按钮添加",
+    "selectField": "选择字段",
+    "selectOperator": "选择条件",
+    "inputValue": "输入值",
+    "inputNumber": "输入数值",
+    "selectDate": "选择日期",
+    "selectValue": "选择值",
+    "operators": {
+      "eq": "等于",
+      "ne": "不等于",
+      "gt": "大于",
+      "gte": "大于等于",
+      "lt": "小于",
+      "lte": "小于等于",
+      "contains": "包含",
+      "not_contains": "不包含",
+      "in": "在...中",
+      "not_in": "不在...中",
+      "empty": "为空",
+      "not_empty": "不为空"
+    }
+  },
+  "detail": {
+    "title": "流程详情",
+    "tabs": {
+      "progress": "流程进度",
+      "form": "表单内容",
+      "flowchart": "流程图",
+      "flowProgress": "审批路径"
+    },
+    "currentPending": "当前待办",
+    "flowInfo": "流程信息",
+    "approvalRecord": "审批记录",
+    "flowTitle": "流程标题",
+    "flowType": "流程类型",
+    "flowStatus": "流程状态",
+    "flowNo": "流程编号",
+    "initiator": "发起人",
+    "currentNode": "当前节点",
+    "startTime": "发起时间",
+    "completeTime": "完成时间",
+    "duration": "流程耗时",
+    "unknownNode": "未知节点",
+    "start": "开始",
+    "noData": "暂无数据",
+    "noApprovalRecord": "暂无审批记录",
+    "noFormContent": "暂无表单内容",
+    "loadDataFailed": "加载数据失败",
+    "loadFormDataFailed": "加载表单数据失败",
+    "systemAuto": "系统自动",
+    "person": "人",
+    "timeout": "已超时",
+    "waiting": "等待中",
+    "daysLater": "天后",
+    "hoursLater": "小时",
+    "minutesLater": "分钟",
+    "days": "天",
+    "hours": "小时",
+    "minutes": "分钟",
+    "status": {
+      "pending": "审批中",
+      "approved": "已通过",
+      "rejected": "已拒绝",
+      "cancelled": "已撤回"
+    },
+    "actions": {
+      "start": "发起流程",
+      "approve": "审批通过",
+      "reject": "审批拒绝",
+      "return": "驳回",
+      "transfer": "转办",
+      "delegate": "委派",
+      "add_sign": "加签",
+      "revise": "重新提交",
+      "cancel": "撤回",
+      "copy": "抄送",
+      "handle": "办理",
+      "urge": "催办",
+      "task_timeout": "任务超时",
+      "task_timeout_notify": "超时提醒",
+      "task_auto_approve": "超时自动通过",
+      "task_auto_reject": "超时自动拒绝",
+      "delay_start": "开始延时",
+      "delay_complete": "延时结束",
+      "delay_skip": "延时跳过",
+      "notify": "发送通知",
+      "parallel_start": "进入并行",
+      "parallel_complete": "并行完成",
+      "subflow_start": "启动子流程",
+      "subflow_complete": "子流程完成",
+      "data_update": "字段更新",
+      "condition": "条件分支"
+    },
+    "flowProgress": {
+      "returnRecords": "驳回记录",
+      "noData": "暂无流程进度数据",
+      "loadFailed": "加载流程进度失败",
+      "delayWaiting": "延时等待中，预计恢复时间：",
+      "pending": "待处理",
+      "waiting": "等待中",
+      "skipped": "已跳过",
+      "copied": "已抄送",
+      "nodeTypes": {
+        "start": "开始",
+        "end": "结束",
+        "approval": "审批",
+        "handle": "办理",
+        "copy": "抄送",
+        "condition": "条件",
+        "parallel": "并行",
+        "delay": "延时",
+        "notify": "通知",
+        "service": "服务",
+        "subflow": "子流程",
+        "data_update": "字段更新"
+      },
+      "nodeStatus": {
+        "completed": "已完成",
+        "active": "进行中",
+        "pending": "待执行",
+        "skipped": "已跳过",
+        "rejected": "已拒绝"
+      },
+      "actions": {
+        "approve": "通过",
+        "reject": "拒绝",
+        "return": "驳回",
+        "transfer": "转交",
+        "delegate": "委派",
+        "handle": "办理",
+        "add_sign": "加签"
+      },
+      "signTypes": {
+        "before": "前加签",
+        "after": "后加签",
+        "parallel": "并行加签"
+      },
+      "extraActions": {
+        "add_sign": "加签",
+        "reduce_sign": "减签",
+        "transfer": "转交",
+        "delegate": "委派",
+        "return": "驳回"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Dictionary",
+  "title": "Dictionary Management",
+  "dictName": "Dictionary Name",
+  "dictCode": "Dictionary Code",
+  "remark": "Remark",
+  "remarkPlaceholder": "Please enter remark",
+  "status": "Status",
+  "operation": "Operation",
+  "edit": "Edit",
+  "codeFormatError": "Dictionary code can only contain letters, numbers and underscores",
+  "selectDictFirst": "Please select dictionary first",
+  "noData": "No data",
+  "itemName": "Dictionary Item",
+  "itemLabel": "Label",
+  "itemValue": "Value",
+  "itemIcon": "Icon",
+  "sort": "Sort",
+  "isGlobal": "Global Visible",
+  "globalTag": "Global",
+  "mainApp": "Main App"
+}

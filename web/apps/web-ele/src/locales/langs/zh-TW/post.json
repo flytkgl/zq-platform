@@ -1,0 +1,34 @@
+{
+  "name": "崗位",
+  "title": "崗位管理",
+  "postName": "崗位名稱",
+  "postCode": "崗位編碼",
+  "postType": "崗位類型",
+  "postLevel": "崗位級別",
+  "department": "所屬部門",
+  "description": "崗位描述",
+  "status": "狀態",
+  "operation": "操作",
+  "edit": "編輯",
+  "codeFormatError": "崗位編碼只能包含字母、數字、下劃線和橫線",
+  "selectDepartment": "請選擇所屬部門",
+  "descriptionPlaceholder": "請輸入崗位描述/職責",
+  "selectUsersFirst": "請先選擇用戶",
+  "addUsersSuccess": "添加成功",
+  "removeUsersConfirm": "確定要刪除選中的 {0} 個用戶嗎？",
+  "removeUsersSuccess": "刪除成功",
+  "removeUsersFailed": "刪除失敗",
+  "types": {
+    "management": "管理崗",
+    "technical": "技術崗",
+    "business": "業務崗",
+    "functional": "職能崗",
+    "other": "其他"
+  },
+  "levels": {
+    "senior": "高層",
+    "middle": "中層",
+    "basic": "基層",
+    "staff": "一般員工"
+  }
+}

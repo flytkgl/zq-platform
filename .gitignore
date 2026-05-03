@@ -1,0 +1,151 @@
+# =========== 操作系统文件 ===========
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# =========== IDE / 编辑器 ===========
+.idea/
+.vscode/
+*.iml
+*.iws
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.history
+.cursor/
+
+# =========== Python / 后端 ===========
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+env.bak/
+venv.bak/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+backend/env/dev.env
+backend/env/uat.env
+backend/env/prod.env
+.env/
+
+# Keep example env files
+!example.env
+!backend/env/example.env
+
+# Database
+*.db
+*.sqlite3
+*.sqlite3-journal
+
+# Distribution / build
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# =========== 前端 ===========
+node_modules/
+.pnpm-store/
+
+# Build output
+web/dist/
+web/dist-ssr/
+web/dist.zip
+web/dist.tar
+web/dist.war
+.nitro/
+.output/
+*-dist.zip
+*-dist.tar
+*-dist.war
+
+# Cache
+web/.cache/
+web/.turbo/
+web/.temp/
+web/dev-dist/
+web/.stylelintcache
+web/.eslintcache
+.vitepress/cache/
+
+# Lock files
+web/package-lock.json
+
+# Local env for frontend
+web/.env.local
+web/.env.*.local
+
+# Vite config generated
+web/vite.config.mts.*
+web/vite.config.mjs.*
+web/vite.config.js.*
+web/vite.config.ts.*
+
+# =========== 日志 ===========
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =========== 杂项 ===========
+coverage/
+.VSCodeCounter/
+**/backend-mock/data/
+/go-view/
+media/
+static/
+staticfiles/

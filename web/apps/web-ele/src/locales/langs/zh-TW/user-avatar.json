@@ -1,0 +1,13 @@
+{
+  "profile": {
+    "overview": "概述",
+    "organization": "組織",
+    "email": "郵箱",
+    "mobile": "手機",
+    "department": "部門",
+    "position": "崗位",
+    "manager": "主管",
+    "city": "城市",
+    "type": "類型"
+  }
+}

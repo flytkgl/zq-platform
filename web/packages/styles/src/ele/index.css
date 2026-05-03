@@ -1,0 +1,134 @@
+.el-card {
+  --el-card-border-radius: var(--radius) !important;
+}
+
+.form-valid-error {
+  /** select 选择器的样式 */
+  .el-select .el-select__wrapper {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  }
+
+  /** input 选择器的样式 */
+  .el-input .el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  }
+
+  /** radio和checkbox 选择器的样式 */
+  .el-radio .el-radio__inner,
+  .el-checkbox .el-checkbox__inner {
+    border: 1px solid var(--el-color-danger);
+  }
+
+  .el-checkbox-button .el-checkbox-button__inner,
+  .el-radio-button .el-radio-button__inner {
+    border: 1px solid var(--el-color-danger);
+  }
+
+  .el-checkbox-button:first-child .el-checkbox-button__inner,
+  .el-radio-button:first-child .el-radio-button__inner {
+    border-left: 1px solid var(--el-color-danger);
+  }
+
+  .el-checkbox-button:not(:first-child) .el-checkbox-button__inner,
+  .el-radio-button:not(:first-child) .el-radio-button__inner {
+    border-left: none;
+  }
+
+  .el-textarea .el-textarea__inner {
+    border: 1px solid var(--el-color-danger);
+  }
+}
+
+html .el-loading-mask {
+  z-index: 1000;
+}
+
+/* ========== Ant Design 风格 Loading ========== */
+
+/* 隐藏原有的 SVG 圆环 */
+.el-loading-spinner svg,
+.el-loading-spinner .circular,
+.el-loading-spinner svg.circular {
+  display: none !important;
+}
+
+/* Loading 容器 */
+.el-loading-spinner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ant Design 四点旋转容器 */
+.el-loading-spinner::before {
+  position: relative;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  content: '';
+
+  /* 四个点使用 box-shadow 实现 */
+  background: transparent;
+  border-radius: 50%;
+  box-shadow:
+    0 -12px 0 0 hsl(var(--primary)),
+    12px 0 0 0 hsl(var(--primary) / 30%),
+    0 12px 0 0 hsl(var(--primary) / 30%),
+    -12px 0 0 0 hsl(var(--primary) / 30%);
+  transform: rotate(45deg);
+  animation:
+    antd-rotate 1.2s linear infinite,
+    antd-dot-opacity 1s ease-in-out infinite;
+}
+
+/* 旋转动画 */
+@keyframes antd-rotate {
+  to {
+    transform: rotate(405deg);
+  }
+}
+
+/* 点透明度动画 - 通过改变 box-shadow */
+@keyframes antd-dot-opacity {
+  0%,
+  100% {
+    box-shadow:
+      0 -12px 0 0 hsl(var(--primary)),
+      12px 0 0 0 hsl(var(--primary) / 30%),
+      0 12px 0 0 hsl(var(--primary) / 30%),
+      -12px 0 0 0 hsl(var(--primary) / 30%);
+  }
+
+  25% {
+    box-shadow:
+      0 -12px 0 0 hsl(var(--primary) / 30%),
+      12px 0 0 0 hsl(var(--primary)),
+      0 12px 0 0 hsl(var(--primary) / 30%),
+      -12px 0 0 0 hsl(var(--primary) / 30%);
+  }
+
+  50% {
+    box-shadow:
+      0 -12px 0 0 hsl(var(--primary) / 30%),
+      12px 0 0 0 hsl(var(--primary) / 30%),
+      0 12px 0 0 hsl(var(--primary)),
+      -12px 0 0 0 hsl(var(--primary) / 30%);
+  }
+
+  75% {
+    box-shadow:
+      0 -12px 0 0 hsl(var(--primary) / 30%),
+      12px 0 0 0 hsl(var(--primary) / 30%),
+      0 12px 0 0 hsl(var(--primary) / 30%),
+      -12px 0 0 0 hsl(var(--primary));
+  }
+}
+
+/* Loading 文字样式 */
+.el-loading-spinner .el-loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: hsl(var(--primary));
+}

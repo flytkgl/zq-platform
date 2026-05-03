@@ -1,0 +1,57 @@
+/* 覆盖 el-dialog 的默认样式 */
+
+.zq-dialog .el-dialog {
+  padding: 0 !important;
+}
+
+.zq-dialog .el-dialog__header {
+  padding: 0 20px 16px;
+  margin-right: 0;
+}
+
+.zq-dialog .el-dialog__body {
+  padding: 0 !important;
+}
+
+.zq-dialog .el-dialog__footer {
+  padding: 16px 20px 0;
+}
+
+/* 限制 dialog 最大高度 */
+.zq-dialog .el-dialog {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.zq-dialog .el-dialog__body {
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.zq-dialog .zq-dialog-body {
+  height: 100%;
+}
+
+/* 全屏模式下的样式调整 */
+.zq-dialog.is-fullscreen .el-dialog {
+  max-height: 100vh;
+}
+
+.zq-dialog.is-fullscreen .el-dialog__body {
+  height: calc(100vh - 130px);
+  overflow: hidden;
+}
+
+.zq-dialog.is-fullscreen .zq-dialog-body {
+  height: 100%;
+}
+
+.zq-dialog.is-fullscreen .el-scrollbar {
+  height: 100%;
+}
+
+.zq-dialog.is-fullscreen .el-scrollbar__wrap {
+  height: 100%;
+}
