@@ -17,8 +17,7 @@
 ## 🌐 相关链接
 
 - **官方网站**：<https://zq-platform.com/>
-- **完整版演示**：<https://demo.zq-platform.com/>
-- **开源版演示**：<https://opensource.zq-platform.com/>
+- **社区版演示**：<https://opensource.zq-platform.com/>
 - **演示账号**：`zhangwei`
 - **演示密码**：`admin123`
 

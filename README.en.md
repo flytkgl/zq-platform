@@ -17,8 +17,7 @@ English | [简体中文](README.md)
 ## 🌐 Links
 
 - **Official Website**: <https://zq-platform.com/>
-- **Full Version Demo**: <https://demo.zq-platform.com/>
-- **Open-Source Demo**: <https://opensource.zq-platform.com/>
+- **Demo Link**: <https://opensource.zq-platform.com/>
 - **Demo Account**: `zhangwei`
 - **Demo Password**: `admin123`
 
