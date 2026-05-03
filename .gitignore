@@ -126,6 +126,9 @@ web/package-lock.json
 web/.env.local
 web/.env.*.local
 
+# Track frontend default env config
+!web/apps/web-ele/.env
+
 # Vite config generated
 web/vite.config.mts.*
 web/vite.config.mjs.*
