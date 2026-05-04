@@ -37,6 +37,18 @@ const routes: RouteRecordRaw[] = [
     component: () =>
       import('#/views/online-dev/form-manager/editor/index.vue'),
   },
+  // 页面设计器 - 主应用
+  {
+    meta: {
+      hideInMenu: true,
+      title: '页面设计器',
+      noBasicLayout: true,
+    },
+    name: 'PageDesignEditor',
+    path: '/online-dev/page-manager/editor/:id',
+    component: () =>
+      import('#/views/online-dev/page-manager/editor/index.vue'),
+  },
   // 页面设计器 - 子应用
   {
     meta: {
