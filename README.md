@@ -226,6 +226,94 @@ pnpm dev
 
 访问 <http://localhost:5777> 即可进入系统。
 
+### 🐳 Docker Compose 一键部署
+
+项目提供了完整的 Docker Compose 部署方案，位于 `docker/` 目录下，可一键启动 PostgreSQL、Redis、后端和前端服务。
+
+#### 前置条件
+
+- [Docker](https://www.docker.com/) >= 24.0
+- [Docker Compose](https://docs.docker.com/compose/) >= 2.20
+
+#### 部署步骤
+
+```bash
+# 1. 进入项目根目录
+cd zq-platform
+
+# 2. （可选）修改环境变量配置
+# 编辑 .env 文件，生产环境请务必修改 JWT_SECRET_KEY、DB_PASSWORD、REDIS_PASSWORD
+vim .env
+
+# 3. 构建并启动所有服务
+docker compose up -d
+
+# 4. 查看启动日志
+docker compose logs -f
+
+# 5. 访问系统
+# 浏览器打开 http://localhost
+```
+
+#### 服务架构
+
+```text
+┌─────────────┐      ┌──────────────────────────────────┐
+│   Browser   │ ───▶ │     Nginx (Port 80)               │
+└─────────────┘      │  ├─ 静态文件 → Vue SPA            │
+                     │  ├─ /basic-api/* → backend:8000   │
+                     │  └─ /ws/*        → backend:8000   │
+                     └──────────┬───────────────────────┘
+                                │
+         ┌──────────────────────┼──────────────────────┐
+         ▼                      ▼                       ▼
+  ┌─────────────┐       ┌──────────────┐       ┌──────────────┐
+  │ PostgreSQL  │       │    Redis     │       │   Backend    │
+  │   :5432     │       │   :6379      │       │   :8000      │
+  └─────────────┘       └──────────────┘       └──────────────┘
+```
+
+#### 服务说明
+
+| 服务名 | 镜像 | 端口 | 说明 |
+|--------|------|------|------|
+| **postgres** | postgres:16-alpine | 5432 | 数据库 |
+| **redis** | redis:7-alpine | 6379 | 缓存（AOF 持久化） |
+| **backend** | 自建 | 8000 | FastAPI（Uvicorn 4 workers） |
+| **web** | 自建 | **80** | Nginx 服务前端 + 代理 API/WebSocket |
+
+#### 常用命令
+
+```bash
+# 构建并启动
+docker compose up -d
+
+# 查看日志
+docker compose logs -f
+
+# 停止服务
+docker compose down
+
+# 完全清理（会删除数据卷，首次部署时使用）
+docker compose down -v
+
+# 仅重建某个服务（修改代码后）
+docker compose build backend
+docker compose up -d backend
+
+# 查看服务状态
+docker compose ps
+```
+
+#### 安全注意事项
+
+1. **生产部署前务必修改 `.env` 中的密钥**：
+   - `JWT_SECRET_KEY` — JWT 签名密钥
+   - `DB_PASSWORD` — 数据库密码
+   - `REDIS_PASSWORD` — Redis 密码
+2. 默认使用 PostgreSQL，如需切换 MySQL 请修改 `docker-compose.yml` 中的服务配置
+3. 文件存储默认使用 `local` 模式，如需 MinIO/OSS 可在 `.env` 中配置
+
 
 ## 🏛 项目结构
 

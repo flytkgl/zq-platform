@@ -227,6 +227,95 @@ pnpm dev
 
 Visit <http://localhost:5777> to access the system.
 
+### 🐳 Docker Compose Deployment
+
+The project provides a complete Docker Compose deployment solution located in the `docker/` directory. It can start PostgreSQL, Redis, backend, and frontend services with a single command.
+
+#### Prerequisites
+
+- [Docker](https://www.docker.com/) >= 24.0
+- [Docker Compose](https://docs.docker.com/compose/) >= 2.20
+
+#### Deployment Steps
+
+```bash
+# 1. Navigate to the project root
+cd zq-platform
+
+# 2. (Optional) Configure environment variables
+# For production, be sure to modify JWT_SECRET_KEY, DB_PASSWORD, and REDIS_PASSWORD
+vim .env
+
+# 3. Build and start all services
+docker compose up -d
+
+# 4. View startup logs
+docker compose logs -f
+
+# 5. Access the system
+# Open http://localhost in your browser
+```
+
+#### Service Architecture
+
+```text
+┌─────────────┐      ┌──────────────────────────────────┐
+│   Browser   │ ───▶ │     Nginx (Port 80)               │
+└─────────────┘      │  ├─ Static files → Vue SPA        │
+                     │  ├─ /basic-api/* → backend:8000   │
+                     │  └─ /ws/*        → backend:8000   │
+                     └──────────┬───────────────────────┘
+                                │
+         ┌──────────────────────┼──────────────────────┐
+         ▼                      ▼                       ▼
+  ┌─────────────┐       ┌──────────────┐       ┌──────────────┐
+  │ PostgreSQL  │       │    Redis     │       │   Backend    │
+  │   :5432     │       │   :6379      │       │   :8000      │
+  └─────────────┘       └──────────────┘       └──────────────┘
+```
+
+#### Service Details
+
+| Service | Image | Port | Description |
+|---------|-------|------|-------------|
+| **postgres** | postgres:16-alpine | 5432 | Database |
+| **redis** | redis:7-alpine | 6379 | Cache (AOF persistence) |
+| **backend** | Custom build | 8000 | FastAPI (Uvicorn 4 workers) |
+| **web** | Custom build | **80** | Nginx serving frontend + proxying API/WebSocket |
+
+#### Common Commands
+
+```bash
+# Build and start
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+
+# Full cleanup (removes volumes, use for initial deployment)
+docker compose down -v
+
+# Rebuild a specific service (after code changes)
+docker compose build backend
+docker compose up -d backend
+
+# Check service status
+docker compose ps
+```
+
+#### Security Notes
+
+1. **Before deploying to production, be sure to update the following secrets in `.env`**:
+   - `JWT_SECRET_KEY` — JWT signing key
+   - `DB_PASSWORD` — Database password
+   - `REDIS_PASSWORD` — Redis password
+2. The default database is PostgreSQL. To switch to MySQL, modify the service configuration in `docker-compose.yml`.
+3. File storage defaults to `local` mode. To use MinIO or OSS, configure it in `.env`.
+
+
 ## 🏛 Project Structure
 
 ```

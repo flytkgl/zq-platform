@@ -1,0 +1,108 @@
+name: zq-platform
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zq-postgres
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME:-zq_platform}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-zq_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "${DB_PORT_MAPPING:-5432}"
+    networks:
+      - zq-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: zq-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "${REDIS_PORT_MAPPING:-6379}"
+    networks:
+      - zq-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    image: zq-platform-backend:latest
+    container_name: zq-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ENV: prod
+      APP_NAME: ${APP_NAME:-ZQ-Platform}
+      DB_TYPE: postgresql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-zq_platform}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      REDIS_DB: 0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-your-secret-key-change-in-production}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
+      FILE_STORAGE_LOCAL_PATH: ${FILE_STORAGE_LOCAL_PATH:-/app/storage}
+      TIMEZONE: ${TIMEZONE:-Asia/Shanghai}
+      CACHE_PREFIX: ${CACHE_PREFIX:-zq-platform:prod:}
+    volumes:
+      - backend_storage:/app/storage
+    ports:
+      - "${BACKEND_PORT_MAPPING:-8000}"
+    networks:
+      - zq-network
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+      args:
+        VITE_GLOB_API_URL: /basic-api
+        VITE_APP_TITLE: ${APP_NAME:-ZQ-Platform}
+    image: zq-platform-web:latest
+    container_name: zq-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-80}:80"
+    networks:
+      - zq-network
+
+volumes:
+  postgres_data:
+    name: zq-postgres-data
+  redis_data:
+    name: zq-redis-data
+  backend_storage:
+    name: zq-backend-storage
+
+networks:
+  zq-network:
+    name: zq-platform-network
+    driver: bridge
