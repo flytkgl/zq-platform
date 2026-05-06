@@ -18,8 +18,8 @@ English | [简体中文](README.md)
 
 - **Official Website**: <https://zq-platform.com/>
 - **Demo Link**: <https://opensource.zq-platform.com/>
-- **Demo Account**: `zhangwei`
-- **Demo Password**: `admin123`
+- **Demo Account**: zhangwei
+- **Demo Password**: 123456
 
 ***
 

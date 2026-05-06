@@ -18,8 +18,8 @@
 
 - **官方网站**：<https://zq-platform.com/>
 - **社区版演示**：<https://opensource.zq-platform.com/>
-- **演示账号**：`zhangwei`
-- **演示密码**：`admin123`
+- **演示账号**：zhangwei
+- **演示密码**：123456
 
 ***
 
