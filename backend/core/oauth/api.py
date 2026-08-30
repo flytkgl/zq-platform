@@ -70,7 +70,7 @@ async def get_oauth_authorize_url(
         combined_state = json.dumps(state_data, separators=(',', ':'))
 
         service_class = OAUTH_PROVIDERS[provider]
-        authorize_url = service_class.get_authorize_url(combined_state)
+        authorize_url = await service_class.get_authorize_url(combined_state)
 
         return AuthorizeUrlOut(authorize_url=authorize_url)
     except Exception as e:

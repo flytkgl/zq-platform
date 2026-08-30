@@ -35,8 +35,15 @@ class BaseOAuthService(ABC):
     USER_INFO_URL: str = None  # 获取用户信息的 URL
 
     @classmethod
+    async def get_oauth_group_config(cls) -> Dict[str, str]:
+        """读取当前 OAuth 提供商配置（数据库优先，环境变量兜底）。"""
+        from app.config_manager import config_manager
+
+        return await config_manager.get_group(f"oauth_{cls.PROVIDER_NAME}")
+
+    @classmethod
     @abstractmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """
         获取客户端配置
         
@@ -46,7 +53,7 @@ class BaseOAuthService(ABC):
         pass
 
     @classmethod
-    def get_authorize_url(cls, state: str = None) -> str:
+    async def get_authorize_url(cls, state: str = None) -> str:
         """
         获取 OAuth 授权 URL
         
@@ -56,7 +63,7 @@ class BaseOAuthService(ABC):
         Returns:
             str: 授权 URL
         """
-        config = cls.get_client_config()
+        config = await cls.get_client_config()
         params = {
             'client_id': config['client_id'],
             'redirect_uri': config['redirect_uri'],
@@ -93,7 +100,7 @@ class BaseOAuthService(ABC):
             Optional[str]: 访问令牌，失败返回 None
         """
         try:
-            config = cls.get_client_config()
+            config = await cls.get_client_config()
             data = {
                 'grant_type': 'authorization_code',
                 'code': code,

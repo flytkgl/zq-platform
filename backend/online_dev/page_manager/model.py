@@ -16,7 +16,8 @@ class PageMeta(BaseModel):
     application_id = Column(String(21), nullable=True, index=True, comment="所属应用ID")
 
     name = Column(String(100), nullable=False, comment="页面名称")
-    code = Column(String(100), unique=True, nullable=False, comment="页面编码")
+    # 仅未删除页面的编码必须唯一，软删除后允许重新使用原编码
+    code = Column(String(100), nullable=False, comment="页面编码")
     category = Column(String(50), default="", comment="分类")
     description = Column(Text, default="", comment="描述")
     status = Column(String(20), default="draft", index=True, comment="状态: draft/published")

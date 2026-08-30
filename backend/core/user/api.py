@@ -20,13 +20,17 @@ from core.user.schema import (
     UserProfileUpdateIn
 )
 from core.user.service import UserService
-from utils.security import get_current_user, get_current_user_id
+from utils.security import get_current_superuser, get_current_user, get_current_user_id
 
 router = APIRouter(prefix="/user", tags=["用户管理"])
 
 
 @router.post("", response_model=UserResponse, summary="创建用户")
-async def create_user(data: UserCreate, db: AsyncSession = Depends(get_db)):
+async def create_user(
+        data: UserCreate,
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
+):
     """创建用户"""
     # 用户名唯一性校验
     if not await UserService.check_unique(db, field="username", value=data.username):
@@ -63,7 +67,8 @@ async def get_user_list(
         user_status: Optional[int] = Query(None, alias="user_status", description="用户状态"),
         user_type: Optional[int] = Query(None, alias="user_type", description="用户类型"),
         dept_id: Optional[str] = Query(None, alias="dept_ids", description="部门ID"),
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取用户列表（分页）"""
     from core.user.model import User
@@ -105,7 +110,8 @@ async def get_user_list(
 async def get_user_simple_list(
         user_status: Optional[int] = Query(None, alias="userStatus", description="用户状态"),
         dept_id: Optional[str] = Query(None, alias="deptId", description="部门ID"),
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取用户简单列表（用于选择器）"""
     from core.user.model import User
@@ -121,7 +127,10 @@ async def get_user_simple_list(
 
 
 @router.get("/export/excel", summary="导出用户Excel")
-async def export_user_excel(db: AsyncSession = Depends(get_db)):
+async def export_user_excel(
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
+):
     """导出用户到Excel"""
     output = await UserService.export_to_excel(db)
     return StreamingResponse(
@@ -132,7 +141,7 @@ async def export_user_excel(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/import/template", summary="下载用户导入模板")
-async def download_user_template():
+async def download_user_template(current_user=Depends(get_current_superuser)):
     """下载用户导入模板"""
     output = UserService.get_import_template()
     return StreamingResponse(
@@ -145,7 +154,8 @@ async def download_user_template():
 @router.post("/import/excel", response_model=ResponseModel, summary="导入用户Excel")
 async def import_user_excel(
         file: UploadFile = File(..., description="Excel文件(.xlsx)"),
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """从Excel导入用户"""
     if not file.filename.endswith(".xlsx"):
@@ -161,7 +171,8 @@ async def check_user_unique(
         field: str = Query(..., description="字段名"),
         value: str = Query(..., description="字段值"),
         exclude_id: Optional[str] = Query(None, alias="excludeId", description="排除ID"),
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """检查用户字段唯一性"""
     allowed_fields = ["username", "email", "mobile"]
@@ -175,7 +186,8 @@ async def check_user_unique(
 @router.post("/batch_delete", response_model=UserBatchDeleteOut, summary="批量删除用户")
 async def batch_delete_users(
         data: UserBatchDeleteIn,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """批量删除用户"""
     success_count, fail_count = await UserService.batch_delete(db, data.ids)
@@ -185,7 +197,8 @@ async def batch_delete_users(
 @router.post("/batch/status", response_model=UserBatchUpdateStatusOut, summary="批量更新用户状态")
 async def batch_update_user_status(
         data: UserBatchUpdateStatusIn,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """批量更新用户状态"""
     count = await UserService.batch_update_status(db, data.ids, data.user_status)
@@ -194,7 +207,8 @@ async def batch_update_user_status(
 
 @router.get("/org-chart/top", response_model=List[OrgChartNode], summary="获取组织架构顶层节点")
 async def get_org_chart_top(
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取组织架构顶层用户（无上级）"""
     users = await UserService.get_top_users(db)
@@ -208,7 +222,8 @@ async def get_org_chart_top(
 @router.get("/org-chart/{user_id}", response_model=OrgChartNode, summary="获取指定用户的组织架构节点")
 async def get_org_chart_node(
         user_id: str,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取指定用户的组织架构节点信息"""
     user = await UserService.get_by_id(db, record_id=user_id)
@@ -221,7 +236,8 @@ async def get_org_chart_node(
 @router.get("/org-chart/{user_id}/chain", response_model=OrgChartChainNode, summary="获取用户汇报链")
 async def get_org_chart_chain(
         user_id: str,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取从指定用户到顶层的完整汇报链（嵌套树结构，顶层为根）"""
     chain = await UserService.get_report_chain(db, user_id)
@@ -252,7 +268,8 @@ async def get_org_chart_chain(
 @router.get("/org-chart/{user_id}/children", response_model=List[OrgChartNode], summary="获取组织架构子节点")
 async def get_org_chart_children(
         user_id: str,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取指定用户的下属（组织架构子节点）"""
     subordinates = await UserService.get_subordinates(db, user_id)
@@ -266,7 +283,8 @@ async def get_org_chart_children(
 @router.get("/{user_id}/subordinates", response_model=List[UserSimple], summary="获取下属用户")
 async def get_user_subordinates(
         user_id: str,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """获取下属用户列表"""
     subordinates = await UserService.get_subordinates(db, user_id)
@@ -277,7 +295,8 @@ async def get_user_subordinates(
 async def reset_user_password(
         user_id: str,
         data: UserPasswordSetIn,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """管理员重置用户密码"""
     success = await UserService.reset_password(db, user_id, data.new_password)
@@ -305,7 +324,8 @@ async def change_my_password(
 async def change_user_password(
         user_id: str,
         data: UserPasswordResetIn,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """管理员修改指定用户的密码"""
     success, message = await UserService.change_password(
@@ -353,7 +373,8 @@ async def update_my_profile(
 async def update_user_profile(
         user_id: str,
         data: UserProfileUpdateIn,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """更新指定用户的个人信息（管理员功能）"""
     # 邮箱唯一性校验
@@ -375,7 +396,11 @@ async def update_user_profile(
 
 
 @router.get("/{user_id}", response_model=UserResponse, summary="获取用户详情")
-async def get_user_by_id(user_id: str, db: AsyncSession = Depends(get_db)):
+async def get_user_by_id(
+        user_id: str,
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
+):
     """获取用户详情"""
     user = await UserService.get_by_id(db, user_id)
     if user is None:
@@ -389,7 +414,12 @@ async def get_user_by_id(user_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{user_id}", response_model=UserResponse, summary="更新用户")
-async def update_user(user_id: str, data: UserUpdate, db: AsyncSession = Depends(get_db)):
+async def update_user(
+        user_id: str,
+        data: UserUpdate,
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
+):
     """更新用户"""
     # 用户名唯一性校验
     if data.username:
@@ -421,7 +451,8 @@ async def update_user(user_id: str, data: UserUpdate, db: AsyncSession = Depends
 async def delete_user(
         user_id: str,
         hard: bool = Query(default=False, description="是否物理删除"),
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        current_user=Depends(get_current_superuser),
 ):
     """删除用户"""
     user = await UserService.get_by_id(db, user_id)

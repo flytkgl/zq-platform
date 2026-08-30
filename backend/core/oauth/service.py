@@ -28,12 +28,13 @@ class GiteeOAuthService(BaseOAuthService):
     USER_INFO_URL = "https://gitee.com/api/v5/user"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取 Gitee 客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'GITEE_CLIENT_ID', ''),
-            'client_secret': getattr(settings, 'GITEE_CLIENT_SECRET', ''),
-            'redirect_uri': getattr(settings, 'GITEE_REDIRECT_URI', ''),
+            'client_id': config.get('client_id', ''),
+            'client_secret': config.get('client_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -84,12 +85,13 @@ class GitHubOAuthService(BaseOAuthService):
     USER_INFO_URL = "https://api.github.com/user"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取 GitHub 客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'GITHUB_CLIENT_ID', ''),
-            'client_secret': getattr(settings, 'GITHUB_CLIENT_SECRET', ''),
-            'redirect_uri': getattr(settings, 'GITHUB_REDIRECT_URI', ''),
+            'client_id': config.get('client_id', ''),
+            'client_secret': config.get('client_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -156,12 +158,13 @@ class QQOAuthService(BaseOAuthService):
     OPENID_URL = "https://graph.qq.com/oauth2.0/me"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取 QQ 客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'QQ_APP_ID', ''),
-            'client_secret': getattr(settings, 'QQ_APP_KEY', ''),
-            'redirect_uri': getattr(settings, 'QQ_REDIRECT_URI', ''),
+            'client_id': config.get('app_id', ''),
+            'client_secret': config.get('app_key', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -175,7 +178,7 @@ class QQOAuthService(BaseOAuthService):
     async def get_access_token(cls, code: str) -> Optional[str]:
         """使用授权码获取访问令牌（QQ 返回 URL 参数格式）"""
         try:
-            config = cls.get_client_config()
+            config = await cls.get_client_config()
 
             params = {
                 'grant_type': 'authorization_code',
@@ -238,7 +241,7 @@ class QQOAuthService(BaseOAuthService):
                 logger.info(f"QQ openid 获取成功: {openid}")
 
                 # 2. 获取用户信息
-                config = cls.get_client_config()
+                config = await cls.get_client_config()
                 user_response = await client.get(
                     cls.USER_INFO_URL,
                     params={
@@ -287,12 +290,13 @@ class GoogleOAuthService(BaseOAuthService):
     USER_INFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取 Google 客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'GOOGLE_CLIENT_ID', ''),
-            'client_secret': getattr(settings, 'GOOGLE_CLIENT_SECRET', ''),
-            'redirect_uri': getattr(settings, 'GOOGLE_REDIRECT_URI', ''),
+            'client_id': config.get('client_id', ''),
+            'client_secret': config.get('client_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -357,18 +361,19 @@ class WeChatOAuthService(BaseOAuthService):
         return 'wechat_unionid'
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取微信客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'WECHAT_APP_ID', ''),
-            'client_secret': getattr(settings, 'WECHAT_APP_SECRET', ''),
-            'redirect_uri': getattr(settings, 'WECHAT_REDIRECT_URI', ''),
+            'client_id': config.get('app_id', ''),
+            'client_secret': config.get('app_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
-    def get_authorize_url(cls, state: str = None) -> str:
+    async def get_authorize_url(cls, state: str = None) -> str:
         """获取微信授权 URL（微信参数名称与标准 OAuth 2.0 不同）"""
-        config = cls.get_client_config()
+        config = await cls.get_client_config()
 
         params = {
             'appid': config['client_id'],
@@ -387,7 +392,7 @@ class WeChatOAuthService(BaseOAuthService):
     async def get_access_token(cls, code: str) -> Optional[Dict]:
         """使用授权码获取访问令牌（微信返回 access_token 和 openid）"""
         try:
-            config = cls.get_client_config()
+            config = await cls.get_client_config()
             params = {
                 'appid': config['client_id'],
                 'secret': config['client_secret'],
@@ -672,12 +677,13 @@ class MicrosoftOAuthService(BaseOAuthService):
     USER_INFO_URL = "https://graph.microsoft.com/v1.0/me"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取微软客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'MICROSOFT_CLIENT_ID', ''),
-            'client_secret': getattr(settings, 'MICROSOFT_CLIENT_SECRET', ''),
-            'redirect_uri': getattr(settings, 'MICROSOFT_REDIRECT_URI', ''),
+            'client_id': config.get('client_id', ''),
+            'client_secret': config.get('client_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -741,12 +747,13 @@ class DingTalkOAuthService(BaseOAuthService):
     USER_INFO_URL = "https://api.dingtalk.com/v1.0/contact/users/me"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取钉钉客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'DINGTALK_APP_ID', ''),
-            'client_secret': getattr(settings, 'DINGTALK_APP_SECRET', ''),
-            'redirect_uri': getattr(settings, 'DINGTALK_REDIRECT_URI', ''),
+            'client_id': config.get('app_id', ''),
+            'client_secret': config.get('app_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -762,7 +769,7 @@ class DingTalkOAuthService(BaseOAuthService):
     async def get_access_token(cls, code: str) -> Optional[str]:
         """使用授权码获取访问令牌（钉钉使用 JSON body）"""
         try:
-            config = cls.get_client_config()
+            config = await cls.get_client_config()
 
             data = {
                 'clientId': config['client_id'],
@@ -855,12 +862,13 @@ class FeishuOAuthService(BaseOAuthService):
     USER_INFO_URL = "https://open.feishu.cn/open-apis/authen/v1/user_info"
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取飞书客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'FEISHU_APP_ID', ''),
-            'client_secret': getattr(settings, 'FEISHU_APP_SECRET', ''),
-            'redirect_uri': getattr(settings, 'FEISHU_REDIRECT_URI', ''),
+            'client_id': config.get('app_id', ''),
+            'client_secret': config.get('app_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
         }
 
     @classmethod
@@ -875,7 +883,7 @@ class FeishuOAuthService(BaseOAuthService):
     async def _get_app_access_token(cls) -> Optional[str]:
         """获取应用级别的 access_token"""
         try:
-            config = cls.get_client_config()
+            config = await cls.get_client_config()
 
             url = "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal"
             data = {
@@ -1015,19 +1023,20 @@ class WeComOAuthService(BaseOAuthService):
         return 'wecom_userid'
 
     @classmethod
-    def get_client_config(cls) -> Dict[str, str]:
+    async def get_client_config(cls) -> Dict[str, str]:
         """获取企业微信客户端配置"""
+        config = await cls.get_oauth_group_config()
         return {
-            'client_id': getattr(settings, 'WECOM_CORP_ID', ''),
-            'client_secret': getattr(settings, 'WECOM_APP_SECRET', ''),
-            'redirect_uri': getattr(settings, 'WECOM_REDIRECT_URI', ''),
-            'agent_id': getattr(settings, 'WECOM_AGENT_ID', ''),
+            'client_id': config.get('corp_id', ''),
+            'client_secret': config.get('app_secret', ''),
+            'redirect_uri': config.get('redirect_uri', ''),
+            'agent_id': config.get('agent_id', ''),
         }
 
     @classmethod
-    def get_authorize_url(cls, state: str = None) -> str:
+    async def get_authorize_url(cls, state: str = None) -> str:
         """获取企业微信授权 URL（企业微信使用特殊的 SSO 登录页面）"""
-        config = cls.get_client_config()
+        config = await cls.get_client_config()
 
         params = {
             'login_type': 'CorpApp',
@@ -1046,7 +1055,7 @@ class WeComOAuthService(BaseOAuthService):
     async def _get_corp_access_token(cls) -> Optional[str]:
         """获取企业微信的企业级 access_token"""
         try:
-            config = cls.get_client_config()
+            config = await cls.get_client_config()
             params = {
                 'corpid': config['client_id'],
                 'corpsecret': config['client_secret'],
