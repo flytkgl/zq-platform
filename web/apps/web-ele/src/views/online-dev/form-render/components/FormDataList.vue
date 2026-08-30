@@ -1758,10 +1758,12 @@ const tableColumns = computed(() => {
   ];
   if (
     auditEnabled.value &&
-    !configuredColumns.some((column: any) => column.field === 'audit_status')
+    !configuredColumns.some(
+      (column: any) => column.field === 'sys_audit_status',
+    )
   ) {
     configuredColumns.push({
-      field: 'audit_status',
+      field: 'sys_audit_status',
       label: '审核状态',
       originalComponent: 'select',
       options: [
@@ -3337,13 +3339,13 @@ function getRowActionItems(row: any) {
   }
   if (
     effectiveButtons.value.showApprove &&
-    row.audit_status === 'pending'
+    row.sys_audit_status === 'pending'
   ) {
     items.push({ type: 'builtin', key: 'approve', data: null });
   }
   if (
     effectiveButtons.value.showUnapprove &&
-    row.audit_status === 'approved'
+    row.sys_audit_status === 'approved'
   ) {
     items.push({ type: 'builtin', key: 'unapprove', data: null });
   }
@@ -4387,7 +4389,7 @@ defineExpose({
                       <ElTooltip
                         v-if="
                           effectiveButtons.showApprove &&
-                          item.audit_status === 'pending'
+                          item.sys_audit_status === 'pending'
                         "
                         :content="$t('common.approve')"
                         placement="top"
@@ -4404,7 +4406,7 @@ defineExpose({
                       <ElTooltip
                         v-if="
                           effectiveButtons.showUnapprove &&
-                          item.audit_status === 'approved'
+                          item.sys_audit_status === 'approved'
                         "
                         :content="$t('common.unapprove')"
                         placement="top"

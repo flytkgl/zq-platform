@@ -47,9 +47,9 @@ const AUTO_HANDLED_FIELDS = new Set([
   'sys_dept_id',
   'sys_modifier_id',
   'sys_update_datetime',
-  'audit_status',
-  'audit_user_id',
-  'audit_datetime',
+  'sys_audit_status',
+  'sys_audit_user_id',
+  'sys_audit_datetime',
 ]);
 
 // 判断字段是否为自动处理字段
@@ -373,9 +373,9 @@ const SYSTEM_FIELDS = new Set([
   'sys_dept_id',
   'sys_modifier_id',
   'sys_update_datetime',
-  'audit_status',
-  'audit_user_id',
-  'audit_datetime',
+  'sys_audit_status',
+  'sys_audit_user_id',
+  'sys_audit_datetime',
 ]);
 
 // 根据从表配置生成子表单组件

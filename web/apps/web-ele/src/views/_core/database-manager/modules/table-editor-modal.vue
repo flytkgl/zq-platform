@@ -81,6 +81,9 @@ const systemFieldNames = [
   'sys_creator_id',
   'sys_modifier_id',
   'sys_dept_id',
+  'sys_audit_status',
+  'sys_audit_user_id',
+  'sys_audit_datetime',
 ];
 
 // 表编辑数据

@@ -858,7 +858,7 @@ class FormService:
         lifecycle = form_config.get("lifecycle") or {}
         if lifecycle.get("auditEnabled"):
             field_metadata.update({
-                "audit_status": {
+                "sys_audit_status": {
                     "label": "审核状态",
                     "field_type": "string",
                     "required": True,
@@ -866,7 +866,7 @@ class FormService:
                     "maskable": False,
                     "default_permission": "read",
                 },
-                "audit_user_id": {
+                "sys_audit_user_id": {
                     "label": "审核人",
                     "field_type": "string",
                     "required": False,
@@ -874,7 +874,7 @@ class FormService:
                     "maskable": False,
                     "default_permission": "read",
                 },
-                "audit_datetime": {
+                "sys_audit_datetime": {
                     "label": "审核时间",
                     "field_type": "datetime",
                     "required": False,

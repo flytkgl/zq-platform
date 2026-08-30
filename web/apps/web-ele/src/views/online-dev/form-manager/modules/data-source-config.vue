@@ -431,9 +431,9 @@ const SYSTEM_FIELDS = [
   'sys_modifier_id',
   'sys_dept_id',
   'sort',
-  'audit_status',
-  'audit_user_id',
-  'audit_datetime',
+  'sys_audit_status',
+  'sys_audit_user_id',
+  'sys_audit_datetime',
 ];
 
 // 检查表是否缺少系统字段
@@ -452,11 +452,15 @@ const SYSTEM_FIELD_COMMENTS: Record<string, string> = {
   sort: '排序',
 };
 
-const AUDIT_FIELDS = ['audit_status', 'audit_user_id', 'audit_datetime'];
+const AUDIT_FIELDS = [
+  'sys_audit_status',
+  'sys_audit_user_id',
+  'sys_audit_datetime',
+];
 const AUDIT_FIELD_COMMENTS: Record<string, string> = {
-  audit_status: '审核状态',
-  audit_user_id: '审核人ID',
-  audit_datetime: '审核时间',
+  sys_audit_status: '审核状态',
+  sys_audit_user_id: '审核人ID',
+  sys_audit_datetime: '审核时间',
 };
 
 function getQuotedTableName(tableName: string, dbType: string, schema?: string) {
@@ -484,9 +488,9 @@ function generateAddAuditFieldsSQL(
 
   for (const fieldName of missingFields) {
     let fieldDefinition = '';
-    if (fieldName === 'audit_status') {
+    if (fieldName === 'sys_audit_status') {
       fieldDefinition = `${statusType} NOT NULL DEFAULT 'pending'`;
-    } else if (fieldName === 'audit_user_id') {
+    } else if (fieldName === 'sys_audit_user_id') {
       fieldDefinition = `${userType} NULL`;
     } else {
       fieldDefinition = `${datetimeType} NULL`;

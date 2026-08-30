@@ -87,9 +87,9 @@ class FormDataService:
         self._list_config = form_meta.list_config or {}
 
     AUDIT_FIELDS = {
-        "audit_status",
-        "audit_user_id",
-        "audit_datetime",
+        "sys_audit_status",
+        "sys_audit_user_id",
+        "sys_audit_datetime",
     }
 
     @property
@@ -2781,9 +2781,9 @@ class FormDataService:
         filtered_main = self._fill_system_fields_for_create(filtered_main)
 
         if self.audit_enabled:
-            filtered_main["audit_status"] = "pending"
-            filtered_main["audit_user_id"] = None
-            filtered_main["audit_datetime"] = None
+            filtered_main["sys_audit_status"] = "pending"
+            filtered_main["sys_audit_user_id"] = None
+            filtered_main["sys_audit_datetime"] = None
 
         if not filtered_main:
             raise FormDataException("主表数据不能为空")
@@ -3019,7 +3019,7 @@ class FormDataService:
             raise FormDataException(f"不支持的审核动作: {action}")
 
         existing = await self._get_raw_main_record(db, pk, for_update=True)
-        current_status = existing.get("audit_status")
+        current_status = existing.get("sys_audit_status")
         expected_status = "pending" if action == "approve" else "approved"
         next_status = "approved" if action == "approve" else "pending"
 
@@ -3072,9 +3072,9 @@ class FormDataService:
         database = self.form_meta.main_table_database or None
         now = datetime.now()
         update_data = {
-            "audit_status": next_status,
-            "audit_user_id": operator_id if action == "approve" else None,
-            "audit_datetime": now if action == "approve" else None,
+            "sys_audit_status": next_status,
+            "sys_audit_user_id": operator_id if action == "approve" else None,
+            "sys_audit_datetime": now if action == "approve" else None,
         }
         sql, params = self.sql_builder.build_update(
             table=table,
@@ -3084,14 +3084,14 @@ class FormDataService:
             schema=schema,
             database=database,
         )
-        sql += f" AND {self.sql_builder.quote_identifier('audit_status')} = :expected_audit_status"
-        params["expected_audit_status"] = expected_status
+        sql += f" AND {self.sql_builder.quote_identifier('sys_audit_status')} = :expected_sys_audit_status"
+        params["expected_sys_audit_status"] = expected_status
 
         if await self._execute_command(db, sql, params) != 1:
             # 处理并发请求：如果其他请求已经将记录改成了本次操作的目标状态，
             # 同样按幂等成功处理；否则才报告真正的状态冲突。
             latest = await self._get_raw_main_record(db, pk)
-            if latest.get("audit_status") == next_status:
+            if latest.get("sys_audit_status") == next_status:
                 return await self.get(db, pk)
             raise FormDataException("记录状态已变化，请刷新后重试")
 
