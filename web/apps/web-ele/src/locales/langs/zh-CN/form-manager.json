@@ -6,6 +6,8 @@
   "type": "表单类型",
   "status": "状态",
   "description": "描述",
+  "auditEnabled": "启用审核",
+  "auditEnabledTip": "开启后自动增加审核字段，并启用审核/反审动作",
   "createTime": "创建时间",
   "updateTime": "更新时间",
   "actions": "操作",

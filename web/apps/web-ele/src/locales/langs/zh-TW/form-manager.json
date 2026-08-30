@@ -6,6 +6,8 @@
   "type": "表單類型",
   "status": "狀態",
   "description": "描述",
+  "auditEnabled": "啟用審核",
+  "auditEnabledTip": "開啟後自動增加審核字段，並啟用審核/反審動作",
   "createTime": "創建時間",
   "updateTime": "更新時間",
   "actions": "操作",

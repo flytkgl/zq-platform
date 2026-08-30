@@ -50,6 +50,8 @@ import { useAppContextStore } from '#/store/app-context';
 
 // 从表单设计获取的字段数据
 const props = defineProps<{
+  auditEnabled?: boolean;
+  auditConfigurable?: boolean;
   formFields?: any[];
   formType?: 'normal' | 'workflow';
   subTables?: Array<{
@@ -59,6 +61,14 @@ const props = defineProps<{
     tableName: string;
   }>;
 }>();
+
+const emit = defineEmits<{
+  'update:auditEnabled': [value: boolean];
+}>();
+
+function handleAuditToggle(value: boolean | number | string) {
+  emit('update:auditEnabled', Boolean(value));
+}
 
 // 是否是流程表单
 const isWorkflowForm = computed(() => props.formType === 'workflow');
@@ -218,6 +228,10 @@ const listSettings = ref({
     showExport: true,
     showImport: false,
     showBatchDelete: true,
+    showApprove: true,
+    showUnapprove: true,
+    showBatchApprove: true,
+    showBatchUnapprove: true,
   },
   // Card 属性
   card: {
@@ -1639,6 +1653,10 @@ function setData(data: any) {
     showExport: data?.buttons?.showExport ?? true,
     showImport: data?.buttons?.showImport ?? false,
     showBatchDelete: data?.buttons?.showBatchDelete ?? true,
+    showApprove: data?.buttons?.showApprove ?? true,
+    showUnapprove: data?.buttons?.showUnapprove ?? true,
+    showBatchApprove: data?.buttons?.showBatchApprove ?? true,
+    showBatchUnapprove: data?.buttons?.showBatchUnapprove ?? true,
   };
 
   // 恢复确认按钮显示配置（流程表单默认关闭，其他类型默认打开）
@@ -2738,6 +2756,20 @@ defineExpose({
                   </ElIcon>
                 </div>
                 <div v-show="activeSections.includes('buttons')">
+                  <ElFormItem
+                    v-if="props.auditConfigurable"
+                    :label="$t('form-manager.auditEnabled')"
+                    class="!mb-3"
+                  >
+                    <ElSwitch
+                      :model-value="props.auditEnabled"
+                      @update:model-value="handleAuditToggle"
+                    />
+                    <span class="text-muted-foreground ml-2 text-xs">
+                      {{ $t('form-manager.auditEnabledTip') }}
+                    </span>
+                  </ElFormItem>
+
                   <!-- 列表头部按钮 -->
                   <div class="mb-3 mt-2">
                     <div class="text-muted-foreground mb-2 text-xs font-medium">
@@ -2756,6 +2788,24 @@ defineExpose({
                       >
                         <ElSwitch
                           v-model="listSettings.buttons.showBatchDelete"
+                        />
+                      </ElFormItem>
+                      <ElFormItem
+                        v-if="props.auditEnabled"
+                        label="批量审核"
+                        class="!mb-2"
+                      >
+                        <ElSwitch
+                          v-model="listSettings.buttons.showBatchApprove"
+                        />
+                      </ElFormItem>
+                      <ElFormItem
+                        v-if="props.auditEnabled"
+                        label="批量反审"
+                        class="!mb-2"
+                      >
+                        <ElSwitch
+                          v-model="listSettings.buttons.showBatchUnapprove"
                         />
                       </ElFormItem>
                       <ElFormItem
@@ -2796,6 +2846,22 @@ defineExpose({
                         class="!mb-2"
                       >
                         <ElSwitch v-model="listSettings.buttons.showDelete" />
+                      </ElFormItem>
+                      <ElFormItem
+                        v-if="props.auditEnabled"
+                        label="审核"
+                        class="!mb-2"
+                      >
+                        <ElSwitch v-model="listSettings.buttons.showApprove" />
+                      </ElFormItem>
+                      <ElFormItem
+                        v-if="props.auditEnabled"
+                        label="反审"
+                        class="!mb-2"
+                      >
+                        <ElSwitch
+                          v-model="listSettings.buttons.showUnapprove"
+                        />
                       </ElFormItem>
                     </div>
                   </div>

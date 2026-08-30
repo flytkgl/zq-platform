@@ -20,6 +20,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from online_dev.form_manager.model import FormMeta, FormSubTable
 from online_dev.form_data_manager.dynamic_sql_builder import DynamicSQLBuilder
+from online_dev.form_data_manager.lifecycle import (
+    FormLifecycleContext,
+    hook_registry,
+)
 from core.database_manager.service import AsyncDatabaseManagerService
 from app.timezone import APP_TIMEZONE
 
@@ -81,6 +85,40 @@ class FormDataService:
         # 缓存 JSON 配置，避免 session 过期后懒加载导致 MissingGreenlet
         self._form_config = form_meta.form_config or {}
         self._list_config = form_meta.list_config or {}
+
+    AUDIT_FIELDS = {
+        "audit_status",
+        "audit_user_id",
+        "audit_datetime",
+    }
+
+    @property
+    def audit_enabled(self) -> bool:
+        """Whether this form opted into the generic audit lifecycle."""
+        lifecycle = self._form_config.get("lifecycle") or {}
+        return bool(lifecycle.get("auditEnabled", False))
+
+    async def _dispatch_hook(
+        self,
+        event: str,
+        db: AsyncSession,
+        action: str,
+        record_id: Optional[str] = None,
+        old_data: Optional[Dict[str, Any]] = None,
+        data: Optional[Dict[str, Any]] = None,
+        operator_id: Optional[str] = None,
+    ) -> FormLifecycleContext:
+        context = FormLifecycleContext(
+            db=db,
+            form_code=self.form_meta.code,
+            action=action,
+            record_id=str(record_id) if record_id is not None else None,
+            old_data=old_data,
+            data=data or {},
+            operator_id=operator_id,
+        )
+        await hook_registry.dispatch(self.form_meta.code, event, context)
+        return context
     
     async def _resolve_schema(self, db: AsyncSession, schema: str) -> Optional[str]:
         """
@@ -1077,6 +1115,26 @@ class FormDataService:
         result = await self.apply_field_permissions(result, db)
 
         return result
+
+    async def _get_raw_main_record(
+        self,
+        db: AsyncSession,
+        pk: Any,
+    ) -> Dict[str, Any]:
+        """获取未经过字段权限过滤的主表记录，供内部动作使用。"""
+        table = self.form_meta.main_table
+        schema = await self._resolve_schema(db, self.form_meta.main_table_schema) or None
+        database = self.form_meta.main_table_database or None
+        sql, params = self.sql_builder.build_select(
+            table=table,
+            schema=schema,
+            database=database,
+            where={"id": pk},
+        )
+        rows = await self._execute_query(db, sql, params)
+        if not rows:
+            raise FormDataException(f"数据不存在: {pk}")
+        return self._serialize_row(rows[0])
 
     async def _query_sub_table_data(
             self,
@@ -2658,8 +2716,14 @@ class FormDataService:
         
         return field_types
 
-    async def create(self, db: AsyncSession, data: Dict[str, Any]) -> Dict[str, Any]:
-        """新增数据（含子表，事务）"""
+    async def create(
+        self,
+        db: AsyncSession,
+        data: Dict[str, Any],
+        auto_commit: bool = True,
+        operator_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """新增数据（含子表，支持生命周期钩子）"""
         main_data = data.get("main") or {}
         sub_tables_data = data.get("sub_tables") or {}
 
@@ -2672,14 +2736,33 @@ class FormDataService:
 
         # 移除 id 字段，生成新的 UUID
         filtered_main.pop("id", None)
+        # 审核字段只能由审核生命周期维护，不能由客户端传入
+        for audit_field in self.AUDIT_FIELDS:
+            filtered_main.pop(audit_field, None)
         generated_id = str(uuid.uuid4())
         filtered_main["id"] = generated_id
         
         # 填充系统字段（创建时间、创建人、部门等）
         filtered_main = self._fill_system_fields_for_create(filtered_main)
 
+        if self.audit_enabled:
+            filtered_main["audit_status"] = "pending"
+            filtered_main["audit_user_id"] = None
+            filtered_main["audit_datetime"] = None
+
         if not filtered_main:
             raise FormDataException("主表数据不能为空")
+
+        before_context = await self._dispatch_hook(
+            "before_create",
+            db=db,
+            action="create",
+            record_id=generated_id,
+            data={"main": filtered_main, "sub_tables": sub_tables_data},
+            operator_id=operator_id,
+        )
+        filtered_main = before_context.data.get("main") or filtered_main
+        sub_tables_data = before_context.data.get("sub_tables") or sub_tables_data
 
         # 唯一性校验（新增时不需要排除ID）
         await self._validate_unique_fields(db, filtered_main)
@@ -2728,14 +2811,34 @@ class FormDataService:
                     )
                     await self._execute_command(db, sub_sql, sub_params)
 
-        await db.commit()
+        await db.flush()
+
+        created = await self.get(db, main_pk)
+        await self._dispatch_hook(
+            "after_create",
+            db=db,
+            action="create",
+            record_id=main_pk,
+            data=created,
+            operator_id=operator_id,
+        )
+
+        if auto_commit:
+            await db.commit()
 
         logger.info(f"表单数据创建成功: form={self.form_meta.code}, pk={main_pk}")
 
         return await self.get(db, main_pk)
 
-    async def update(self, db: AsyncSession, pk: Any, data: Dict[str, Any]) -> Dict[str, Any]:
-        """更新数据（含子表，事务）"""
+    async def update(
+        self,
+        db: AsyncSession,
+        pk: Any,
+        data: Dict[str, Any],
+        auto_commit: bool = True,
+        operator_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """更新数据（含子表，支持生命周期钩子）"""
         main_data = data.get("main") or {}
         sub_tables_data = data.get("sub_tables") or {}
 
@@ -2744,12 +2847,27 @@ class FormDataService:
         if not existing:
             raise FormDataException(f"数据不存在: {pk}")
 
+        before_context = await self._dispatch_hook(
+            "before_update",
+            db=db,
+            action="update",
+            record_id=pk,
+            old_data=existing,
+            data={"main": dict(main_data), "sub_tables": sub_tables_data},
+            operator_id=operator_id,
+        )
+        hook_data = before_context.data or {}
+        main_data = hook_data.get("main") or main_data
+        sub_tables_data = hook_data.get("sub_tables") or sub_tables_data
+
         # 1. 更新主表
         if main_data:
             allowed_main_fields = self._get_allowed_fields("main")
             filtered_main = self._filter_fields(main_data, allowed_main_fields)
             filtered_main = self._convert_data_types(filtered_main)
             filtered_main.pop("id", None)
+            for audit_field in self.AUDIT_FIELDS:
+                filtered_main.pop(audit_field, None)
             
             # 填充系统字段（更新时间、修改人）
             filtered_main = self._fill_system_fields_for_update(filtered_main)
@@ -2780,10 +2898,105 @@ class FormDataService:
             new_sub_data = sub_tables_data[sub_table.table_name]
             await self._handle_sub_table_update(db, sub_table, pk, new_sub_data)
 
-        await db.commit()
+        await db.flush()
+
+        updated = await self.get(db, pk)
+        await self._dispatch_hook(
+            "after_update",
+            db=db,
+            action="update",
+            record_id=pk,
+            old_data=existing,
+            data=updated,
+            operator_id=operator_id,
+        )
+
+        if auto_commit:
+            await db.commit()
 
         logger.info(f"表单数据更新成功: form={self.form_meta.code}, pk={pk}")
 
+        return await self.get(db, pk)
+
+    async def change_audit_status(
+        self,
+        db: AsyncSession,
+        pk: Any,
+        action: str,
+        operator_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """审核或反审一条记录，调用方负责事务边界。"""
+        if not self.audit_enabled:
+            raise FormDataException("该表单未启用审核功能")
+
+        if action not in ("approve", "unapprove"):
+            raise FormDataException(f"不支持的审核动作: {action}")
+
+        existing = await self._get_raw_main_record(db, pk)
+        current_status = existing.get("audit_status")
+        expected_status = "pending" if action == "approve" else "approved"
+        next_status = "approved" if action == "approve" else "pending"
+
+        # 审核/反审设计为幂等操作：记录已经处于目标状态时直接返回成功，
+        # 不重复执行生命周期钩子，也不刷新审核人和审核时间。
+        if current_status == next_status:
+            return await self.get(db, pk)
+
+        if current_status != expected_status:
+            action_name = "审核" if action == "approve" else "反审"
+            raise FormDataException(f"当前状态不能{action_name}")
+
+        event_prefix = "before_approve" if action == "approve" else "before_unapprove"
+        await self._dispatch_hook(
+            event_prefix,
+            db=db,
+            action=action,
+            record_id=pk,
+            old_data=existing,
+            data=dict(existing),
+            operator_id=operator_id,
+        )
+
+        table = self.form_meta.main_table
+        schema = await self._resolve_schema(db, self.form_meta.main_table_schema) or None
+        database = self.form_meta.main_table_database or None
+        now = datetime.now()
+        update_data = {
+            "audit_status": next_status,
+            "audit_user_id": operator_id if action == "approve" else None,
+            "audit_datetime": now if action == "approve" else None,
+        }
+        sql, params = self.sql_builder.build_update(
+            table=table,
+            data=update_data,
+            pk_field="id",
+            pk_value=pk,
+            schema=schema,
+            database=database,
+        )
+        sql += f" AND {self.sql_builder.quote_identifier('audit_status')} = :expected_audit_status"
+        params["expected_audit_status"] = expected_status
+
+        if await self._execute_command(db, sql, params) != 1:
+            # 处理并发请求：如果其他请求已经将记录改成了本次操作的目标状态，
+            # 同样按幂等成功处理；否则才报告真正的状态冲突。
+            latest = await self._get_raw_main_record(db, pk)
+            if latest.get("audit_status") == next_status:
+                return await self.get(db, pk)
+            raise FormDataException("记录状态已变化，请刷新后重试")
+
+        await db.flush()
+        updated = await self._get_raw_main_record(db, pk)
+        event_suffix = "after_approve" if action == "approve" else "after_unapprove"
+        await self._dispatch_hook(
+            event_suffix,
+            db=db,
+            action=action,
+            record_id=pk,
+            old_data=existing,
+            data=updated,
+            operator_id=operator_id,
+        )
         return await self.get(db, pk)
 
     async def _handle_sub_table_update(

@@ -47,6 +47,9 @@ const AUTO_HANDLED_FIELDS = new Set([
   'sys_dept_id',
   'sys_modifier_id',
   'sys_update_datetime',
+  'audit_status',
+  'audit_user_id',
+  'audit_datetime',
 ]);
 
 // 判断字段是否为自动处理字段
@@ -246,6 +249,7 @@ const isSystemField = (field: TableField, foreignKey?: string) => {
   return (
     field.isPrimaryKey ||
     field.name.toLowerCase() === 'id' ||
+    AUTO_HANDLED_FIELDS.has(field.name) ||
     (foreignKey && field.name === foreignKey)
   );
 };
@@ -369,6 +373,9 @@ const SYSTEM_FIELDS = new Set([
   'sys_dept_id',
   'sys_modifier_id',
   'sys_update_datetime',
+  'audit_status',
+  'audit_user_id',
+  'audit_datetime',
 ]);
 
 // 根据从表配置生成子表单组件

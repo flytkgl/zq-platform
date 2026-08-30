@@ -35,7 +35,7 @@ async def check_form_permission(
     检查用户是否有表单操作权限
     
     :param form_code: 表单编码
-    :param action: 操作类型 (view/add/edit/delete/export/import)
+    :param action: 操作类型 (view/add/edit/delete/export/import/approve/unapprove/batch_approve/batch_unapprove)
     :param request: 请求对象
     :param db: 数据库会话
     :return: True 表示有权限
@@ -101,6 +101,10 @@ async def check_form_permission(
         "delete": "删除",
         "export": "导出",
         "import": "导入",
+        "approve": "审核",
+        "unapprove": "反审",
+        "batch_approve": "批量审核",
+        "batch_unapprove": "批量反审",
     }
     action_name = action_names.get(action, action)
     
@@ -131,6 +135,10 @@ async def get_user_form_permissions(
         "delete": False,
         "export": False,
         "import": False,
+        "approve": False,
+        "unapprove": False,
+        "batchApprove": False,
+        "batchUnapprove": False,
     }
     
     # 超级管理员拥有所有权限
@@ -176,8 +184,14 @@ async def get_user_form_permissions(
     for perm_code in perm_codes:
         # 格式: form:{form_code}:{action}
         parts = perm_code.split(":")
-        if len(parts) == 3 and parts[2] in permissions:
-            permissions[parts[2]] = True
+        if len(parts) == 3:
+            action = parts[2]
+            action_key = {
+                "batch_approve": "batchApprove",
+                "batch_unapprove": "batchUnapprove",
+            }.get(action, action)
+            if action_key in permissions:
+                permissions[action_key] = True
     
     return permissions
 

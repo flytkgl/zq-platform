@@ -6,6 +6,8 @@
   "type": "Form Type",
   "status": "Status",
   "description": "Description",
+  "auditEnabled": "Enable Approval",
+  "auditEnabledTip": "Adds approval fields and enables approve/unapprove actions",
   "createTime": "Create Time",
   "updateTime": "Update Time",
   "actions": "Actions",

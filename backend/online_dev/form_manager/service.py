@@ -233,6 +233,12 @@ class FormService:
 
         sub_tables_data = data.pop("sub_tables", [])
 
+        # 审核功能默认关闭；显式配置时保留调用方的其他 form_config 设置。
+        form_config = dict(data.get("form_config") or {})
+        lifecycle = dict(form_config.get("lifecycle") or {})
+        lifecycle.setdefault("auditEnabled", False)
+        form_config["lifecycle"] = lifecycle
+
         # 从上下文获取用户信息
         from utils.context import get_current_user_info_from_context
         user_info = get_current_user_info_from_context()
@@ -250,7 +256,7 @@ class FormService:
             main_table=data.get("main_table"),
             main_table_schema=data.get("main_table_schema", ""),
             main_table_database=data.get("main_table_database", ""),
-            form_config=data.get("form_config", {}),
+            form_config=form_config,
             list_config=data.get("list_config", {}),
             sort=data.get("sort", 0),
             sys_creator_id=creator_id,
@@ -517,6 +523,9 @@ class FormService:
         )
         logger.info(f"注册表单资源类型: {resource_type}, application_id={form.application_id}, fields={len(field_metadata)}")
 
+        lifecycle = form.form_config.get("lifecycle", {}) if form.form_config else {}
+        audit_enabled = bool(lifecycle.get("auditEnabled", False))
+
         # 定义标准操作权限
         actions = [
             ("view", "查看", True, 0, "GET"),
@@ -525,6 +534,10 @@ class FormService:
             ("delete", "删除", publish_config.get("allow_delete", True) if publish_config else True, 3, "DELETE"),
             ("export", "导出", publish_config.get("allow_export", True) if publish_config else True, 1, "POST"),
             ("import", "导入", publish_config.get("allow_import", False) if publish_config else False, 1, "POST"),
+            ("approve", "审核", audit_enabled, 1, "POST"),
+            ("unapprove", "反审", audit_enabled, 1, "POST"),
+            ("batch_approve", "批量审核", audit_enabled, 1, "POST"),
+            ("batch_unapprove", "批量反审", audit_enabled, 1, "POST"),
         ]
 
         # HTTP 方法映射
@@ -841,6 +854,35 @@ class FormService:
                 }
         
         extract_fields(items)
+
+        lifecycle = form_config.get("lifecycle") or {}
+        if lifecycle.get("auditEnabled"):
+            field_metadata.update({
+                "audit_status": {
+                    "label": "审核状态",
+                    "field_type": "string",
+                    "required": True,
+                    "sensitive": False,
+                    "maskable": False,
+                    "default_permission": "read",
+                },
+                "audit_user_id": {
+                    "label": "审核人",
+                    "field_type": "string",
+                    "required": False,
+                    "sensitive": False,
+                    "maskable": False,
+                    "default_permission": "read",
+                },
+                "audit_datetime": {
+                    "label": "审核时间",
+                    "field_type": "datetime",
+                    "required": False,
+                    "sensitive": False,
+                    "maskable": False,
+                    "default_permission": "read",
+                },
+            })
         return field_metadata
 
     @staticmethod

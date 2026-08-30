@@ -52,6 +52,8 @@ import {
 
 import {
   batchDeleteFormDataApi,
+  batchApproveFormDataApi,
+  batchUnapproveFormDataApi,
   createFormDataApi,
   deleteFormDataApi,
   downloadBlob,
@@ -62,6 +64,8 @@ import {
   getFormPermissionsApi,
   getImportTemplateApi,
   getTreeChildrenApi,
+  approveFormDataApi,
+  unapproveFormDataApi,
   updateFormDataApi,
 } from '#/api/online-dev/form-data-api';
 import { getFormByCodeApi } from '#/api/online-dev/form-manager';
@@ -133,6 +137,9 @@ const emit = defineEmits<{
 // 表单元数据
 const formMeta = ref<FormMeta | null>(null);
 const loading = ref(false);
+const auditEnabled = computed(() => {
+  return Boolean(formMeta.value?.form_config?.lifecycle?.auditEnabled);
+});
 
 // 查询字段动态选项（字典 / 表单数据源）：key 为 field name
 const queryFieldDynamicOptions = ref<Record<string, any[]>>({});
@@ -207,6 +214,10 @@ const listConfig = computed(() => {
       showExport: config.buttons?.showExport ?? false,
       showImport: config.buttons?.showImport ?? false,
       showBatchDelete: config.buttons?.showBatchDelete ?? false,
+      showApprove: config.buttons?.showApprove ?? true,
+      showUnapprove: config.buttons?.showUnapprove ?? true,
+      showBatchApprove: config.buttons?.showBatchApprove ?? true,
+      showBatchUnapprove: config.buttons?.showBatchUnapprove ?? true,
     },
     // 新增/编辑时显示确认按钮
     showConfirmButton: config.showConfirmButton ?? true,
@@ -276,6 +287,10 @@ const userPermissions = ref<FormPermissions>({
   delete: false,
   export: false,
   import: false,
+  approve: false,
+  unapprove: false,
+  batchApprove: false,
+  batchUnapprove: false,
 });
 
 // 字段权限
@@ -294,6 +309,22 @@ const effectiveButtons = computed(() => ({
     listConfig.value.buttons.showImport && userPermissions.value.import,
   showBatchDelete:
     listConfig.value.buttons.showBatchDelete && userPermissions.value.delete,
+  showApprove:
+    auditEnabled.value &&
+    listConfig.value.buttons.showApprove &&
+    userPermissions.value.approve,
+  showUnapprove:
+    auditEnabled.value &&
+    listConfig.value.buttons.showUnapprove &&
+    userPermissions.value.unapprove,
+  showBatchApprove:
+    auditEnabled.value &&
+    listConfig.value.buttons.showBatchApprove &&
+    userPermissions.value.batchApprove,
+  showBatchUnapprove:
+    auditEnabled.value &&
+    listConfig.value.buttons.showBatchUnapprove &&
+    userPermissions.value.batchUnapprove,
 }));
 
 // ============ 子表操作按钮相关 ============
@@ -1240,7 +1271,10 @@ function handleCardFormSelectorClick(e: Event, item: any, fieldConfig: any) {
 async function loadUserPermissions() {
   if (!props.formCode) return;
   try {
-    userPermissions.value = await getFormPermissionsApi(props.formCode);
+    userPermissions.value = {
+      ...userPermissions.value,
+      ...(await getFormPermissionsApi(props.formCode)),
+    };
   } catch (error) {
     console.error('加载权限失败:', error);
     // 权限加载失败时，默认无权限
@@ -1251,6 +1285,10 @@ async function loadUserPermissions() {
       delete: false,
       export: false,
       import: false,
+      approve: false,
+      unapprove: false,
+      batchApprove: false,
+      batchUnapprove: false,
     };
   }
 }
@@ -1713,10 +1751,30 @@ function renderFileCell(value: any, _col: any) {
 
 // 根据 list_config 生成表格列（根据字段权限过滤隐藏的列）
 const tableColumns = computed(() => {
-  if (!formMeta.value?.list_config?.columns) return [];
+  if (!formMeta.value?.list_config?.columns && !auditEnabled.value) return [];
+
+  const configuredColumns = [
+    ...(formMeta.value?.list_config?.columns || []),
+  ];
+  if (
+    auditEnabled.value &&
+    !configuredColumns.some((column: any) => column.field === 'audit_status')
+  ) {
+    configuredColumns.push({
+      field: 'audit_status',
+      label: '审核状态',
+      originalComponent: 'select',
+      options: [
+        { label: '待审核', value: 'pending' },
+        { label: '已审核', value: 'approved' },
+      ],
+      showAsTag: true,
+      width: 100,
+    });
+  }
 
   // 过滤掉隐藏的字段
-  const visibleColumns = formMeta.value.list_config.columns.filter(
+  const visibleColumns = configuredColumns.filter(
     (col: any) => {
       const perm = fieldPermissions.value[col.field];
       // 如果字段权限为 hidden，则不显示该列（兼容 permission_type 和 permission 两种key）
@@ -1985,7 +2043,9 @@ const tableColumns = computed(() => {
   const showActions =
     effectiveButtons.value.showView ||
     effectiveButtons.value.showEdit ||
-    effectiveButtons.value.showDelete;
+    effectiveButtons.value.showDelete ||
+    effectiveButtons.value.showApprove ||
+    effectiveButtons.value.showUnapprove;
   // 选择模式下不显示操作列
   if (showActions && !props.selectionMode) {
     // 动态计算操作列宽度：基础按钮（查看/编辑/删除）+ 子表按钮 + 自定义行按钮
@@ -1993,6 +2053,8 @@ const tableColumns = computed(() => {
     if (effectiveButtons.value.showView) actionBtnCount++;
     if (effectiveButtons.value.showEdit) actionBtnCount++;
     if (effectiveButtons.value.showDelete) actionBtnCount++;
+    if (effectiveButtons.value.showApprove) actionBtnCount++;
+    if (effectiveButtons.value.showUnapprove) actionBtnCount++;
     actionBtnCount += listConfig.value.subTableButtons?.length || 0;
     actionBtnCount +=
       listConfig.value.customButtons?.filter(
@@ -2761,6 +2823,32 @@ function handleEdit(row: any) {
   showFormDialog.value = true;
 }
 
+async function handleAudit(row: any, action: 'approve' | 'unapprove') {
+  const isApprove = action === 'approve';
+  try {
+    await ElMessageBox.confirm(
+      isApprove ? '确定要审核这条数据吗？' : '确定要反审这条数据吗？',
+      isApprove ? $t('common.approve') : $t('common.unapprove'),
+      { type: 'warning' },
+    );
+
+    if (isApprove) {
+      await approveFormDataApi(props.formCode, row.id);
+    } else {
+      await unapproveFormDataApi(props.formCode, row.id);
+    }
+
+    ElMessage.success(isApprove ? `${$t('common.approve')}成功` : `${$t('common.unapprove')}成功`);
+    if (listConfig.value.listType === 'card') {
+      await loadCardData();
+    } else {
+      await gridApi.reload();
+    }
+  } catch {
+    // 用户取消或后端返回错误时由请求拦截器处理提示
+  }
+}
+
 // 处理表单选择器字段点击，弹窗显示关联表单详情
 async function handleFormSelectorClick(formCode: string, recordId: string) {
   if (!formCode || !recordId) return;
@@ -2832,6 +2920,50 @@ async function handleDelete(row: any) {
 }
 
 const batchDeleting = ref(false);
+const batchAuditing = ref(false);
+
+async function handleBatchAudit(action: 'approve' | 'unapprove') {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要操作的数据');
+    return;
+  }
+
+  const isApprove = action === 'approve';
+  try {
+    await ElMessageBox.confirm(
+      `确定要${isApprove ? '审核' : '反审'}选中的 ${selectedRows.value.length} 条数据吗？`,
+      `${isApprove ? $t('common.batchApprove') : $t('common.batchUnapprove')}确认`,
+      { type: 'warning' },
+    );
+
+    batchAuditing.value = true;
+    const ids = selectedRows.value.map((row) => String(row.id));
+    const result = isApprove
+      ? await batchApproveFormDataApi(props.formCode, ids)
+      : await batchUnapproveFormDataApi(props.formCode, ids);
+
+    if (result.failed_count > 0) {
+      ElMessage.warning(
+        `${isApprove ? $t('common.batchApprove') : $t('common.batchUnapprove')}完成：成功 ${result.success_count} 条，失败 ${result.failed_count} 条`,
+      );
+    } else {
+      ElMessage.success(
+        `${isApprove ? $t('common.batchApprove') : $t('common.batchUnapprove')}成功，共 ${result.success_count} 条`,
+      );
+    }
+
+    selectedRows.value = [];
+    if (listConfig.value.listType === 'card') {
+      await loadCardData();
+    } else {
+      await gridApi.reload();
+    }
+  } catch {
+    // 用户取消或请求失败
+  } finally {
+    batchAuditing.value = false;
+  }
+}
 
 async function handleBatchDelete() {
   if (selectedRows.value.length === 0) {
@@ -3193,6 +3325,18 @@ function getRowActionItems(row: any) {
   if (effectiveButtons.value.showDelete) {
     items.push({ type: 'builtin', key: 'delete', data: null });
   }
+  if (
+    effectiveButtons.value.showApprove &&
+    row.audit_status === 'pending'
+  ) {
+    items.push({ type: 'builtin', key: 'approve', data: null });
+  }
+  if (
+    effectiveButtons.value.showUnapprove &&
+    row.audit_status === 'approved'
+  ) {
+    items.push({ type: 'builtin', key: 'unapprove', data: null });
+  }
 
   // 子表按钮
   for (const subBtn of listConfig.value.subTableButtons || []) {
@@ -3251,7 +3395,9 @@ watch(
           // 选择模式下隐藏复选框列和序号列（由 tableColumns 手动添加）
           showSelection: props.selectionMode
             ? false
-            : effectiveButtons.value.showBatchDelete,
+            : effectiveButtons.value.showBatchDelete ||
+              effectiveButtons.value.showBatchApprove ||
+              effectiveButtons.value.showBatchUnapprove,
           showIndex: props.selectionMode
             ? false
             : listConfig.value.table.showIndex,
@@ -3490,7 +3636,7 @@ defineExpose({
             </ElButton>
             <ElButton
               v-if="effectiveButtons.showBatchDelete && !selectionMode"
-              :disabled="selectedRows.length === 0"
+                :disabled="selectedRows.length === 0"
               :loading="batchDeleting"
               type="danger"
               plain
@@ -3501,6 +3647,34 @@ defineExpose({
                 selectedRows.length > 0
                   ? `${$t('common.batchDelete')} (${selectedRows.length})`
                   : $t('common.batchDelete')
+              }}
+            </ElButton>
+            <ElButton
+              v-if="effectiveButtons.showBatchApprove && !selectionMode"
+              :disabled="selectedRows.length === 0"
+              :loading="batchAuditing"
+              type="success"
+              plain
+              @click="handleBatchAudit('approve')"
+            >
+              {{
+                selectedRows.length > 0
+                  ? `${$t('common.batchApprove')} (${selectedRows.length})`
+                  : $t('common.batchApprove')
+              }}
+            </ElButton>
+            <ElButton
+              v-if="effectiveButtons.showBatchUnapprove && !selectionMode"
+              :disabled="selectedRows.length === 0"
+              :loading="batchAuditing"
+              type="warning"
+              plain
+              @click="handleBatchAudit('unapprove')"
+            >
+              {{
+                selectedRows.length > 0
+                  ? `${$t('common.batchUnapprove')} (${selectedRows.length})`
+                  : $t('common.batchUnapprove')
               }}
             </ElButton>
             <ElButton
@@ -3665,6 +3839,24 @@ defineExpose({
                 >
                   {{ $t('common.delete') }}
                 </ElButton>
+                <ElButton
+                  v-else-if="action.type === 'builtin' && action.key === 'approve'"
+                  link
+                  type="success"
+                  @click="handleAudit(row, 'approve')"
+                >
+                  {{ $t('common.approve') }}
+                </ElButton>
+                <ElButton
+                  v-else-if="
+                    action.type === 'builtin' && action.key === 'unapprove'
+                  "
+                  link
+                  type="warning"
+                  @click="handleAudit(row, 'unapprove')"
+                >
+                  {{ $t('common.unapprove') }}
+                </ElButton>
                 <!-- 子表按钮 -->
                 <ElButton
                   v-else-if="action.type === 'subtable'"
@@ -3772,6 +3964,25 @@ defineExpose({
                         <span class="text-red-500">{{
                           $t('common.delete')
                         }}</span>
+                      </ElDropdownItem>
+                      <ElDropdownItem
+                        v-else-if="
+                          action.type === 'builtin' && action.key === 'approve'
+                        "
+                        @click="handleAudit(row, 'approve')"
+                      >
+                        <span class="mr-2 text-green-500">✓</span>
+                        <span class="text-green-500">{{ $t('common.approve') }}</span>
+                      </ElDropdownItem>
+                      <ElDropdownItem
+                        v-else-if="
+                          action.type === 'builtin' &&
+                          action.key === 'unapprove'
+                        "
+                        @click="handleAudit(row, 'unapprove')"
+                      >
+                        <span class="mr-2 text-orange-500">↶</span>
+                        <span class="text-orange-500">{{ $t('common.unapprove') }}</span>
                       </ElDropdownItem>
                       <!-- 子表按钮 -->
                       <ElDropdownItem
@@ -4161,6 +4372,40 @@ defineExpose({
                           @click="handleDelete(item)"
                         >
                           <Trash2 class="h-4 w-4" />
+                        </ElButton>
+                      </ElTooltip>
+                      <ElTooltip
+                        v-if="
+                          effectiveButtons.showApprove &&
+                          item.audit_status === 'pending'
+                        "
+                        :content="$t('common.approve')"
+                        placement="top"
+                      >
+                        <ElButton
+                          link
+                          size="small"
+                          type="success"
+                          @click="handleAudit(item, 'approve')"
+                        >
+                          <span class="text-sm">✓</span>
+                        </ElButton>
+                      </ElTooltip>
+                      <ElTooltip
+                        v-if="
+                          effectiveButtons.showUnapprove &&
+                          item.audit_status === 'approved'
+                        "
+                        :content="$t('common.unapprove')"
+                        placement="top"
+                      >
+                        <ElButton
+                          link
+                          size="small"
+                          type="warning"
+                          @click="handleAudit(item, 'unapprove')"
+                        >
+                          <span class="text-sm">↶</span>
                         </ElButton>
                       </ElTooltip>
                       <!-- 子表操作按钮 -->

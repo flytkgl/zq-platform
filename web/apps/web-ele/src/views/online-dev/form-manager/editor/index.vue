@@ -37,6 +37,17 @@ const loading = ref(false);
 const formName = ref('');
 const formCode = ref('');
 const formType = ref<'normal' | 'workflow'>('normal');
+const lifecycleConfig = ref({ auditEnabled: false });
+
+function handleAuditFieldsFailed() {
+  lifecycleConfig.value.auditEnabled = false;
+  autoSaveStatus.value = 'unsaved';
+}
+
+function handleAuditEnabledChange(enabled: boolean) {
+  lifecycleConfig.value.auditEnabled = enabled;
+  autoSaveStatus.value = 'unsaved';
+}
 
 // 自动保存状态
 const autoSaveStatus = ref<'saved' | 'saving' | 'unsaved'>('saved');
@@ -332,6 +343,9 @@ async function loadFormData() {
     formName.value = form.name;
     formCode.value = form.code;
     formType.value = form.form_type || 'normal';
+    lifecycleConfig.value = {
+      auditEnabled: Boolean(form.form_config?.lifecycle?.auditEnabled),
+    };
 
     // 恢复表配置
     if (form.form_config?.tableConfigs) {
@@ -498,6 +512,7 @@ async function doSave(showMessage = true) {
         formBorderRadius: formDesignStore.formConf.formBorderRadius,
         formShadow: formDesignStore.formConf.formShadow,
         disabled: formDesignStore.formConf.disabled,
+        lifecycle: lifecycleConfig.value,
         tableConfigs: tableConfigs.value,
       },
       list_config: listDesignData.value,
@@ -643,7 +658,11 @@ onMounted(() => {
       <!-- 步骤1: 数据库设计 -->
       <div v-show="currentStep === 0" class="h-full overflow-hidden py-4">
         <div class="bg-card h-full w-full overflow-hidden rounded-lg shadow-sm">
-          <DataSourceConfig v-model="tableConfigs" />
+          <DataSourceConfig
+            v-model="tableConfigs"
+            :audit-enabled="lifecycleConfig.auditEnabled"
+            @audit-fields-failed="handleAuditFieldsFailed"
+          />
         </div>
       </div>
 
@@ -659,9 +678,12 @@ onMounted(() => {
       >
         <ListDesign
           ref="listDesignRef"
+          :audit-enabled="lifecycleConfig.auditEnabled"
+          :audit-configurable="true"
           :form-fields="formFields"
           :form-type="formType"
           :sub-tables="subTablesForListDesign"
+          @update:audit-enabled="handleAuditEnabledChange"
         />
       </div>
     </div>

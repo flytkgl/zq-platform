@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { ColumnInfo } from '#/api/core/database-manager';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import {
   Copy,
@@ -111,14 +111,17 @@ interface ContextMenuItem {
 interface Props {
   modelValue: TableConfig[];
   workflowMode?: boolean; // 工作流模式：隐藏左侧数据库树，主表/从表可编辑
+  auditEnabled?: boolean; // 新建表单时自动补充审核字段
 }
 
 const props = withDefaults(defineProps<Props>(), {
   workflowMode: false,
+  auditEnabled: false,
 });
 
 const emit = defineEmits<{
   'update:modelValue': [value: TableConfig[]];
+  'audit-fields-failed': [];
 }>();
 
 // 内部数据
@@ -428,6 +431,9 @@ const SYSTEM_FIELDS = [
   'sys_modifier_id',
   'sys_dept_id',
   'sort',
+  'audit_status',
+  'audit_user_id',
+  'audit_datetime',
 ];
 
 // 检查表是否缺少系统字段
@@ -445,6 +451,153 @@ const SYSTEM_FIELD_COMMENTS: Record<string, string> = {
   sys_dept_id: '部门ID',
   sort: '排序',
 };
+
+const AUDIT_FIELDS = ['audit_status', 'audit_user_id', 'audit_datetime'];
+const AUDIT_FIELD_COMMENTS: Record<string, string> = {
+  audit_status: '审核状态',
+  audit_user_id: '审核人ID',
+  audit_datetime: '审核时间',
+};
+
+function getQuotedTableName(tableName: string, dbType: string, schema?: string) {
+  const type = dbType.toLowerCase();
+  const quote = type === 'mysql' ? '`' : type === 'sqlserver' ? '[' : '"';
+  const endQuote = type === 'sqlserver' ? ']' : quote;
+  const table = `${quote}${tableName}${endQuote}`;
+  return schema && type !== 'mysql'
+    ? `${quote}${schema}${endQuote}.${table}`
+    : table;
+}
+
+function generateAddAuditFieldsSQL(
+  tableName: string,
+  missingFields: string[],
+  dbType: string,
+  schema?: string,
+): string {
+  const type = dbType.toLowerCase();
+  const fullTableName = getQuotedTableName(tableName, type, schema);
+  const statusType = type === 'sqlserver' ? 'NVARCHAR(20)' : 'VARCHAR(20)';
+  const userType = type === 'sqlserver' ? 'NVARCHAR(36)' : 'VARCHAR(36)';
+  const datetimeType = type === 'mysql' ? 'DATETIME' : 'TIMESTAMP';
+  const statements: string[] = [];
+
+  for (const fieldName of missingFields) {
+    let fieldDefinition = '';
+    if (fieldName === 'audit_status') {
+      fieldDefinition = `${statusType} NOT NULL DEFAULT 'pending'`;
+    } else if (fieldName === 'audit_user_id') {
+      fieldDefinition = `${userType} NULL`;
+    } else {
+      fieldDefinition = `${datetimeType} NULL`;
+    }
+
+    const typeQuote = type === 'mysql' ? '`' : type === 'sqlserver' ? '[' : '"';
+    const typeEndQuote = type === 'sqlserver' ? ']' : typeQuote;
+    statements.push(
+      `ALTER TABLE ${fullTableName} ADD ${typeQuote}${fieldName}${typeEndQuote} ${fieldDefinition};`,
+    );
+
+    if (type === 'postgresql') {
+      const comment = AUDIT_FIELD_COMMENTS[fieldName] || fieldName;
+      statements.push(
+        `COMMENT ON COLUMN ${fullTableName}."${fieldName}" IS '${comment}';`,
+      );
+    }
+  }
+
+  return statements.join('\n');
+}
+
+async function ensureAuditFields(
+  node: TreeNode,
+  fields: TableField[],
+): Promise<TableField[] | null> {
+  if (!props.auditEnabled) return fields;
+
+  const existingNames = new Set(fields.map((field) => field.name));
+  const missingFields = AUDIT_FIELDS.filter((field) => !existingNames.has(field));
+  if (missingFields.length === 0) return fields;
+
+  try {
+    await ElMessageBox.confirm(
+      `开启审核需要给主表增加字段：${missingFields.join(', ')}，是否自动添加？`,
+      '添加审核字段',
+      {
+        confirmButtonText: '自动添加',
+        cancelButtonText: '取消并关闭审核',
+        type: 'warning',
+      },
+    );
+
+    const sql = generateAddAuditFieldsSQL(
+      node.meta?.table || '',
+      missingFields,
+      node.meta?.dbType || 'postgresql',
+      node.meta?.schema,
+    );
+    const result = await executeDDLApi(node.meta?.dbName || '', {
+      sql,
+      database: node.meta?.database,
+      schema_name: node.meta?.schema,
+    });
+
+    if (!result.success) {
+      ElMessage.error(result.message || '添加审核字段失败');
+      emit('audit-fields-failed');
+      return null;
+    }
+
+    const columns = await getTableColumnsApi(
+      node.meta?.dbName || '',
+      node.meta?.table || '',
+      node.meta?.database,
+      node.meta?.schema,
+    );
+    return columns.map((col: ColumnInfo) => ({
+      name: col.column_name,
+      type: normalizeDbType(col.data_type),
+      comment: col.description || '',
+      nullable: col.is_nullable,
+      isPrimaryKey: col.is_primary_key,
+      uniqueCheck: col.is_unique,
+      maxLength: col.character_maximum_length,
+      precision: col.numeric_precision,
+      scale: col.numeric_scale,
+    }));
+  } catch {
+    emit('audit-fields-failed');
+    return null;
+  }
+}
+
+watch(
+  () => props.auditEnabled,
+  async (enabled) => {
+    if (!enabled) return;
+
+    const main = tables.value.find((table) => table.type === 'main');
+    if (!main?.tableName) return;
+    const meta = main.meta;
+    if (!meta) return;
+
+    const node: TreeNode = {
+      id: `audit-${main.tableName}`,
+      label: main.tableName,
+      type: 'table',
+      isLeaf: true,
+      meta: {
+        dbName: meta.dbName,
+        dbType: meta.dbType,
+        database: meta.database,
+        schema: meta.schema,
+        table: main.tableName,
+      },
+    };
+    const fields = await ensureAuditFields(node, main.fields);
+    if (fields) main.fields = fields;
+  },
+);
 
 // 生成添加系统字段的 SQL
 function generateAddSystemFieldsSQL(
@@ -584,6 +737,10 @@ async function addMainTable(node: TreeNode) {
       // 用户点击取消，忽略继续
     }
   }
+
+  const auditFields = await ensureAuditFields(node, fields);
+  if (!auditFields) return;
+  fields = auditFields;
 
   // 如果已有主表，先移除
   const existingMainIndex = tables.value.findIndex((t) => t.type === 'main');

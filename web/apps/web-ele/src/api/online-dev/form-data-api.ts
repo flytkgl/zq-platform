@@ -19,6 +19,18 @@ export interface FormDataUpdateInput {
   sub_tables?: Record<string, Record<string, any>[]>;
 }
 
+/** 审核动作结果 */
+export interface FormDataBatchActionResult {
+  total: number;
+  success_count: number;
+  failed_count: number;
+  results: Array<{
+    id: string;
+    success: boolean;
+    message?: string;
+  }>;
+}
+
 /** 表单数据列表响应 */
 export interface FormDataListResponse {
   items: Record<string, any>[];
@@ -103,6 +115,10 @@ export interface FormPermissions {
   delete: boolean;
   export: boolean;
   import: boolean;
+  approve: boolean;
+  unapprove: boolean;
+  batchApprove: boolean;
+  batchUnapprove: boolean;
 }
 
 /** 字段权限配置 */
@@ -266,6 +282,42 @@ export async function updateFormDataApi(
   return requestClient.put<Record<string, any>>(
     `/api/online_dev/form-data/${formCode}/${pk}`,
     data,
+  );
+}
+
+/** 审核表单数据 */
+export async function approveFormDataApi(formCode: string, pk: string) {
+  return requestClient.post<Record<string, any>>(
+    `/api/online_dev/form-data/${formCode}/${pk}/approve`,
+  );
+}
+
+/** 反审表单数据 */
+export async function unapproveFormDataApi(formCode: string, pk: string) {
+  return requestClient.post<Record<string, any>>(
+    `/api/online_dev/form-data/${formCode}/${pk}/unapprove`,
+  );
+}
+
+/** 批量审核表单数据 */
+export async function batchApproveFormDataApi(
+  formCode: string,
+  ids: string[],
+) {
+  return requestClient.post<FormDataBatchActionResult>(
+    `/api/online_dev/form-data/${formCode}/batch/approve`,
+    { ids },
+  );
+}
+
+/** 批量反审表单数据 */
+export async function batchUnapproveFormDataApi(
+  formCode: string,
+  ids: string[],
+) {
+  return requestClient.post<FormDataBatchActionResult>(
+    `/api/online_dev/form-data/${formCode}/batch/unapprove`,
+    { ids },
   );
 }
 

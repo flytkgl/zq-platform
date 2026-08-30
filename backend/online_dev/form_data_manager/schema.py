@@ -20,6 +20,11 @@ class FormDataUpdateIn(BaseModel):
     sub_tables: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict, description="子表数据")
 
 
+class FormDataBatchActionIn(BaseModel):
+    """批量表单动作请求"""
+    ids: List[str] = Field(..., min_length=1, description="记录ID列表")
+
+
 class FormDataListOut(BaseModel):
     """表单数据列表输出"""
     items: List[Dict[str, Any]]

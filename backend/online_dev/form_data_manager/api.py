@@ -24,8 +24,9 @@ from sqlalchemy.exc import (
     ProgrammingError,
 )
 
-from app.database import get_db
+from app.database import get_db, transaction
 from online_dev.form_data_manager.schema import (
+    FormDataBatchActionIn,
     FormDataCreateIn,
     FormDataListOut,
     FormDataUpdateIn,
@@ -400,7 +401,14 @@ async def create_form_data(
     
     try:
         service = await FormDataService.create_service(db, form_code)
-        return await service.create(db, data.model_dump())
+        user_info = await get_user_info(request)
+        async with transaction(db):
+            return await service.create(
+                db,
+                data.model_dump(),
+                auto_commit=False,
+                operator_id=user_info.get("user_id"),
+            )
     except FormDataException as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -421,7 +429,126 @@ async def update_form_data(
     
     try:
         service = await FormDataService.create_service(db, form_code)
-        return await service.update(db, pk, data.model_dump())
+        user_info = await get_user_info(request)
+        async with transaction(db):
+            return await service.update(
+                db,
+                pk,
+                data.model_dump(),
+                auto_commit=False,
+                operator_id=user_info.get("user_id"),
+            )
+    except FormDataException as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise _handle_db_error(e)
+
+
+async def _run_audit_action(
+        form_code: str,
+        pk: str,
+        action: str,
+        request: Request,
+        db: AsyncSession,
+):
+    """执行单条审核动作；事务由调用方负责。"""
+    service = await FormDataService.create_service(db, form_code)
+    user_info = await get_user_info(request)
+    return await service.change_audit_status(
+        db=db,
+        pk=pk,
+        action=action,
+        operator_id=user_info.get("user_id"),
+    )
+
+
+async def _batch_audit_action(
+        form_code: str,
+        ids: List[str],
+        action: str,
+        request: Request,
+        db: AsyncSession,
+) -> Dict[str, Any]:
+    """逐条执行批量审核动作，每条记录使用独立事务。"""
+    unique_ids = list(dict.fromkeys(ids))
+    results: List[Dict[str, Any]] = []
+
+    for pk in unique_ids:
+        try:
+            async with transaction(db):
+                await _run_audit_action(form_code, pk, action, request, db)
+            results.append({"id": pk, "success": True})
+        except FormDataException as e:
+            results.append({"id": pk, "success": False, "message": str(e)})
+        except Exception as e:
+            logger.exception("批量审核动作失败: form=%s, id=%s, action=%s", form_code, pk, action)
+            results.append({"id": pk, "success": False, "message": "操作失败，请稍后重试"})
+
+    success_count = sum(1 for item in results if item["success"])
+    return {
+        "total": len(results),
+        "success_count": success_count,
+        "failed_count": len(results) - success_count,
+        "results": results,
+    }
+
+
+@router.post("/{form_code}/batch/approve", summary="批量审核表单数据")
+async def batch_approve_form_data(
+        form_code: str,
+        data: FormDataBatchActionIn,
+        request: Request,
+        db: AsyncSession = Depends(get_db),
+):
+    """逐条批量审核表单数据。"""
+    await check_form_permission(form_code, "batch_approve", request, db)
+    return await _batch_audit_action(form_code, data.ids, "approve", request, db)
+
+
+@router.post("/{form_code}/batch/unapprove", summary="批量反审表单数据")
+async def batch_unapprove_form_data(
+        form_code: str,
+        data: FormDataBatchActionIn,
+        request: Request,
+        db: AsyncSession = Depends(get_db),
+):
+    """逐条批量反审表单数据。"""
+    await check_form_permission(form_code, "batch_unapprove", request, db)
+    return await _batch_audit_action(form_code, data.ids, "unapprove", request, db)
+
+
+@router.post("/{form_code}/{pk}/approve", summary="审核表单数据")
+async def approve_form_data(
+        form_code: str,
+        pk: str,
+        request: Request,
+        db: AsyncSession = Depends(get_db),
+):
+    """审核单条表单数据。"""
+    await check_form_permission(form_code, "approve", request, db)
+
+    try:
+        async with transaction(db):
+            return await _run_audit_action(form_code, pk, "approve", request, db)
+    except FormDataException as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise _handle_db_error(e)
+
+
+@router.post("/{form_code}/{pk}/unapprove", summary="反审表单数据")
+async def unapprove_form_data(
+        form_code: str,
+        pk: str,
+        request: Request,
+        db: AsyncSession = Depends(get_db),
+):
+    """反审单条表单数据。"""
+    await check_form_permission(form_code, "unapprove", request, db)
+
+    try:
+        async with transaction(db):
+            return await _run_audit_action(form_code, pk, "unapprove", request, db)
     except FormDataException as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

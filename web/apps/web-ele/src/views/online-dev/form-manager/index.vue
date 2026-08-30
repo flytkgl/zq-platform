@@ -205,6 +205,9 @@ async function handleConfirm() {
             sort: basicForm.sort,
             db_config: 'default',
             main_table: '',
+            form_config: {
+              lifecycle: { auditEnabled: false },
+            },
           });
           ElMessage.success($t('form-manager.editor.createSuccess'));
           dialogVisible.value = false;
@@ -212,7 +215,7 @@ async function handleConfirm() {
           // 创建后直接跳转设计页面
           router.push(
             appContextStore.getContextPath(
-              `/online-dev/form-manager/editor/${res.id}`,
+              `/online-dev/form-manager/editor/${res.id}?new=1`,
             ),
           );
         }

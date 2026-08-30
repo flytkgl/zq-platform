@@ -104,6 +104,7 @@ const basicForm = ref({
   show_in_mobile: false,
   icon: '',
   icon_bg_color: '',
+  auditEnabled: false,
 });
 
 // 数据表配置
@@ -194,6 +195,7 @@ async function loadFormData(formId: string) {
       show_in_mobile: form.show_in_mobile || false,
       icon: form.icon || '',
       icon_bg_color: form.icon_bg_color || '',
+      auditEnabled: Boolean(form.form_config?.lifecycle?.auditEnabled),
     };
 
     // 恢复表配置（从 form_config 中）
@@ -635,6 +637,9 @@ async function doSave() {
         formBorderRadius: formDesignStore.formConf.formBorderRadius,
         formShadow: formDesignStore.formConf.formShadow,
         disabled: formDesignStore.formConf.disabled,
+        lifecycle: {
+          auditEnabled: basicForm.value.auditEnabled,
+        },
         tableConfigs: tableConfigs.value,
       },
       list_config: listDesignData.value,
@@ -667,6 +672,7 @@ function handleClose() {
     show_in_mobile: false,
     icon: '',
     icon_bg_color: '',
+    auditEnabled: false,
   };
   tableConfigs.value = [];
   // 清空表单设计
@@ -918,7 +924,11 @@ function handleClose() {
       <!-- 步骤2: 数据库设计 -->
       <div v-show="currentStep === 1" class="h-full overflow-hidden py-4">
         <div class="bg-card h-full w-full overflow-hidden rounded-lg shadow-sm">
-          <DataSourceConfig v-model="tableConfigs" />
+          <DataSourceConfig
+            v-model="tableConfigs"
+            :audit-enabled="basicForm.auditEnabled"
+            @audit-fields-failed="basicForm.auditEnabled = false"
+          />
         </div>
       </div>
 
@@ -934,9 +944,12 @@ function handleClose() {
       >
         <ListDesign
           ref="listDesignRef"
+          :audit-enabled="basicForm.auditEnabled"
+          :audit-configurable="true"
           :form-fields="formFields"
           :form-type="basicForm.form_type"
           :sub-tables="subTablesForListDesign"
+          @update:audit-enabled="basicForm.auditEnabled = $event"
         />
       </div>
     </div>
