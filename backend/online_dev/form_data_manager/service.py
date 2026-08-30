@@ -200,7 +200,12 @@ class FormDataService:
             FormSubTable.is_deleted == False
         ).order_by(FormSubTable.sort)
         sub_result = await db.execute(sub_stmt)
-        sub_tables = list(sub_result.scalars().all())
+        # 兼容历史重复元数据：同一张子表只加载一次，否则保存主表时会重复
+        # 插入子表行，并让回写规则被重复触发。
+        unique_sub_tables = {}
+        for item in sub_result.scalars().all():
+            unique_sub_tables.setdefault(item.table_name, item)
+        sub_tables = list(unique_sub_tables.values())
 
         # 获取数据库类型
         from core.database_manager.service import parse_database_url

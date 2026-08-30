@@ -185,7 +185,12 @@ class FormWriteBackService:
         result = await db.execute(select(FormSubTable).where(
             FormSubTable.form_id == form_id, FormSubTable.is_deleted == False
         ))
-        return list(result.scalars().all())
+        # 历史上同一张子表可能被重复写入元数据。回写规则只需要一个表描述，
+        # 重复描述会导致同一条规则被重复执行或同一行被重复保存。
+        unique: Dict[str, FormSubTable] = {}
+        for item in result.scalars().all():
+            unique.setdefault(item.table_name, item)
+        return list(unique.values())
 
     @staticmethod
     def _table_config(form: FormMeta, table_key: str) -> Dict[str, Any]:
@@ -336,6 +341,28 @@ class FormWriteBackService:
         result = await db.execute(text(sql))
         return [dict(row._mapping) for row in result.fetchall()]
 
+    @classmethod
+    async def _query_source_record(
+        cls,
+        db: AsyncSession,
+        descriptor: Dict[str, Any],
+        record_id: Any,
+    ) -> Optional[Dict[str, Any]]:
+        """读取已落库的源行，避免事件上下文只带了表单投影字段。"""
+        if record_id is None:
+            return None
+        builder = cls._builder()
+        table = builder.build_table_name(
+            descriptor["table"], descriptor["schema"], descriptor["database"]
+        )
+        sql = (
+            f"SELECT * FROM {table} "
+            f"WHERE {builder.quote_identifier('id')} = :source_id LIMIT 1"
+        )
+        result = await db.execute(text(sql), {"source_id": record_id})
+        row = result.first()
+        return dict(row._mapping) if row else None
+
     @staticmethod
     def _condition_value(value: Any, new_data: Dict[str, Any], old_data: Dict[str, Any]) -> Any:
         if isinstance(value, dict) and value.get("from") in ("newData", "oldData"):
@@ -394,8 +421,10 @@ class FormWriteBackService:
         elif event.startswith("after_"):
             if event.endswith("create"):
                 remove(old_rows)
+                if context.data: replace(new_rows, context.data)
             elif event.endswith("update") or event.endswith("approve") or event.endswith("unapprove"):
                 replace(old_rows, context.old_data)
+                replace(new_rows, context.data)
             elif event.endswith("delete"):
                 new_rows = [row for row in current if str(row.get("id")) != record_id]
                 if context.old_data: old_rows.append(dict(context.old_data))
@@ -410,7 +439,12 @@ class FormWriteBackService:
         for index, item in enumerate(rule.match_conditions or []):
             target_field = _ensure_identifier(item.get("target_field", ""), "关联目标字段")
             if item.get("source_field"):
-                value = source_row.get(item["source_field"])
+                source_field = item["source_field"]
+                if source_field not in source_row:
+                    raise FormWriteBackException(
+                        f"规则「{rule.name}」关联源字段「{source_field}」不在当前源数据中"
+                    )
+                value = source_row.get(source_field)
             else:
                 value = item.get("fixed_value")
             if value is None:
@@ -463,6 +497,13 @@ class FormWriteBackService:
         for rule in rules_result.scalars().all():
             if event not in (rule.trigger_events or []):
                 continue
+            # 一条规则的源表决定了它监听哪一个表级生命周期钩子。
+            # 例如源表是 purchase_in_item 时，主表 purchase_in 的
+            # after_create 不能执行这条规则，否则上下文里不会有
+            # purchase_order_item_id，最终会被误判为目标记录不存在。
+            hook_table_key = "main" if context.table_type == "main" else context.table_name
+            if hook_table_key != rule.source_table_key:
+                continue
             token_key = (str(rule.id), context.form_code, context.table_name, str(context.record_id))
             current_active = active.get()
             if token_key in current_active:
@@ -478,11 +519,27 @@ class FormWriteBackService:
                 if not cls._conditions_match(effective_new or effective_old, rule.execute_conditions or [], effective_new, effective_old):
                     continue
                 source_descriptor = cls._descriptor(source, source_subs, rule.source_table_key)
+                source_row = dict(effective_new or effective_old)
+                # after_create/after_update 等事件的上下文通常来自落库后的完整行，
+                # 但某些调用方只传了表单可见字段。按源表和记录 ID 再读取一次，
+                # 保证关联字段（例如 purchase_order_item_id）不会因投影缺失而变成空值。
+                source_record_id = None
+                if rule.source_table_key == "main":
+                    source_record_id = context.main_record_id or context.record_id
+                elif context.table_name == rule.source_table_key:
+                    source_record_id = context.record_id
+                persisted_source = await cls._query_source_record(
+                    context.db, source_descriptor, source_record_id
+                )
+                if persisted_source:
+                    source_row = {**source_row, **persisted_source}
+                if "id" not in source_row and source_record_id is not None:
+                    source_row["id"] = source_record_id
                 current_rows = await cls._query_rows(context.db, source_descriptor)
                 new_rows, old_rows = cls._apply_event_snapshot(current_rows, context, event)
                 target = await cls._get_form(context.db, rule.target_form_id)
                 target_subs = await cls._get_sub_tables(context.db, target.id)
-                targets = await cls._find_targets(context.db, target, target_subs, rule, effective_new or effective_old)
+                targets = await cls._find_targets(context.db, target, target_subs, rule, source_row)
                 if len(targets) == 0:
                     raise FormWriteBackException(f"规则「{rule.name}」未找到目标记录")
                 if len(targets) > 1:

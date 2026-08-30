@@ -161,6 +161,17 @@ function normalizeTables(form: any) {
   ];
   if (!targetTables.value.some((item) => item.key === rule.target_table_key))
     rule.target_table_key = 'main';
+  syncTargetField();
+}
+
+function syncTargetField() {
+  // 目标表单详情是异步加载的，列表尚未加载完成时不能把已保存的字段误清空。
+  if (!targetTables.value.length) return;
+  if (
+    !targetFields.value.some((item: any) => item.name === rule.target_field)
+  ) {
+    rule.target_field = '';
+  }
 }
 
 async function loadTargetForm() {
@@ -293,15 +304,7 @@ async function save() {
 }
 
 watch(() => rule.target_form_id, loadTargetForm);
-watch(
-  () => [rule.target_table_key, rule.target_form_id],
-  () => {
-    if (
-      !targetFields.value.some((item: any) => item.name === rule.target_field)
-    )
-      rule.target_field = '';
-  },
-);
+watch(() => rule.target_table_key, syncTargetField);
 watch(
   () => rule.source_table_key,
   () => {
