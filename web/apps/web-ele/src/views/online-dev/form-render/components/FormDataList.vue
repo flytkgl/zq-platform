@@ -2979,10 +2979,20 @@ async function handleBatchDelete() {
     );
     batchDeleting.value = true;
     const ids = selectedRows.value.map((row) => row.id);
-    await batchDeleteFormDataApi(props.formCode, ids);
-    ElMessage.success('删除成功');
+    const result = await batchDeleteFormDataApi(props.formCode, ids);
+    if (result.failed_count > 0) {
+      ElMessage.warning(
+        `删除完成：成功 ${result.success_count} 条，失败 ${result.failed_count} 条`,
+      );
+    } else {
+      ElMessage.success(`删除成功，共 ${result.success_count} 条`);
+    }
     selectedRows.value = [];
-    gridApi.reload();
+    if (listConfig.value.listType === 'card') {
+      await loadCardData();
+    } else {
+      await gridApi.reload();
+    }
   } catch {
     // 用户取消
   } finally {

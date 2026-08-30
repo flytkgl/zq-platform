@@ -334,7 +334,7 @@ export async function deleteFormDataApi(formCode: string, pk: string) {
  * 批量删除表单数据
  */
 export async function batchDeleteFormDataApi(formCode: string, ids: string[]) {
-  return requestClient.delete<{ count: number }>(
+  return requestClient.delete<FormDataBatchActionResult>(
     `/api/online_dev/form-data/${formCode}/batch/delete`,
     { params: { ids } },
   );

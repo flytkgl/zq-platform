@@ -98,26 +98,40 @@ class FormDataService:
         lifecycle = self._form_config.get("lifecycle") or {}
         return bool(lifecycle.get("auditEnabled", False))
 
-    async def _dispatch_hook(
+    async def _dispatch_table_hook(
         self,
+        table_name: str,
         event: str,
         db: AsyncSession,
         action: str,
         record_id: Optional[str] = None,
+        main_record_id: Optional[str] = None,
         old_data: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
+        parent_old_data: Optional[Dict[str, Any]] = None,
+        parent_data: Optional[Dict[str, Any]] = None,
         operator_id: Optional[str] = None,
     ) -> FormLifecycleContext:
+        table_type = "main" if table_name == "main" else "sub"
         context = FormLifecycleContext(
             db=db,
             form_code=self.form_meta.code,
+            table_name=table_name,
+            table_type=table_type,
             action=action,
             record_id=str(record_id) if record_id is not None else None,
-            old_data=old_data,
-            data=data or {},
+            main_record_id=(
+                str(main_record_id)
+                if main_record_id is not None
+                else (str(record_id) if table_type == "main" and record_id is not None else None)
+            ),
+            old_data=old_data or {},
+            data=data if data is not None else {},
+            parent_old_data=parent_old_data or {},
+            parent_data=parent_data or {},
             operator_id=operator_id,
         )
-        await hook_registry.dispatch(self.form_meta.code, event, context)
+        await hook_registry.dispatch(self.form_meta.code, table_name, event, context)
         return context
     
     async def _resolve_schema(self, db: AsyncSession, schema: str) -> Optional[str]:
@@ -1120,6 +1134,7 @@ class FormDataService:
         self,
         db: AsyncSession,
         pk: Any,
+        for_update: bool = False,
     ) -> Dict[str, Any]:
         """获取未经过字段权限过滤的主表记录，供内部动作使用。"""
         table = self.form_meta.main_table
@@ -1131,6 +1146,8 @@ class FormDataService:
             database=database,
             where={"id": pk},
         )
+        if for_update:
+            sql += " FOR UPDATE"
         rows = await self._execute_query(db, sql, params)
         if not rows:
             raise FormDataException(f"数据不存在: {pk}")
@@ -1151,6 +1168,24 @@ class FormDataService:
         )
         rows = await self._execute_query(db, sql, params)
         return [self._serialize_row(row) for row in rows]
+
+    async def _get_raw_sub_table_record(
+            self,
+            db: AsyncSession,
+            sub_table: FormSubTable,
+            pk: Any,
+    ) -> Dict[str, Any]:
+        """获取未经过字段权限过滤的单条从表记录。"""
+        sql, params = self.sql_builder.build_select(
+            table=sub_table.table_name,
+            schema=sub_table.table_schema or None,
+            database=sub_table.table_database or None,
+            where={"id": pk},
+        )
+        rows = await self._execute_query(db, sql, params)
+        if not rows:
+            raise FormDataException(f"从表数据不存在: {pk}")
+        return self._serialize_row(rows[0])
 
     def _is_uuid_like(self, value: str) -> bool:
         """检查值是否像 UUID（用于判断是 ID 还是名称）"""
@@ -2753,16 +2788,16 @@ class FormDataService:
         if not filtered_main:
             raise FormDataException("主表数据不能为空")
 
-        before_context = await self._dispatch_hook(
-            "before_create",
+        main_before_context = await self._dispatch_table_hook(
+            table_name="main",
+            event="before_create",
             db=db,
             action="create",
             record_id=generated_id,
-            data={"main": filtered_main, "sub_tables": sub_tables_data},
+            data=filtered_main,
             operator_id=operator_id,
         )
-        filtered_main = before_context.data.get("main") or filtered_main
-        sub_tables_data = before_context.data.get("sub_tables") or sub_tables_data
+        filtered_main = main_before_context.data or filtered_main
 
         # 唯一性校验（新增时不需要排除ID）
         await self._validate_unique_fields(db, filtered_main)
@@ -2783,6 +2818,18 @@ class FormDataService:
         await self._execute_command(db, sql, params)
         main_pk = generated_id
 
+        main_created = await self._get_raw_main_record(db, main_pk)
+        await self._dispatch_table_hook(
+            table_name="main",
+            event="after_create",
+            db=db,
+            action="create",
+            record_id=main_pk,
+            data=main_created,
+            operator_id=operator_id,
+        )
+        main_created = await self._get_raw_main_record(db, main_pk)
+
         # 2. 插入子表
         for sub_table in self.sub_tables:
             sub_data_list = sub_tables_data.get(sub_table.table_name, [])
@@ -2802,6 +2849,21 @@ class FormDataService:
                 filtered_sub = self._fill_system_fields_for_create(filtered_sub)
 
                 if filtered_sub:
+                    sub_before_context = await self._dispatch_table_hook(
+                        table_name=sub_table.table_name,
+                        event="before_create",
+                        db=db,
+                        action="create",
+                        record_id=filtered_sub["id"],
+                        main_record_id=main_pk,
+                        data=filtered_sub,
+                        parent_data=main_created,
+                        operator_id=operator_id,
+                    )
+                    filtered_sub = sub_before_context.data or filtered_sub
+                    filtered_sub["id"] = str(filtered_sub.get("id") or uuid.uuid4())
+                    filtered_sub[sub_table.foreign_key] = main_pk
+
                     sub_sql, sub_params = self.sql_builder.build_insert(
                         table=sub_table.table_name,
                         data=filtered_sub,
@@ -2811,17 +2873,22 @@ class FormDataService:
                     )
                     await self._execute_command(db, sub_sql, sub_params)
 
-        await db.flush()
+                    sub_created = await self._get_raw_sub_table_record(
+                        db, sub_table, filtered_sub["id"]
+                    )
+                    await self._dispatch_table_hook(
+                        table_name=sub_table.table_name,
+                        event="after_create",
+                        db=db,
+                        action="create",
+                        record_id=filtered_sub["id"],
+                        main_record_id=main_pk,
+                        data=sub_created,
+                        parent_data=main_created,
+                        operator_id=operator_id,
+                    )
 
-        created = await self.get(db, main_pk)
-        await self._dispatch_hook(
-            "after_create",
-            db=db,
-            action="create",
-            record_id=main_pk,
-            data=created,
-            operator_id=operator_id,
-        )
+        await db.flush()
 
         if auto_commit:
             await db.commit()
@@ -2842,25 +2909,11 @@ class FormDataService:
         main_data = data.get("main") or {}
         sub_tables_data = data.get("sub_tables") or {}
 
-        # 验证数据存在
-        existing = await self.get(db, pk)
-        if not existing:
-            raise FormDataException(f"数据不存在: {pk}")
+        # 验证数据存在，并保留主表数据作为从表 Hook 的父级上下文。
+        existing_main = await self._get_raw_main_record(db, pk)
 
-        before_context = await self._dispatch_hook(
-            "before_update",
-            db=db,
-            action="update",
-            record_id=pk,
-            old_data=existing,
-            data={"main": dict(main_data), "sub_tables": sub_tables_data},
-            operator_id=operator_id,
-        )
-        hook_data = before_context.data or {}
-        main_data = hook_data.get("main") or main_data
-        sub_tables_data = hook_data.get("sub_tables") or sub_tables_data
-
-        # 1. 更新主表
+        # 先准备主表候选数据，主表 Hook 始终执行，即使本次只修改从表。
+        filtered_main: Dict[str, Any] = {}
         if main_data:
             allowed_main_fields = self._get_allowed_fields("main")
             filtered_main = self._filter_fields(main_data, allowed_main_fields)
@@ -2868,10 +2921,32 @@ class FormDataService:
             filtered_main.pop("id", None)
             for audit_field in self.AUDIT_FIELDS:
                 filtered_main.pop(audit_field, None)
-            
-            # 填充系统字段（更新时间、修改人）
             filtered_main = self._fill_system_fields_for_update(filtered_main)
 
+        main_before_data = dict(existing_main)
+        main_before_data.update(filtered_main)
+        main_before_context = await self._dispatch_table_hook(
+            table_name="main",
+            event="before_update",
+            db=db,
+            action="update",
+            record_id=pk,
+            old_data=existing_main,
+            data=main_before_data,
+            operator_id=operator_id,
+        )
+        hook_main_data = main_before_context.data or {}
+        if hook_main_data:
+            allowed_main_fields = self._get_allowed_fields("main")
+            filtered_main = self._filter_fields(hook_main_data, allowed_main_fields)
+            filtered_main = self._convert_data_types(filtered_main)
+            filtered_main.pop("id", None)
+            for audit_field in self.AUDIT_FIELDS:
+                filtered_main.pop(audit_field, None)
+            filtered_main = self._fill_system_fields_for_update(filtered_main)
+
+        # 1. 更新主表
+        if filtered_main:
             # 唯一性校验（编辑时排除自身）
             await self._validate_unique_fields(db, filtered_main, exclude_id=str(pk))
 
@@ -2890,26 +2965,37 @@ class FormDataService:
                 )
                 await self._execute_command(db, sql, params)
 
+        await db.flush()
+        parent_data = await self._get_raw_main_record(db, pk)
+        await self._dispatch_table_hook(
+            table_name="main",
+            event="after_update",
+            db=db,
+            action="update",
+            record_id=pk,
+            old_data=existing_main,
+            data=parent_data,
+            operator_id=operator_id,
+        )
+        parent_data = await self._get_raw_main_record(db, pk)
+
         # 2. 处理子表（差异更新）
         for sub_table in self.sub_tables:
             if sub_table.table_name not in sub_tables_data:
                 continue
 
             new_sub_data = sub_tables_data[sub_table.table_name]
-            await self._handle_sub_table_update(db, sub_table, pk, new_sub_data)
+            await self._handle_sub_table_update(
+                db,
+                sub_table,
+                pk,
+                new_sub_data,
+                parent_old_data=existing_main,
+                parent_data=parent_data,
+                operator_id=operator_id,
+            )
 
         await db.flush()
-
-        updated = await self.get(db, pk)
-        await self._dispatch_hook(
-            "after_update",
-            db=db,
-            action="update",
-            record_id=pk,
-            old_data=existing,
-            data=updated,
-            operator_id=operator_id,
-        )
 
         if auto_commit:
             await db.commit()
@@ -2932,7 +3018,7 @@ class FormDataService:
         if action not in ("approve", "unapprove"):
             raise FormDataException(f"不支持的审核动作: {action}")
 
-        existing = await self._get_raw_main_record(db, pk)
+        existing = await self._get_raw_main_record(db, pk, for_update=True)
         current_status = existing.get("audit_status")
         expected_status = "pending" if action == "approve" else "approved"
         next_status = "approved" if action == "approve" else "pending"
@@ -2946,9 +3032,18 @@ class FormDataService:
             action_name = "审核" if action == "approve" else "反审"
             raise FormDataException(f"当前状态不能{action_name}")
 
-        event_prefix = "before_approve" if action == "approve" else "before_unapprove"
-        await self._dispatch_hook(
-            event_prefix,
+        event = "approve" if action == "approve" else "unapprove"
+        before_event = f"before_{event}"
+        after_event = f"after_{event}"
+        sub_rows: List[Tuple[FormSubTable, List[Dict[str, Any]]]] = []
+        for sub_table in self.sub_tables:
+            sub_rows.append(
+                (sub_table, await self._query_sub_table_data(db, sub_table, pk))
+            )
+
+        await self._dispatch_table_hook(
+            table_name="main",
+            event=before_event,
             db=db,
             action=action,
             record_id=pk,
@@ -2956,6 +3051,21 @@ class FormDataService:
             data=dict(existing),
             operator_id=operator_id,
         )
+        for sub_table, rows in sub_rows:
+            for row in rows:
+                await self._dispatch_table_hook(
+                    table_name=sub_table.table_name,
+                    event=before_event,
+                    db=db,
+                    action=action,
+                    record_id=row.get("id"),
+                    main_record_id=pk,
+                    old_data=row,
+                    data=dict(row),
+                    parent_old_data=existing,
+                    parent_data=existing,
+                    operator_id=operator_id,
+                )
 
         table = self.form_meta.main_table
         schema = await self._resolve_schema(db, self.form_meta.main_table_schema) or None
@@ -2987,9 +3097,28 @@ class FormDataService:
 
         await db.flush()
         updated = await self._get_raw_main_record(db, pk)
-        event_suffix = "after_approve" if action == "approve" else "after_unapprove"
-        await self._dispatch_hook(
-            event_suffix,
+        for sub_table, rows in sub_rows:
+            for row in rows:
+                row_id = row.get("id")
+                updated_row = await self._get_raw_sub_table_record(
+                    db, sub_table, row_id
+                )
+                await self._dispatch_table_hook(
+                    table_name=sub_table.table_name,
+                    event=after_event,
+                    db=db,
+                    action=action,
+                    record_id=row_id,
+                    main_record_id=pk,
+                    old_data=row,
+                    data=updated_row,
+                    parent_old_data=existing,
+                    parent_data=updated,
+                    operator_id=operator_id,
+                )
+        await self._dispatch_table_hook(
+            table_name="main",
+            event=after_event,
             db=db,
             action=action,
             record_id=pk,
@@ -3004,7 +3133,10 @@ class FormDataService:
             db: AsyncSession,
             sub_table: FormSubTable,
             main_pk: Any,
-            new_data: List[Dict[str, Any]]
+            new_data: List[Dict[str, Any]],
+            parent_old_data: Dict[str, Any],
+            parent_data: Dict[str, Any],
+            operator_id: Optional[str] = None,
     ):
         """处理子表更新（差异对比：新增/更新/删除）"""
         table_name = sub_table.table_name
@@ -3038,6 +3170,20 @@ class FormDataService:
 
         # 执行删除
         for del_id in to_delete:
+            deleted_row = existing_map[del_id]
+            await self._dispatch_table_hook(
+                table_name=table_name,
+                event="before_delete",
+                db=db,
+                action="delete",
+                record_id=del_id,
+                main_record_id=main_pk,
+                old_data=deleted_row,
+                data=dict(deleted_row),
+                parent_old_data=parent_old_data,
+                parent_data=parent_data,
+                operator_id=operator_id,
+            )
             sql, params = self.sql_builder.build_delete(
                 table=table_name,
                 pk_field="id",
@@ -3046,16 +3192,51 @@ class FormDataService:
                 database=database
             )
             await self._execute_command(db, sql, params)
+            await self._dispatch_table_hook(
+                table_name=table_name,
+                event="after_delete",
+                db=db,
+                action="delete",
+                record_id=del_id,
+                main_record_id=main_pk,
+                old_data=deleted_row,
+                data=dict(deleted_row),
+                parent_old_data=parent_old_data,
+                parent_data=parent_data,
+                operator_id=operator_id,
+            )
 
         # 执行更新
         for item in to_update:
             filtered = self._filter_fields(item, allowed_fields)
             filtered = self._convert_data_types(filtered)
             item_id = filtered.pop("id", None)
-            
+            old_row = existing_map[item_id] if item_id else {}
+            candidate = dict(old_row)
+            candidate.update(filtered)
+            if item_id:
+                before_context = await self._dispatch_table_hook(
+                    table_name=table_name,
+                    event="before_update",
+                    db=db,
+                    action="update",
+                    record_id=item_id,
+                    main_record_id=main_pk,
+                    old_data=old_row,
+                    data=candidate,
+                    parent_old_data=parent_old_data,
+                    parent_data=parent_data,
+                    operator_id=operator_id,
+                )
+                candidate = before_context.data or candidate
+
+            filtered = self._filter_fields(candidate, allowed_fields)
+            filtered = self._convert_data_types(filtered)
+            filtered.pop("id", None)
+            filtered.pop(foreign_key, None)
             # 填充子表系统字段（更新）
             filtered = self._fill_system_fields_for_update(filtered)
-            
+
             if filtered and item_id:
                 sql, params = self.sql_builder.build_update(
                     table=table_name,
@@ -3066,6 +3247,22 @@ class FormDataService:
                     database=database
                 )
                 await self._execute_command(db, sql, params)
+                updated_row = await self._get_raw_sub_table_record(
+                    db, sub_table, item_id
+                )
+                await self._dispatch_table_hook(
+                    table_name=table_name,
+                    event="after_update",
+                    db=db,
+                    action="update",
+                    record_id=item_id,
+                    main_record_id=main_pk,
+                    old_data=old_row,
+                    data=updated_row,
+                    parent_old_data=parent_old_data,
+                    parent_data=parent_data,
+                    operator_id=operator_id,
+                )
 
         # 执行新增
         for item in to_insert:
@@ -3082,6 +3279,22 @@ class FormDataService:
             filtered = self._fill_system_fields_for_create(filtered)
 
             if filtered and len(filtered) > 2:
+                row_id = filtered["id"]
+                before_context = await self._dispatch_table_hook(
+                    table_name=table_name,
+                    event="before_create",
+                    db=db,
+                    action="create",
+                    record_id=row_id,
+                    main_record_id=main_pk,
+                    data=filtered,
+                    parent_old_data=parent_old_data,
+                    parent_data=parent_data,
+                    operator_id=operator_id,
+                )
+                filtered = before_context.data or filtered
+                filtered["id"] = str(filtered.get("id") or row_id)
+                filtered[foreign_key] = main_pk
                 sql, params = self.sql_builder.build_insert(
                     table=table_name,
                     data=filtered,
@@ -3090,26 +3303,83 @@ class FormDataService:
                     return_id=False
                 )
                 await self._execute_command(db, sql, params)
+                inserted_row = await self._get_raw_sub_table_record(
+                    db, sub_table, filtered["id"]
+                )
+                await self._dispatch_table_hook(
+                    table_name=table_name,
+                    event="after_create",
+                    db=db,
+                    action="create",
+                    record_id=filtered["id"],
+                    main_record_id=main_pk,
+                    data=inserted_row,
+                    parent_old_data=parent_old_data,
+                    parent_data=parent_data,
+                    operator_id=operator_id,
+                )
 
-    async def delete(self, db: AsyncSession, pk: Any) -> bool:
-        """删除数据（含子表，事务）"""
-        # 验证数据存在
-        existing = await self.get(db, pk)
-        if not existing:
-            raise FormDataException(f"数据不存在: {pk}")
+    async def delete(
+        self,
+        db: AsyncSession,
+        pk: Any,
+        auto_commit: bool = True,
+        operator_id: Optional[str] = None,
+    ) -> bool:
+        """删除数据（含主从表生命周期钩子）。"""
+        parent_old_data = await self._get_raw_main_record(db, pk)
 
-        # 1. 删除子表数据
+        # 1. 删除从表数据，并逐条执行从表删除钩子。
         for sub_table in self.sub_tables:
-            sql, params = self.sql_builder.build_delete_by_foreign_key(
-                table=sub_table.table_name,
-                fk_field=sub_table.foreign_key,
-                fk_value=pk,
-                schema=sub_table.table_schema or None,
-                database=sub_table.table_database or None
-            )
-            await self._execute_command(db, sql, params)
+            sub_rows = await self._query_sub_table_data(db, sub_table, pk)
+            for row in sub_rows:
+                row_id = row.get("id")
+                await self._dispatch_table_hook(
+                    table_name=sub_table.table_name,
+                    event="before_delete",
+                    db=db,
+                    action="delete",
+                    record_id=row_id,
+                    main_record_id=pk,
+                    old_data=row,
+                    data=dict(row),
+                    parent_old_data=parent_old_data,
+                    parent_data=parent_old_data,
+                    operator_id=operator_id,
+                )
+                sql, params = self.sql_builder.build_delete(
+                    table=sub_table.table_name,
+                    pk_field="id",
+                    pk_value=row_id,
+                    schema=sub_table.table_schema or None,
+                    database=sub_table.table_database or None,
+                )
+                await self._execute_command(db, sql, params)
+                await self._dispatch_table_hook(
+                    table_name=sub_table.table_name,
+                    event="after_delete",
+                    db=db,
+                    action="delete",
+                    record_id=row_id,
+                    main_record_id=pk,
+                    old_data=row,
+                    data=dict(row),
+                    parent_old_data=parent_old_data,
+                    parent_data=parent_old_data,
+                    operator_id=operator_id,
+                )
 
-        # 2. 删除主表数据
+        # 2. 删除主表数据。
+        await self._dispatch_table_hook(
+            table_name="main",
+            event="before_delete",
+            db=db,
+            action="delete",
+            record_id=pk,
+            old_data=parent_old_data,
+            data=dict(parent_old_data),
+            operator_id=operator_id,
+        )
         table = self.form_meta.main_table
         schema = await self._resolve_schema(db, self.form_meta.main_table_schema) or None
         database = self.form_meta.main_table_database or None
@@ -3119,65 +3389,72 @@ class FormDataService:
             pk_field="id",
             pk_value=pk,
             schema=schema,
-            database=database
+            database=database,
         )
         affected = await self._execute_command(db, sql, params)
+        if affected:
+            await self._dispatch_table_hook(
+                table_name="main",
+                event="after_delete",
+                db=db,
+                action="delete",
+                record_id=pk,
+                old_data=parent_old_data,
+                data=dict(parent_old_data),
+                operator_id=operator_id,
+            )
 
-        await db.commit()
+        if auto_commit:
+            await db.commit()
 
         logger.info(f"表单数据删除成功: form={self.form_meta.code}, pk={pk}")
 
         return affected > 0
 
-    async def batch_delete(self, db: AsyncSession, pks: List[Any]) -> int:
-        """
-        批量删除（优化版：使用 IN 子句批量删除，单次事务提交）
-        
-        Args:
-            db: 数据库会话
-            pks: 主键列表
-        
-        Returns:
-            成功删除的数量
-        """
-        if not pks:
-            return 0
-        
-        # 1. 批量删除所有子表数据（使用 IN 子句）
-        for sub_table in self.sub_tables:
-            schema = await self._resolve_schema(db, sub_table.table_schema) if sub_table.table_schema else None
-            database = sub_table.table_database or None
-            
-            # 构建批量删除 SQL: DELETE FROM table WHERE fk_field IN (:pk0, :pk1, ...)
-            full_table = self.sql_builder.build_table_name(sub_table.table_name, schema, database)
-            fk_field = self.sql_builder.quote_identifier(sub_table.foreign_key)
-            
-            placeholders = ", ".join(f":pk{i}" for i in range(len(pks)))
-            sql = f"DELETE FROM {full_table} WHERE {fk_field} IN ({placeholders})"
-            params = {f"pk{i}": pk for i, pk in enumerate(pks)}
-            
-            await self._execute_command(db, sql, params)
-        
-        # 2. 批量删除主表数据（使用 IN 子句）
-        table = self.form_meta.main_table
-        schema = await self._resolve_schema(db, self.form_meta.main_table_schema) or None
-        database = self.form_meta.main_table_database or None
-        
-        full_table = self.sql_builder.build_table_name(table, schema, database)
-        id_field = self.sql_builder.quote_identifier("id")
-        
-        placeholders = ", ".join(f":pk{i}" for i in range(len(pks)))
-        sql = f"DELETE FROM {full_table} WHERE {id_field} IN ({placeholders})"
-        params = {f"pk{i}": pk for i, pk in enumerate(pks)}
-        
-        affected = await self._execute_command(db, sql, params)
-        
-        # 3. 单次提交
-        await db.commit()
-        
-        logger.info(f"批量删除成功: form={self.form_meta.code}, count={affected}")
-        
-        return affected
+    async def batch_delete(
+        self,
+        db: AsyncSession,
+        pks: List[Any],
+        operator_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """逐条删除，每条主表记录使用独立事务。"""
+        unique_ids = list(dict.fromkeys(pks))
+        results: List[Dict[str, Any]] = []
+
+        for pk in unique_ids:
+            try:
+                await self.delete(
+                    db,
+                    pk,
+                    auto_commit=True,
+                    operator_id=operator_id,
+                )
+                results.append({"id": pk, "success": True})
+            except FormDataException as e:
+                await db.rollback()
+                results.append({"id": pk, "success": False, "message": str(e)})
+            except Exception:
+                await db.rollback()
+                logger.exception(
+                    "批量删除失败: form=%s, id=%s",
+                    self.form_meta.code,
+                    pk,
+                )
+                results.append(
+                    {
+                        "id": pk,
+                        "success": False,
+                        "message": "操作失败，请稍后重试",
+                    }
+                )
+
+        success_count = sum(1 for item in results if item["success"])
+        return {
+            "total": len(results),
+            "success_count": success_count,
+            "failed_count": len(results) - success_count,
+            "results": results,
+        }
 
     # ============ 工具方法 ============
 

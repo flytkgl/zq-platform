@@ -568,7 +568,14 @@ async def delete_form_data(
     
     try:
         service = await FormDataService.create_service(db, form_code)
-        await service.delete(db, pk)
+        user_info = await get_user_info(request)
+        async with transaction(db):
+            await service.delete(
+                db,
+                pk,
+                auto_commit=False,
+                operator_id=user_info.get("user_id"),
+            )
         return {"success": True}
     except FormDataException as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -589,8 +596,12 @@ async def batch_delete_form_data(
     
     try:
         service = await FormDataService.create_service(db, form_code)
-        count = await service.batch_delete(db, ids)
-        return {"count": count}
+        user_info = await get_user_info(request)
+        return await service.batch_delete(
+            db,
+            ids,
+            operator_id=user_info.get("user_id"),
+        )
     except FormDataException as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
