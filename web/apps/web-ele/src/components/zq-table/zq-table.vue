@@ -58,6 +58,7 @@ import { PostSelector } from '../zq-form/post-selector';
 import { TableSelector } from '../zq-form/table-selector';
 import { UserSelector } from '../zq-form/user-selector';
 import { useTableForm } from './init';
+import { getRowSelectionAction, getSelectionRange } from './table-selection';
 
 import './style.css';
 
@@ -86,6 +87,7 @@ const tableContainerRef = ref<HTMLElement>();
 const tableWidth = ref(0);
 const tableHeight = ref(0);
 const tableRef = ref();
+const selectionAnchorRow = ref<any>(null);
 
 const isFullscreen = ref(false);
 function toggleFullscreen() {
@@ -264,6 +266,15 @@ const tableData = props.api.tableData;
 const total = props.api.total;
 const loading = props.api.loading;
 const pagination = props.api.pagination;
+
+// 行数据变化后，之前的 Shift 锚点可能已经不在当前页，必须失效。
+watch(
+  tableData,
+  () => {
+    selectionAnchorRow.value = null;
+  },
+  { flush: 'post' },
+);
 
 function onPageChange(currentPage: number) {
   props.api.handlePageChange(currentPage, pagination.pageSize);
@@ -513,6 +524,73 @@ const columns = computed(() => {
 
 function handleSelectionChange(val: any[]) {
   emit('selection-change', val);
+}
+
+function isRowSelectionIgnored(event: MouseEvent, column: any) {
+  if (column?.type === 'selection') return true;
+
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return false;
+
+  return Boolean(
+    target.closest(
+      '.el-table-column--selection, .el-checkbox, .el-radio, button, a, input, textarea, select, [role="button"], [data-row-selection-ignore]',
+    ),
+  );
+}
+
+function handleRowClick(row: any, column: any, event: MouseEvent) {
+  // 保持原有对外事件行为，同时在内部处理带选择列的表格。
+  emit('row-click', row, column, event);
+
+  if (!gridOptions.value?.showSelection || !row) return;
+
+  const rowIndex = tableData.value.indexOf(row);
+  if (rowIndex < 0) return;
+
+  // 复选框由 Element Plus 自己切换，只记录锚点，不触碰其他行。
+  if (isRowSelectionIgnored(event, column)) {
+    const target = event.target;
+    if (
+      column?.type === 'selection' ||
+      (target instanceof HTMLElement && target.closest('.el-checkbox'))
+    ) {
+      selectionAnchorRow.value = row;
+    }
+    return;
+  }
+
+  const anchorIndex = selectionAnchorRow.value
+    ? tableData.value.indexOf(selectionAnchorRow.value)
+    : -1;
+  const action = getRowSelectionAction(
+    event,
+    anchorIndex >= 0 && anchorIndex < tableData.value.length,
+  );
+
+  if (action === 'toggle') {
+    tableRef.value?.toggleRowSelection(row);
+    selectionAnchorRow.value = row;
+    return;
+  }
+
+  if (action === 'range') {
+    tableRef.value?.clearSelection();
+    const range = getSelectionRange(
+      anchorIndex,
+      rowIndex,
+      tableData.value.length,
+    );
+    range.forEach((index) => {
+      const rangeRow = tableData.value[index];
+      if (rangeRow) tableRef.value?.toggleRowSelection(rangeRow, true);
+    });
+    return;
+  }
+
+  tableRef.value?.clearSelection();
+  tableRef.value?.toggleRowSelection(row, true);
+  selectionAnchorRow.value = row;
 }
 
 function handleSortChange(data: any) {
@@ -1195,11 +1273,13 @@ function getSummaryMethod(param: { columns: any[]; data: any[] }) {
           :data="tableData"
           :height="tableHeight"
           :style="{ width: '100%' }"
+          :class="{ 'zq-table-row-selectable': gridOptions?.showSelection }"
           header-row-class-name="zq-table-header"
           :show-summary="gridOptions?.showSummary"
           :summary-method="
             gridOptions?.showSummary ? getSummaryMethod : undefined
           "
+          @row-click="handleRowClick"
           @selection-change="handleSelectionChange"
           @sort-change="handleSortChange"
         >

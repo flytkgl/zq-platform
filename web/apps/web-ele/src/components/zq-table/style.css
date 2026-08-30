@@ -133,6 +133,17 @@
   border-top: 1px solid var(--el-border-color-lighter);
 }
 
+/* 开启复选框选择时，数据单元格支持整行点击选择 */
+.zq-table-row-selectable .el-table__body tr {
+  cursor: pointer;
+}
+
+.zq-table-row-selectable .el-table__body td.el-table-column--selection,
+.zq-table-row-selectable .el-table__body td:has(button),
+.zq-table-row-selectable .el-table__body td:has(a) {
+  cursor: default;
+}
+
 /* Override Element Plus Table V2 styles if needed */
 .el-table-v2__header-cell {
   font-weight: bold;

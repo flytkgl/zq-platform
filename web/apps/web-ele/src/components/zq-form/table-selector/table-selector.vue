@@ -24,6 +24,10 @@ import {
 
 import { requestClient } from '#/api/request';
 import { ZqDialog } from '#/components/zq-dialog';
+import {
+  getRowSelectionAction,
+  getSelectionRange,
+} from '../../zq-table/table-selection';
 
 defineOptions({
   name: 'TableSelector',
@@ -73,6 +77,8 @@ const searchKeyword = ref('');
 const selectedValues = ref<Set<string>>(new Set());
 // 选中项的信息映射
 const selectedItemsMap = ref<Map<string, any>>(new Map());
+// 多选模式下用于 Shift 范围选择的锚点
+const selectionAnchorRow = ref<any>(null);
 // 标签加载状态
 const labelsLoading = ref(false);
 
@@ -212,6 +218,7 @@ const showPagination = computed(() => {
 const openDialog = () => {
   if (props.disabled) return;
   dialogVisible.value = true;
+  selectionAnchorRow.value = null;
   loadData();
 };
 
@@ -314,39 +321,97 @@ const loadData = async () => {
 // 搜索
 const handleSearch = () => {
   currentPage.value = 1;
+  selectionAnchorRow.value = null;
   loadData();
 };
 
 // 分页变化
 const handlePageChange = (page: number) => {
   currentPage.value = page;
+  selectionAnchorRow.value = null;
   loadData();
 };
 
 const handleSizeChange = (size: number) => {
   pageSize.value = size;
   currentPage.value = 1;
+  selectionAnchorRow.value = null;
   loadData();
 };
 
 // 行点击选择
-const handleRowClick = (row: any) => {
+const handleRowClick = (row: any, _column: any, event: MouseEvent) => {
   const value = String(row[props.valueField]);
 
-  if (props.multiple) {
-    if (selectedValues.value.has(value)) {
-      selectedValues.value.delete(value);
-      selectedItemsMap.value.delete(value);
-    } else {
-      selectedValues.value.add(value);
-      selectedItemsMap.value.set(value, row);
-    }
-    selectedValues.value = new Set(selectedValues.value);
-  } else {
+  if (!props.multiple) {
     selectedValues.value = new Set([value]);
     selectedItemsMap.value.clear();
     selectedItemsMap.value.set(value, row);
+    return;
   }
+
+  const target = event?.target;
+  if (
+    target instanceof HTMLElement &&
+    target.closest(
+      '.el-checkbox, .el-radio, button, a, input, textarea, select, [role="button"], [data-row-selection-ignore]',
+    )
+  ) {
+    // 复选框由自身 change 事件负责切换，不影响其他行。
+    selectionAnchorRow.value = row;
+    return;
+  }
+
+  const rowIndex = tableData.value.indexOf(row);
+  if (rowIndex < 0) return;
+
+  const anchorIndex = selectionAnchorRow.value
+    ? tableData.value.indexOf(selectionAnchorRow.value)
+    : -1;
+  const action = getRowSelectionAction(
+    event ?? {},
+    anchorIndex >= 0 && anchorIndex < tableData.value.length,
+  );
+
+  if (action === 'toggle') {
+    const nextValues = new Set(selectedValues.value);
+    if (nextValues.has(value)) {
+      nextValues.delete(value);
+      selectedItemsMap.value.delete(value);
+    } else {
+      nextValues.add(value);
+      selectedItemsMap.value.set(value, row);
+    }
+    selectedValues.value = nextValues;
+    selectionAnchorRow.value = row;
+    return;
+  }
+
+  if (action === 'range') {
+    const range = getSelectionRange(
+      anchorIndex,
+      rowIndex,
+      tableData.value.length,
+    );
+    const rangeRows = range
+      .map((index) => tableData.value[index])
+      .filter(Boolean);
+
+    selectedValues.value = new Set(
+      rangeRows.map((rangeRow) => String(rangeRow[props.valueField])),
+    );
+    selectedItemsMap.value = new Map(
+      rangeRows.map((rangeRow) => [
+        String(rangeRow[props.valueField]),
+        rangeRow,
+      ]),
+    );
+    return;
+  }
+
+  selectedValues.value = new Set([value]);
+  selectedItemsMap.value = new Map([[value, row]]);
+  selectionAnchorRow.value = row;
 };
 
 // 判断行是否选中
@@ -379,6 +444,7 @@ const handleCheckboxChange = (row: any, checked: boolean | number | string) => {
     selectedItemsMap.value.delete(value);
   }
   selectedValues.value = new Set(selectedValues.value);
+  selectionAnchorRow.value = row;
 };
 
 // 全选/取消全选
@@ -628,6 +694,20 @@ const displayColumns = computed<TableSelectorColumn[]>(() => {
 
 .table-selector-content :deep(.el-table__row) {
   cursor: pointer;
+}
+
+.table-selector-content
+  :deep(.el-table__body tr:not(.selected-row):hover > td.el-table__cell) {
+  background-color: var(--el-fill-color-light);
+}
+
+.table-selector-content :deep(.el-table__body tr.selected-row:hover > td) {
+  background-color: var(--el-color-primary-light-8) !important;
+}
+
+.table-selector-content :deep(.el-table__body td:first-child .el-checkbox),
+.table-selector-content :deep(.el-table__body td:first-child .el-radio) {
+  cursor: default;
 }
 </style>
 
