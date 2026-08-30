@@ -4,7 +4,7 @@
 表单管理 Schema 定义
 """
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -176,3 +176,70 @@ class FormPublishIn(BaseModel):
     allow_delete: bool = Field(True, description="允许删除")
     allow_export: bool = Field(True, description="允许导出")
     allow_import: bool = Field(False, description="允许导入")
+
+
+# ============ 回写规则 Schema ============
+
+WRITEBACK_EVENTS = (
+    "before_create", "after_create", "before_update", "after_update",
+    "before_delete", "after_delete", "before_approve", "after_approve",
+    "before_unapprove", "after_unapprove",
+)
+
+
+class WriteBackCondition(BaseModel):
+    field: str = Field(..., min_length=1, max_length=100)
+    operator: Literal["eq", "ne", "gt", "gte", "lt", "lte", "in", "not_in", "contains", "not_empty"] = "eq"
+    value: Any = None
+
+
+class WriteBackMatchCondition(BaseModel):
+    source_field: Optional[str] = Field(None, max_length=100)
+    target_field: str = Field(..., min_length=1, max_length=100)
+    fixed_value: Any = None
+
+
+class FormWriteBackRuleBase(BaseModel):
+    target_form_id: str = Field(..., min_length=1)
+    name: str = Field("", max_length=255)
+    is_name_auto: bool = True
+    enabled: bool = True
+    source_table_key: str = Field("main", min_length=1, max_length=100)
+    target_table_key: str = Field("main", min_length=1, max_length=100)
+    target_field: str = Field(..., min_length=1, max_length=100)
+    trigger_events: List[Literal[
+        "before_create", "after_create", "before_update", "after_update",
+        "before_delete", "after_delete", "before_approve", "after_approve",
+        "before_unapprove", "after_unapprove",
+    ]] = Field(..., min_length=1)
+    value_mode: Literal["custom"] = "custom"
+    custom_expression: str = Field("", max_length=2000)
+    writeback_operator: Literal["set", "add", "subtract"] = "set"
+    execute_conditions: List[WriteBackCondition] = Field(default_factory=list)
+    value_filter_conditions: List[WriteBackCondition] = Field(default_factory=list)
+    match_conditions: List[WriteBackMatchCondition] = Field(default_factory=list)
+    missing_target_policy: Literal["error"] = "error"
+    remark: str = Field("", max_length=2000)
+
+
+class FormWriteBackRuleCreateIn(FormWriteBackRuleBase):
+    pass
+
+
+class FormWriteBackRuleUpdateIn(FormWriteBackRuleBase):
+    pass
+
+
+class FormWriteBackRuleListOut(BaseModel):
+    id: str
+    name: str
+    enabled: bool
+
+
+class FormWriteBackRuleOut(FormWriteBackRuleBase):
+    id: str
+    source_form_id: str
+    sys_create_datetime: Optional[str] = None
+    sys_update_datetime: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)

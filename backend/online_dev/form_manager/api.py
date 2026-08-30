@@ -145,6 +145,7 @@ async def get_form_types():
 async def get_published_forms_simple(
         application_id: str = Query(None, alias="applicationId", description="所属应用ID"),
         all_apps: bool = Query(False, alias="allApps", description="是否返回所有应用的表单（移动端工作台使用）"),
+        include_all: bool = Query(False, alias="includeAll", description="是否返回所有应用下的已发布表单（表单设计器使用）"),
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -152,7 +153,12 @@ async def get_published_forms_simple(
     返回格式: [{code, name, mainTable, application_id, application_name, fields: [{field, label, type}]}]
     """
     try:
-        return await FormService.get_published_forms_simple(db, application_id=application_id, all_apps=all_apps)
+        return await FormService.get_published_forms_simple(
+            db,
+            application_id=application_id,
+            all_apps=all_apps,
+            include_all=include_all,
+        )
     except FormServiceException as e:
         raise HTTPException(status_code=400, detail=str(e))
 

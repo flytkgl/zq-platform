@@ -132,6 +132,9 @@ class FormDataService:
             operator_id=operator_id,
         )
         await hook_registry.dispatch(self.form_meta.code, table_name, event, context)
+        # 动态回写规则与静态生命周期钩子共用当前事务；回写失败会由上层事务统一回滚。
+        from online_dev.form_manager.writeback_service import FormWriteBackService
+        await FormWriteBackService.dispatch(context, event)
         return context
     
     async def _resolve_schema(self, db: AsyncSession, schema: str) -> Optional[str]:

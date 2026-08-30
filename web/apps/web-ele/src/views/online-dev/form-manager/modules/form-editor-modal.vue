@@ -934,7 +934,12 @@ function handleClose() {
 
       <!-- 步骤3: 表单设计 -->
       <div v-show="currentStep === 2" class="h-full overflow-hidden">
-        <FormDesign :data-source="tableConfigs" />
+        <FormDesign
+          :data-source="tableConfigs"
+          :form-id="props.formId || undefined"
+          :form-code="basicForm.code"
+          :form-name="basicForm.name"
+        />
       </div>
 
       <!-- 步骤4: 列表设计 -->

@@ -21,7 +21,6 @@ import {
   Location,
   MagicStick,
   Minus,
-
   Odometer,
   OfficeBuilding,
   Open,
@@ -35,7 +34,18 @@ import {
   Warning,
   Watch,
 } from '@element-plus/icons-vue';
-import { FileSpreadsheet, GripHorizontal, Heading1, LayoutGrid, Link2, ListOrdered, PenLine, QrCode, Sparkles, Table, Table2 } from '@vben/icons';
+import {
+  FileSpreadsheet,
+  GripHorizontal,
+  Heading1,
+  LayoutGrid,
+  Link2,
+  ListOrdered,
+  PenLine,
+  QrCode,
+  Table,
+  Table2,
+} from '@vben/icons';
 import {
   ElIcon,
   ElInput,
@@ -48,9 +58,22 @@ import draggable from 'vuedraggable';
 
 import { useFormDesignStore } from '../store/formDesignStore';
 import FieldPanel from './FieldPanel.vue';
+import WriteBackPanel from './WriteBackPanel.vue';
+
+const props = defineProps<{
+  formId?: string;
+  readonly?: boolean;
+}>();
+const emit = defineEmits<{
+  'writeback-mode-change': [active: boolean];
+  'writeback-create': [];
+  'writeback-edit': [id: string];
+  'writeback-refresh': [];
+}>();
 
 const store = useFormDesignStore();
 const { formConf, templates } = storeToRefs(store);
+const writebackPanelRef = ref<InstanceType<typeof WriteBackPanel>>();
 // 直接使用 store 中的 cloneComponent 方法
 const cloneComponent = store.cloneComponent;
 
@@ -78,7 +101,19 @@ const navTabs = [
   { name: 'library', label: $t('form-design.library'), icon: Grid },
   { name: 'outline', label: $t('form-design.outline'), icon: List },
   { name: 'template', label: $t('form-design.templateLabel'), icon: Files },
+  { name: 'writeback', label: '回写', icon: Link2 },
 ];
+
+function switchTab(name: string) {
+  activeTab.value = name;
+  emit('writeback-mode-change', name === 'writeback');
+}
+
+function refreshWritebackRules() {
+  writebackPanelRef.value?.loadRules();
+}
+
+defineExpose({ refreshWritebackRules });
 
 const getAllComponents = () => [
   ...basicComponents,
@@ -196,11 +231,15 @@ const toggleGroup = (group: string) => {
 };
 
 const applyTemplate = (tpl: any) => {
-  ElMessageBox.confirm($t('form-design.template.applyConfirm'), $t('common.tips'), {
-    type: 'warning',
-    confirmButtonText: $t('common.ok'),
-    cancelButtonText: $t('common.cancel'),
-  }).then(() => {
+  ElMessageBox.confirm(
+    $t('form-design.template.applyConfirm'),
+    $t('common.tips'),
+    {
+      type: 'warning',
+      confirmButtonText: $t('common.ok'),
+      cancelButtonText: $t('common.cancel'),
+    },
+  ).then(() => {
     // 使用 cloneComponent 为模板项生成新的 ID
     const newItems = tpl.items.map((item: any) => store.cloneComponent(item));
     formConf.value.items = newItems;
@@ -297,11 +336,23 @@ const basicComponents = [
         label: `${$t('form-design.attribute.addOption')} 1`,
         value: 1,
         children: [
-          { label: `${$t('form-design.attribute.addChild')} 1`, value: 11, children: [] },
-          { label: `${$t('form-design.attribute.addChild')} 2`, value: 12, children: [] },
+          {
+            label: `${$t('form-design.attribute.addChild')} 1`,
+            value: 11,
+            children: [],
+          },
+          {
+            label: `${$t('form-design.attribute.addChild')} 2`,
+            value: 12,
+            children: [],
+          },
         ],
       },
-      { label: `${$t('form-design.attribute.addOption')} 2`, value: 2, children: [] },
+      {
+        label: `${$t('form-design.attribute.addOption')} 2`,
+        value: 2,
+        children: [],
+      },
     ],
   },
   {
@@ -324,11 +375,23 @@ const basicComponents = [
         label: `${$t('form-design.attribute.addOption')} 1`,
         value: 1,
         children: [
-          { label: `${$t('form-design.attribute.addChild')} 1`, value: 11, children: [] },
-          { label: `${$t('form-design.attribute.addChild')} 2`, value: 12, children: [] },
+          {
+            label: `${$t('form-design.attribute.addChild')} 1`,
+            value: 11,
+            children: [],
+          },
+          {
+            label: `${$t('form-design.attribute.addChild')} 2`,
+            value: 12,
+            children: [],
+          },
         ],
       },
-      { label: `${$t('form-design.attribute.addOption')} 2`, value: 2, children: [] },
+      {
+        label: `${$t('form-design.attribute.addOption')} 2`,
+        value: 2,
+        children: [],
+      },
     ],
   },
   {
@@ -814,8 +877,16 @@ const layoutComponents = [
       accordion: false,
     },
     items: [
-      { title: `${$t('form-design.attribute.layout.addPanel')} 1`, name: '1', children: [] },
-      { title: `${$t('form-design.attribute.layout.addPanel')} 2`, name: '2', children: [] },
+      {
+        title: `${$t('form-design.attribute.layout.addPanel')} 1`,
+        name: '1',
+        children: [],
+      },
+      {
+        title: `${$t('form-design.attribute.layout.addPanel')} 2`,
+        name: '2',
+        children: [],
+      },
     ],
   },
   {
@@ -827,8 +898,16 @@ const layoutComponents = [
       tabPosition: 'top',
     },
     items: [
-      { label: `${$t('form-design.attribute.layout.addTab')} 1`, name: '1', children: [] },
-      { label: `${$t('form-design.attribute.layout.addTab')} 2`, name: '2', children: [] },
+      {
+        label: `${$t('form-design.attribute.layout.addTab')} 1`,
+        name: '1',
+        children: [],
+      },
+      {
+        label: `${$t('form-design.attribute.layout.addTab')} 2`,
+        name: '2',
+        children: [],
+      },
     ],
   },
   {
@@ -863,9 +942,24 @@ const layoutComponents = [
       processStatus: 'process',
     },
     items: [
-      { title: `${$t('form-design.attribute.layout.addStep')} 1`, description: '', name: '1', children: [] },
-      { title: `${$t('form-design.attribute.layout.addStep')} 2`, description: '', name: '2', children: [] },
-      { title: `${$t('form-design.attribute.layout.addStep')} 3`, description: '', name: '3', children: [] },
+      {
+        title: `${$t('form-design.attribute.layout.addStep')} 1`,
+        description: '',
+        name: '1',
+        children: [],
+      },
+      {
+        title: `${$t('form-design.attribute.layout.addStep')} 2`,
+        description: '',
+        name: '2',
+        children: [],
+      },
+      {
+        title: `${$t('form-design.attribute.layout.addStep')} 3`,
+        description: '',
+        name: '3',
+        children: [],
+      },
     ],
   },
 ];
@@ -889,7 +983,7 @@ const layoutComponents = [
             : 'text-[var(--el-text-color-secondary)] hover:bg-[var(--el-fill-color)] hover:text-[var(--el-color-primary)]'
         "
         :title="tab.label"
-        @click="activeTab = tab.name"
+        @click="switchTab(tab.name)"
       >
         <ElIcon :size="18">
           <component :is="tab.icon" />
@@ -901,7 +995,7 @@ const layoutComponents = [
     <!-- 右侧内容区域 -->
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- 搜索框 -->
-      <div class="flex-shrink-0 p-3">
+      <div v-if="activeTab !== 'writeback'" class="flex-shrink-0 p-3">
         <ElInput
           v-model="searchKeyword"
           :placeholder="$t('form-design.search')"
@@ -925,7 +1019,9 @@ const layoutComponents = [
                 class="group-title mb-2 flex cursor-pointer select-none items-center justify-between text-xs text-[var(--el-text-color-regular)] hover:text-[var(--el-color-primary)]"
                 @click="toggleGroup('basic')"
               >
-                <span class="font-bold">{{ $t('form-design.material.basic') }}</span>
+                <span class="font-bold">{{
+                  $t('form-design.material.basic')
+                }}</span>
                 <ElIcon class="h-4 w-4">
                   <ArrowDown v-if="activeGroups.includes('basic')" />
                   <ArrowRight v-else />
@@ -962,7 +1058,9 @@ const layoutComponents = [
                 class="group-title mb-2 flex cursor-pointer select-none items-center justify-between text-xs text-[var(--el-text-color-regular)] hover:text-[var(--el-color-primary)]"
                 @click="toggleGroup('advanced')"
               >
-                <span class="font-bold">{{ $t('form-design.material.advanced') }}</span>
+                <span class="font-bold">{{
+                  $t('form-design.material.advanced')
+                }}</span>
                 <ElIcon class="h-4 w-4">
                   <ArrowDown v-if="activeGroups.includes('advanced')" />
                   <ArrowRight v-else />
@@ -1006,7 +1104,9 @@ const layoutComponents = [
                 class="group-title mb-2 flex cursor-pointer select-none items-center justify-between text-xs text-[var(--el-text-color-regular)] hover:text-[var(--el-color-primary)]"
                 @click="toggleGroup('layout')"
               >
-                <span class="font-bold">{{ $t('form-design.material.layout') }}</span>
+                <span class="font-bold">{{
+                  $t('form-design.material.layout')
+                }}</span>
                 <ElIcon class="h-4 w-4">
                   <ArrowDown v-if="activeGroups.includes('layout')" />
                   <ArrowRight v-else />
@@ -1095,6 +1195,18 @@ const layoutComponents = [
             </div>
           </div>
         </ElScrollbar>
+      </div>
+
+      <!-- 当前表单回写规则面板 -->
+      <div v-show="activeTab === 'writeback'" class="flex-1 overflow-hidden">
+        <WriteBackPanel
+          ref="writebackPanelRef"
+          :form-id="props.formId"
+          :readonly="props.readonly"
+          @create="emit('writeback-create')"
+          @edit="emit('writeback-edit', $event)"
+          @refresh="emit('writeback-refresh')"
+        />
       </div>
     </div>
   </div>

@@ -663,6 +663,8 @@ class FormService:
 
         # 创建新表单
         new_form = FormMeta(
+            # 复制后的表单仍属于源表单所在的应用，否则应用列表查询会将其过滤掉。
+            application_id=source.application_id,
             name=new_name or f"{source.name}_副本",
             code=new_code,
             form_type=source.form_type,
@@ -678,6 +680,7 @@ class FormService:
             sort=source.sort,
             sys_creator_id=user_id,
             sys_modifier_id=user_id,
+            sys_dept_id=source.sys_dept_id,
         )
         db.add(new_form)
         await db.flush()
@@ -886,13 +889,19 @@ class FormService:
         return field_metadata
 
     @staticmethod
-    async def get_published_forms_simple(db: AsyncSession, application_id: str = None, all_apps: bool = False) -> List[Dict[str, Any]]:
+    async def get_published_forms_simple(
+            db: AsyncSession,
+            application_id: str = None,
+            all_apps: bool = False,
+            include_all: bool = False,
+    ) -> List[Dict[str, Any]]:
         """
         获取已发布表单的简单列表（用于下拉选择）
         
         Args:
-            application_id: 过滤指定应用，为 None 且 all_apps=False 时只返回无应用的表单
+            application_id: 过滤指定应用，为 None 且 all_apps=False、include_all=False 时只返回无应用的表单
             all_apps: 为 True 时返回所有应用的已发布表单（移动端工作台使用）
+            include_all: 为 True 时返回所有应用的已发布表单（表单设计器使用）
         Returns:
             [{code, name, mainTable, application_id, application_name, fields: [{field, label, type}]}]
         """
@@ -904,7 +913,7 @@ class FormService:
         ]
         if application_id:
             conditions.append(FormMeta.application_id == application_id)
-        elif not all_apps:
+        elif not all_apps and not include_all:
             conditions.append(FormMeta.application_id.is_(None))
 
         if all_apps:
@@ -973,6 +982,7 @@ class FormService:
             fields = system_fields + fields
             
             simple_list.append({
+                "id": str(form.id),
                 "code": form.code,
                 "name": form.name,
                 "mainTable": form.main_table,

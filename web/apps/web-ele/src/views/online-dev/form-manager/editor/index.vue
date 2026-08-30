@@ -17,10 +17,7 @@ import {
   ElScrollbar,
 } from 'element-plus';
 
-import {
-  getFormDetailApi,
-  updateFormApi,
-} from '#/api/online-dev/form-manager';
+import { getFormDetailApi, updateFormApi } from '#/api/online-dev/form-manager';
 import FormDesign from '#/components/form-design/index.vue';
 import { useFormDesignStore } from '#/components/form-design/store/formDesignStore';
 
@@ -51,7 +48,6 @@ function handleAuditEnabledChange(enabled: boolean) {
 
 // 自动保存状态
 const autoSaveStatus = ref<'saved' | 'saving' | 'unsaved'>('saved');
-const autoSaveTimer = ref<null | ReturnType<typeof setTimeout>>(null);
 
 // 当前步骤
 const currentStep = ref(0);
@@ -668,7 +664,12 @@ onMounted(() => {
 
       <!-- 步骤2: 表单设计 -->
       <div v-show="currentStep === 1" class="h-full overflow-hidden">
-        <FormDesign :data-source="tableConfigs" />
+        <FormDesign
+          :data-source="tableConfigs"
+          :form-id="formId"
+          :form-code="formCode"
+          :form-name="formName"
+        />
       </div>
 
       <!-- 步骤3: 列表设计 -->

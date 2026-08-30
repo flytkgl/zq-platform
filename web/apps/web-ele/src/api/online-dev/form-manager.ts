@@ -263,6 +263,7 @@ export async function importFormConfigApi(data: FormImportInput) {
 
 /** 已发布表单简单信息 */
 export interface PublishedFormSimple {
+  id: string;
   code: string;
   name: string;
   mainTable: string;
@@ -273,12 +274,115 @@ export interface PublishedFormSimple {
   }>;
 }
 
+export type WriteBackEvent =
+  | 'before_create'
+  | 'after_create'
+  | 'before_update'
+  | 'after_update'
+  | 'before_delete'
+  | 'after_delete'
+  | 'before_approve'
+  | 'after_approve'
+  | 'before_unapprove'
+  | 'after_unapprove';
+
+export interface WriteBackCondition {
+  field: string;
+  operator: string;
+  value?: any;
+}
+
+export interface WriteBackMatchCondition {
+  source_field?: string;
+  target_field: string;
+  fixed_value?: any;
+}
+
+export interface FormWriteBackRule {
+  id?: string;
+  source_form_id?: string;
+  target_form_id: string;
+  name: string;
+  is_name_auto: boolean;
+  enabled: boolean;
+  source_table_key: string;
+  target_table_key: string;
+  target_field: string;
+  trigger_events: WriteBackEvent[];
+  value_mode: 'custom';
+  custom_expression: string;
+  writeback_operator: 'set' | 'add' | 'subtract';
+  execute_conditions: WriteBackCondition[];
+  value_filter_conditions: WriteBackCondition[];
+  match_conditions: WriteBackMatchCondition[];
+  missing_target_policy: 'error';
+  remark: string;
+}
+
+export interface FormWriteBackRuleListItem {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
+
+const writeBackBase = (formId: string) =>
+  `/api/online_dev/form/${formId}/writeback-rules`;
+
+export async function getFormWriteBackRulesApi(formId: string) {
+  return requestClient.get<FormWriteBackRuleListItem[]>(writeBackBase(formId));
+}
+
+export async function getFormWriteBackRuleApi(formId: string, ruleId: string) {
+  return requestClient.get<FormWriteBackRule>(
+    `${writeBackBase(formId)}/${ruleId}`,
+  );
+}
+
+export async function createFormWriteBackRuleApi(
+  formId: string,
+  data: FormWriteBackRule,
+) {
+  return requestClient.post<FormWriteBackRule>(writeBackBase(formId), data);
+}
+
+export async function updateFormWriteBackRuleApi(
+  formId: string,
+  ruleId: string,
+  data: FormWriteBackRule,
+) {
+  return requestClient.put<FormWriteBackRule>(
+    `${writeBackBase(formId)}/${ruleId}`,
+    data,
+  );
+}
+
+export async function deleteFormWriteBackRuleApi(
+  formId: string,
+  ruleId: string,
+) {
+  return requestClient.delete<{ success: boolean }>(
+    `${writeBackBase(formId)}/${ruleId}`,
+  );
+}
+
+export async function duplicateFormWriteBackRuleApi(
+  formId: string,
+  ruleId: string,
+) {
+  return requestClient.post<FormWriteBackRule>(
+    `${writeBackBase(formId)}/${ruleId}/duplicate`,
+  );
+}
+
 /**
  * 获取已发布表单简单列表（用于下拉选择）
  */
-export async function getPublishedFormsSimpleApi(applicationId?: string) {
+export async function getPublishedFormsSimpleApi(
+  applicationId?: string,
+  includeAll = false,
+) {
   return requestClient.get<PublishedFormSimple[]>(
     '/api/online_dev/form/published/simple',
-    { params: { applicationId } },
+    { params: { applicationId, includeAll } },
   );
 }
