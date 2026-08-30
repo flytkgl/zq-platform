@@ -1055,14 +1055,20 @@ class FormDataService:
 
         result = self._serialize_row(rows[0])
 
-        # 查询子表数据
+        # 获取关联字段配置，主表和子表详情回显都需要使用
+        relation_fields = self._get_relation_fields()
+
+        # 查询子表数据，并填充子表中的虚拟字段
         result["sub_tables"] = {}
         for sub_table in self.sub_tables:
             sub_data = await self._query_sub_table_data(db, sub_table, pk)
+            if sub_data and relation_fields:
+                sub_data = await self._fill_virtual_fields(
+                    db, sub_data, relation_fields, context="form"
+                )
             result["sub_tables"][sub_table.table_name] = sub_data
 
         # 填充虚拟字段的值（基于值关联配置）
-        relation_fields = self._get_relation_fields()
         filled = await self._fill_virtual_fields(db, [result], relation_fields, context="form")
         if filled:
             result = filled[0]

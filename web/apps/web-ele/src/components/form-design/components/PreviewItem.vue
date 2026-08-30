@@ -1308,6 +1308,25 @@ const handleSelectItem = (
     props.modelValue[`${field}_selectedItem`] = item;
     props.modelValue[`${field}_selectedItems`] = item ? [item] : [];
   }
+
+  // 子表中的值关联字段需要在选择器初始化回显、换选或清空时同步更新。
+  // 后端不会保存虚拟字段，因此不能只依赖源字段值变化触发回填。
+  if (props.subTableItem) {
+    const selectedItem = Array.isArray(item) ? item[0] : item;
+    clearVirtualLinkedFields(
+      props.subTableItem,
+      field,
+      props.modelValue,
+    );
+    if (selectedItem) {
+      fillLinkedFieldsFromItem(
+        props.subTableItem,
+        field,
+        selectedItem,
+        props.modelValue,
+      );
+    }
+  }
 };
 
 // 收集子表中所有行该字段的已有值（排除当前行），用于弹窗打开时自动勾选
@@ -1343,6 +1362,25 @@ function fillLinkedFieldsFromItem(
       if (linkedValue !== undefined && linkedValue !== null) {
         targetRow[col.field] = linkedValue;
       }
+    }
+  });
+}
+
+// 清空子表中依赖指定选择器的虚拟字段，避免保留旧商品的关联值
+function clearVirtualLinkedFields(
+  subItem: any,
+  sourceField: string,
+  targetRow: Record<string, any>,
+) {
+  if (!subItem.children) return;
+  subItem.children.forEach((col: any) => {
+    const colProps = col.props;
+    if (
+      colProps?.isVirtualField &&
+      colProps?.enableValueLink &&
+      colProps?.valueSourceField === sourceField
+    ) {
+      targetRow[col.field] = null;
     }
   });
 }
