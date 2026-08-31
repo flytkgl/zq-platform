@@ -5,12 +5,20 @@ import { computed, reactive, ref, watch } from 'vue';
 
 import { $t } from '@vben/locales';
 
-import { ElButton, ElForm, ElInput, ElMessage } from 'element-plus';
+import {
+  ElButton,
+  ElForm,
+  ElInput,
+  ElMessage,
+  ElMessageBox,
+} from 'element-plus';
 
 import {
+  approveFormDataApi,
   createFormDataApi,
   getFieldPermissionsApi,
   getFormDataDetailApi,
+  unapproveFormDataApi,
   updateFormDataApi,
 } from '#/api/online-dev/form-data-api';
 import PreviewItem from '#/components/form-design/components/PreviewItem.vue';
@@ -43,6 +51,11 @@ interface Props {
   containerType?: 'dialog' | 'drawer';
   dialogConfig?: DialogConfig;
   drawerConfig?: DrawerConfig;
+  // 查看模式下的操作按钮（由列表配置和用户权限共同决定）
+  showEditButton?: boolean;
+  auditEnabled?: boolean;
+  showApproveButton?: boolean;
+  showUnapproveButton?: boolean;
   // 确认按钮显示
   showConfirmButton?: boolean;
   // 保存后行为：close-关闭返回列表, editMode-切换编辑模式, continueAdd-清空继续新增
@@ -74,6 +87,7 @@ const fieldPermissions = ref<FieldPermissions>({});
 // 保存后不关闭时，新增切编辑用的内部状态
 const currentEditId = ref<null | string>(null);
 const currentMode = ref<'add' | 'edit' | 'view'>('add');
+const auditLoading = ref(false);
 
 const { initFormData, extractMainData, extractSubTables, resetFormData } =
   useFormData(formData);
@@ -85,11 +99,14 @@ const dialogTitle = computed(() => {
     edit: '编辑数据',
     view: '查看数据',
   };
-  return titles[props.mode];
+  return titles[currentMode.value];
 });
 
 // 是否只读模式
-const isReadonly = computed(() => props.mode === 'view');
+const isReadonly = computed(() => currentMode.value === 'view');
+
+// 当前记录 ID（支持新增后切换编辑，以及查看模式切换编辑）
+const activeEditId = computed(() => props.editId || currentEditId.value);
 
 // 表单配置
 const formConf = computed(() => {
@@ -208,6 +225,77 @@ const showStartWorkflowButton = computed(() => {
     props.boundWorkflows.length > 0
   );
 });
+
+// 查看模式下的编辑按钮
+const showEditButton = computed(() => {
+  return isReadonly.value && props.showEditButton === true;
+});
+
+// 查看模式下根据审核开关、权限配置和当前状态决定显示的审核动作
+const auditAction = computed<null | 'approve' | 'unapprove'>(() => {
+  if (!isReadonly.value || !props.auditEnabled) return null;
+
+  if (
+    formData.sys_audit_status === 'pending' &&
+    props.showApproveButton === true
+  ) {
+    return 'approve';
+  }
+
+  if (
+    formData.sys_audit_status === 'approved' &&
+    props.showUnapproveButton === true
+  ) {
+    return 'unapprove';
+  }
+
+  return null;
+});
+
+// 从查看模式进入编辑模式，保留当前已加载的数据
+function handleEnterEdit() {
+  currentMode.value = 'edit';
+}
+
+// 查看模式下审核/反审当前记录
+async function handleAudit() {
+  const action = auditAction.value;
+  const editId = activeEditId.value;
+  if (!action || !editId) return;
+
+  const isApprove = action === 'approve';
+  try {
+    await ElMessageBox.confirm(
+      isApprove ? '确定要审核这条数据吗？' : '确定要反审这条数据吗？',
+      isApprove ? $t('common.approve') : $t('common.unapprove'),
+      { type: 'warning' },
+    );
+  } catch {
+    return;
+  }
+
+  auditLoading.value = true;
+  try {
+    if (isApprove) {
+      await approveFormDataApi(props.formCode, editId);
+    } else {
+      await unapproveFormDataApi(props.formCode, editId);
+    }
+
+    // 重新加载详情，确保审核字段及生命周期联动数据与服务端一致
+    await loadEditData();
+    emit('saved');
+    ElMessage.success(
+      isApprove
+        ? `${$t('common.approve')}成功`
+        : `${$t('common.unapprove')}成功`,
+    );
+  } catch (error: any) {
+    ElMessage.error(error?.message || '审核操作失败');
+  } finally {
+    auditLoading.value = false;
+  }
+}
 
 // 发起流程相关状态
 const workflowStarting = ref(false);
@@ -400,34 +488,57 @@ function cancelStartWorkflow() {
           :key="item.id"
           :item="item"
           :model-value="formData"
-          :is-edit="mode !== 'add'"
+          :is-edit="currentMode !== 'add'"
           :field-permissions="fieldPermissions"
           :form-code="formCode"
-          :edit-id="editId ?? undefined"
+          :edit-id="activeEditId ?? undefined"
         />
       </ElForm>
     </div>
     <template #footer>
-      <div class="flex justify-end gap-2">
-        <ElButton @click="dialogVisible = false">
-          {{ isReadonly ? $t('common.close') : $t('common.cancel') }}
-        </ElButton>
-        <ElButton
-          v-if="showStartWorkflowButton"
-          type="success"
-          :loading="workflowStarting"
-          @click="handleStartWorkflowClick"
-        >
-          {{ $t('form-manager.listDesign.startWorkflow') }}
-        </ElButton>
-        <ElButton
-          v-if="!isReadonly && shouldShowConfirmButton"
-          type="primary"
-          :loading="loading"
-          @click="handleSubmit"
-        >
-          {{ $t('common.confirm') }}
-        </ElButton>
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <ElButton v-if="showEditButton" @click="handleEnterEdit">
+            {{ $t('common.edit') }}
+          </ElButton>
+          <ElButton
+            v-if="auditAction === 'approve'"
+            type="success"
+            :loading="auditLoading"
+            @click="handleAudit"
+          >
+            {{ $t('common.approve') }}
+          </ElButton>
+          <ElButton
+            v-if="auditAction === 'unapprove'"
+            type="warning"
+            :loading="auditLoading"
+            @click="handleAudit"
+          >
+            {{ $t('common.unapprove') }}
+          </ElButton>
+        </div>
+        <div class="flex items-center gap-2">
+          <ElButton @click="dialogVisible = false">
+            {{ isReadonly ? $t('common.close') : $t('common.cancel') }}
+          </ElButton>
+          <ElButton
+            v-if="showStartWorkflowButton"
+            type="success"
+            :loading="workflowStarting"
+            @click="handleStartWorkflowClick"
+          >
+            {{ $t('form-manager.listDesign.startWorkflow') }}
+          </ElButton>
+          <ElButton
+            v-if="!isReadonly && shouldShowConfirmButton"
+            type="primary"
+            :loading="loading"
+            @click="handleSubmit"
+          >
+            {{ $t('common.confirm') }}
+          </ElButton>
+        </div>
       </div>
     </template>
   </ZqDialog>
@@ -480,34 +591,57 @@ function cancelStartWorkflow() {
           :key="item.id"
           :item="item"
           :model-value="formData"
-          :is-edit="mode !== 'add'"
+          :is-edit="currentMode !== 'add'"
           :field-permissions="fieldPermissions"
           :form-code="formCode"
-          :edit-id="editId ?? undefined"
+          :edit-id="activeEditId ?? undefined"
         />
       </ElForm>
     </div>
     <template #footer>
-      <div class="flex justify-end gap-2">
-        <ElButton @click="dialogVisible = false">
-          {{ isReadonly ? $t('common.close') : $t('common.cancel') }}
-        </ElButton>
-        <ElButton
-          v-if="showStartWorkflowButton"
-          type="success"
-          :loading="workflowStarting"
-          @click="handleStartWorkflowClick"
-        >
-          {{ $t('form-manager.listDesign.startWorkflow') }}
-        </ElButton>
-        <ElButton
-          v-if="!isReadonly && shouldShowConfirmButton"
-          type="primary"
-          :loading="loading"
-          @click="handleSubmit"
-        >
-          {{ $t('common.confirm') }}
-        </ElButton>
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <ElButton v-if="showEditButton" @click="handleEnterEdit">
+            {{ $t('common.edit') }}
+          </ElButton>
+          <ElButton
+            v-if="auditAction === 'approve'"
+            type="success"
+            :loading="auditLoading"
+            @click="handleAudit"
+          >
+            {{ $t('common.approve') }}
+          </ElButton>
+          <ElButton
+            v-if="auditAction === 'unapprove'"
+            type="warning"
+            :loading="auditLoading"
+            @click="handleAudit"
+          >
+            {{ $t('common.unapprove') }}
+          </ElButton>
+        </div>
+        <div class="flex items-center gap-2">
+          <ElButton @click="dialogVisible = false">
+            {{ isReadonly ? $t('common.close') : $t('common.cancel') }}
+          </ElButton>
+          <ElButton
+            v-if="showStartWorkflowButton"
+            type="success"
+            :loading="workflowStarting"
+            @click="handleStartWorkflowClick"
+          >
+            {{ $t('form-manager.listDesign.startWorkflow') }}
+          </ElButton>
+          <ElButton
+            v-if="!isReadonly && shouldShowConfirmButton"
+            type="primary"
+            :loading="loading"
+            @click="handleSubmit"
+          >
+            {{ $t('common.confirm') }}
+          </ElButton>
+        </div>
       </div>
     </template>
   </ZqDrawer>

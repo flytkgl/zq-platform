@@ -61,6 +61,7 @@ import FieldPanel from './FieldPanel.vue';
 import WriteBackPanel from './WriteBackPanel.vue';
 
 const props = defineProps<{
+  actionMode?: boolean;
   formId?: string;
   readonly?: boolean;
 }>();
@@ -91,23 +92,36 @@ const handleClickAdd = (component: any) => {
   store.addComponent(component);
 };
 
-const activeTab = ref('field');
+const activeTab = ref(props.actionMode ? 'writeback' : 'field');
 const activeGroups = ref(['basic', 'advanced', 'layout']);
 const searchKeyword = ref('');
 
-// 左侧导航配置
-const navTabs = [
+// 普通表单设计与动作设计使用不同的左侧导航。
+const normalNavTabs = [
   { name: 'field', label: $t('form-design.field'), icon: Connection },
   { name: 'library', label: $t('form-design.library'), icon: Grid },
   { name: 'outline', label: $t('form-design.outline'), icon: List },
   { name: 'template', label: $t('form-design.templateLabel'), icon: Files },
-  { name: 'writeback', label: '回写', icon: Link2 },
 ];
+const navTabs = computed(() =>
+  props.actionMode
+    ? [{ name: 'writeback', label: '回写', icon: Link2 }]
+    : normalNavTabs,
+);
 
 function switchTab(name: string) {
   activeTab.value = name;
   emit('writeback-mode-change', name === 'writeback');
 }
+
+watch(
+  () => props.actionMode,
+  (active) => {
+    activeTab.value = active ? 'writeback' : 'field';
+    emit('writeback-mode-change', Boolean(active));
+  },
+  { immediate: true },
+);
 
 function refreshWritebackRules() {
   writebackPanelRef.value?.loadRules();

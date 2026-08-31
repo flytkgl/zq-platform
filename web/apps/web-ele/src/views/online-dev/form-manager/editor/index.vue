@@ -68,6 +68,7 @@ const steps = [
   { title: $t('form-manager.editor.steps.database'), index: 1 },
   { title: $t('form-manager.editor.steps.form'), index: 2 },
   { title: $t('form-manager.editor.steps.list'), index: 3 },
+  { title: $t('form-manager.editor.steps.action'), index: 4 },
 ];
 
 const canGoNext = computed(() => {
@@ -685,6 +686,17 @@ onMounted(() => {
           :form-type="formType"
           :sub-tables="subTablesForListDesign"
           @update:audit-enabled="handleAuditEnabledChange"
+        />
+      </div>
+
+      <!-- 步骤4: 动作设计 -->
+      <div v-show="currentStep === 3" class="h-full overflow-hidden">
+        <FormDesign
+          :action-mode="true"
+          :data-source="tableConfigs"
+          :form-id="formId"
+          :form-code="formCode"
+          :form-name="formName"
         />
       </div>
     </div>

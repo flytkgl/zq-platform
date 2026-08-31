@@ -10,6 +10,7 @@ import WriteBackRuleEditor from './components/WriteBackRuleEditor.vue';
 import { useFormDesignStore } from './store/formDesignStore';
 
 const props = defineProps<{
+  actionMode?: boolean;
   dataSource?: TableConfig[];
   formId?: string;
   formCode?: string;
@@ -19,7 +20,7 @@ const props = defineProps<{
 
 const store = useFormDesignStore();
 const materialPanelRef = ref<InstanceType<typeof MaterialPanel>>();
-const writebackMode = ref(false);
+const writebackMode = ref(Boolean(props.actionMode));
 const selectedWritebackRuleId = ref<string>();
 
 function openNewWritebackRule() {
@@ -35,6 +36,15 @@ function saveWritebackRule() {
   materialPanelRef.value?.refreshWritebackRules();
   selectedWritebackRuleId.value = undefined;
 }
+
+watch(
+  () => props.actionMode,
+  (active) => {
+    writebackMode.value = Boolean(active);
+    if (active) selectedWritebackRuleId.value = undefined;
+  },
+  { immediate: true },
+);
 
 // 监听数据源变化，更新 Store
 watch(
@@ -56,6 +66,7 @@ watch(
     <div class="h-full w-72 flex-shrink-0">
       <MaterialPanel
         ref="materialPanelRef"
+        :action-mode="props.actionMode"
         :form-id="props.formId"
         :readonly="props.readonly"
         @writeback-mode-change="writebackMode = $event"
