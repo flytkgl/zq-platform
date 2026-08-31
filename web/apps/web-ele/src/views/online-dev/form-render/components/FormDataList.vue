@@ -2744,6 +2744,7 @@ const [Grid, gridApi] = useZqTable({
   },
   formOptions: {
     schema: [],
+    layout: 'vertical',
     showCollapseButton: true,
     submitOnChange: false, // 初始化时禁用，避免重复请求
   },
@@ -3454,6 +3455,7 @@ watch(
         },
         formOptions: {
           schema: formSchema.value,
+          layout: 'vertical',
           submitOnChange: false, // 初始化时禁用，避免重复请求
           wrapperClass: 'grid-cols-12',
         },
