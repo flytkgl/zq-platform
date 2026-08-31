@@ -373,6 +373,7 @@
     "unitHour": "Hours",
     "noListFields": "No list fields",
     "selectListTip": "Please select fields to display on the right",
+    "defaultRules": "Default Sorting & Filtering",
     "defaultSortField": "Default Sort Field",
     "selectSortField": "Select sort field",
     "sortOrder": "Sort Order",

@@ -369,18 +369,7 @@ const tabItems: ZqTabItem[] = [
 ];
 
 // 折叠状态
-const activeSections = ref([
-  'table',
-  'tree',
-  'card',
-  'container',
-  'dialog',
-  'drawer',
-  'page',
-  'layout',
-  'buttons',
-  'subTableButtons',
-]);
+const activeSections = ref(['container', 'buttons']);
 
 const toggleSection = (section: string) => {
   const index = activeSections.value.indexOf(section);
@@ -1814,35 +1803,60 @@ defineExpose({
         <div v-show="activeTab === 'properties'" class="h-full">
           <ElScrollbar class="h-full">
             <div class="px-4 pb-4">
-              <ElForm :model="listSettings" label-position="top" size="small">
+              <ElForm
+                :model="listSettings"
+                label-position="top"
+                size="small"
+                class="property-settings-form"
+              >
                 <!-- 列表类型切换 -->
-                <div class="mb-4 mt-4">
-                  <div class="text-muted-foreground mb-2 text-xs font-bold">
-                    {{ $t('form-manager.listDesign.listType') }}
-                  </div>
-                  <ElRadioGroup
-                    v-model="listSettings.listType"
-                    class="list-type-radio w-full"
+                <div class="property-section">
+                  <div
+                    class="property-section-header"
+                    :class="{
+                      'is-expanded': activeSections.includes('listType'),
+                    }"
+                    @click="toggleSection('listType')"
                   >
-                    <ElRadio value="table" class="flex-1">
-                      <div class="flex items-center gap-1">
-                        <TableProperties class="h-4 w-4" />
-                        <span>Table</span>
-                      </div>
-                    </ElRadio>
-                    <ElRadio value="card" class="flex-1">
-                      <div class="flex items-center gap-1">
-                        <LayoutGrid class="h-4 w-4" />
-                        <span>Card</span>
-                      </div>
-                    </ElRadio>
-                  </ElRadioGroup>
+                    <span class="property-section-title">
+                      {{ $t('form-manager.listDesign.listType') }}
+                    </span>
+                    <ElIcon class="property-section-icon">
+                      <ArrowDown
+                        v-if="activeSections.includes('listType')"
+                      />
+                      <ArrowRight v-else />
+                    </ElIcon>
+                  </div>
+                  <div
+                    v-show="activeSections.includes('listType')"
+                    class="property-section-content"
+                  >
+                    <ElRadioGroup
+                      v-model="listSettings.listType"
+                      class="list-type-radio w-full"
+                    >
+                      <ElRadio value="table" class="flex-1">
+                        <div class="flex items-center gap-1">
+                          <TableProperties class="h-4 w-4" />
+                          <span>Table</span>
+                        </div>
+                      </ElRadio>
+                      <ElRadio value="card" class="flex-1">
+                        <div class="flex items-center gap-1">
+                          <LayoutGrid class="h-4 w-4" />
+                          <span>Card</span>
+                        </div>
+                      </ElRadio>
+                    </ElRadioGroup>
+                  </div>
                 </div>
 
                 <!-- Table 属性（仅 Table 模式显示） -->
                 <template v-if="listSettings.listType === 'table'">
                   <div
-                    class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                    class="property-section-header"
+                    :class="{ 'is-expanded': activeSections.includes('table') }"
                     @click="toggleSection('table')"
                   >
                     <span class="font-bold">{{
@@ -1853,7 +1867,10 @@ defineExpose({
                       <ArrowRight v-else />
                     </ElIcon>
                   </div>
-                  <div v-show="activeSections.includes('table')">
+                  <div
+                    v-show="activeSections.includes('table')"
+                    class="property-section-content"
+                  >
                     <ElFormItem
                       :label="$t('form-manager.listDesign.showPagination')"
                     >
@@ -1947,7 +1964,8 @@ defineExpose({
 
                   <!-- 表尾统计 -->
                   <div
-                    class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                    class="property-section-header"
+                    :class="{ 'is-expanded': activeSections.includes('summary') }"
                     @click="toggleSection('summary')"
                   >
                     <span class="font-bold">{{
@@ -1958,7 +1976,10 @@ defineExpose({
                       <ArrowRight v-else />
                     </ElIcon>
                   </div>
-                  <div v-show="activeSections.includes('summary')">
+                  <div
+                    v-show="activeSections.includes('summary')"
+                    class="property-section-content"
+                  >
                     <ElFormItem
                       :label="$t('form-manager.listDesign.showSummary')"
                     >
@@ -2008,7 +2029,8 @@ defineExpose({
 
                   <!-- 树形表格配置 -->
                   <div
-                    class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                    class="property-section-header"
+                    :class="{ 'is-expanded': activeSections.includes('tree') }"
                     @click="toggleSection('tree')"
                   >
                     <span class="font-bold">{{
@@ -2019,7 +2041,10 @@ defineExpose({
                       <ArrowRight v-else />
                     </ElIcon>
                   </div>
-                  <div v-show="activeSections.includes('tree')">
+                  <div
+                    v-show="activeSections.includes('tree')"
+                    class="property-section-content"
+                  >
                     <ElFormItem
                       :label="$t('form-manager.listDesign.enableTree')"
                     >
@@ -2084,7 +2109,8 @@ defineExpose({
                 <!-- Card 属性（仅 Card 模式显示） -->
                 <template v-if="listSettings.listType === 'card'">
                   <div
-                    class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                    class="property-section-header"
+                    :class="{ 'is-expanded': activeSections.includes('card') }"
                     @click="toggleSection('card')"
                   >
                     <span class="font-bold">{{
@@ -2095,7 +2121,10 @@ defineExpose({
                       <ArrowRight v-else />
                     </ElIcon>
                   </div>
-                  <div v-show="activeSections.includes('card')">
+                  <div
+                    v-show="activeSections.includes('card')"
+                    class="property-section-content"
+                  >
                     <ElFormItem
                       :label="$t('form-manager.listDesign.cardColumns')"
                     >
@@ -2225,7 +2254,27 @@ defineExpose({
                 </template>
 
                 <!-- 默认排序与过滤条件（Table 和 Card 模式共用） -->
-                <div class="mt-4">
+                <div
+                  class="property-section-header"
+                  :class="{
+                    'is-expanded': activeSections.includes('defaultRules'),
+                  }"
+                  @click="toggleSection('defaultRules')"
+                >
+                  <span class="property-section-title">
+                    {{ $t('form-manager.listDesign.defaultRules') }}
+                  </span>
+                  <ElIcon class="property-section-icon">
+                    <ArrowDown
+                      v-if="activeSections.includes('defaultRules')"
+                    />
+                    <ArrowRight v-else />
+                  </ElIcon>
+                </div>
+                <div
+                  v-show="activeSections.includes('defaultRules')"
+                  class="property-section-content"
+                >
                   <ElFormItem
                     :label="$t('form-manager.listDesign.defaultSortField')"
                   >
@@ -2516,7 +2565,8 @@ defineExpose({
 
                 <!-- 容器类型选择 -->
                 <div
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('container') }"
                   @click="toggleSection('container')"
                 >
                   <span class="font-bold">容器类型</span>
@@ -2525,7 +2575,10 @@ defineExpose({
                     <ArrowRight v-else />
                   </ElIcon>
                 </div>
-                <div v-show="activeSections.includes('container')">
+                <div
+                  v-show="activeSections.includes('container')"
+                  class="property-section-content"
+                >
                   <ElFormItem label="表单容器">
                     <ElRadioGroup v-model="listSettings.containerType">
                       <ElRadio value="drawer">Drawer（抽屉）</ElRadio>
@@ -2544,7 +2597,8 @@ defineExpose({
                 <!-- Dialog 属性 -->
                 <div
                   v-if="listSettings.containerType === 'dialog'"
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('dialog') }"
                   @click="toggleSection('dialog')"
                 >
                   <span class="font-bold">{{
@@ -2558,6 +2612,7 @@ defineExpose({
                 <div
                   v-if="listSettings.containerType === 'dialog'"
                   v-show="activeSections.includes('dialog')"
+                  class="property-section-content"
                 >
                   <ElFormItem
                     :label="$t('form-manager.listDesign.dialogWidth')"
@@ -2608,7 +2663,8 @@ defineExpose({
                 <!-- Drawer 属性 -->
                 <div
                   v-if="listSettings.containerType === 'drawer'"
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('drawer') }"
                   @click="toggleSection('drawer')"
                 >
                   <span class="font-bold">Drawer 属性</span>
@@ -2620,6 +2676,7 @@ defineExpose({
                 <div
                   v-if="listSettings.containerType === 'drawer'"
                   v-show="activeSections.includes('drawer')"
+                  class="property-section-content"
                 >
                   <ElFormItem label="抽屉尺寸">
                     <ElSelect v-model="listSettings.drawer.size" class="w-full">
@@ -2656,7 +2713,8 @@ defineExpose({
                 <!-- Page 属性 -->
                 <div
                   v-if="listSettings.containerType === 'page'"
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('page') }"
                   @click="toggleSection('page')"
                 >
                   <span class="font-bold">{{
@@ -2670,6 +2728,7 @@ defineExpose({
                 <div
                   v-if="listSettings.containerType === 'page'"
                   v-show="activeSections.includes('page')"
+                  class="property-section-content"
                 >
                   <ElFormItem
                     :label="$t('form-manager.listDesign.showBackButton')"
@@ -2696,7 +2755,8 @@ defineExpose({
                 <!-- Layout 属性 -->
                 <div
                   v-if="listSettings.containerType === 'layout'"
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('layout') }"
                   @click="toggleSection('layout')"
                 >
                   <span class="font-bold">Layout 属性</span>
@@ -2708,6 +2768,7 @@ defineExpose({
                 <div
                   v-if="listSettings.containerType === 'layout'"
                   v-show="activeSections.includes('layout')"
+                  class="property-section-content"
                 >
                   <ElFormItem
                     :label="$t('form-manager.listDesign.layoutRenderMode')"
@@ -2744,7 +2805,8 @@ defineExpose({
 
                 <!-- 按钮显示 -->
                 <div
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('buttons') }"
                   @click="toggleSection('buttons')"
                 >
                   <span class="font-bold">{{
@@ -2755,7 +2817,10 @@ defineExpose({
                     <ArrowRight v-else />
                   </ElIcon>
                 </div>
-                <div v-show="activeSections.includes('buttons')">
+                <div
+                  v-show="activeSections.includes('buttons')"
+                  class="property-section-content"
+                >
                   <ElFormItem
                     v-if="props.auditConfigurable"
                     :label="$t('form-manager.auditEnabled')"
@@ -2939,7 +3004,10 @@ defineExpose({
                 <!-- 子表操作按钮 -->
                 <div
                   v-if="props.subTables && props.subTables.length > 0"
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{
+                    'is-expanded': activeSections.includes('subTableButtons'),
+                  }"
                   @click="toggleSection('subTableButtons')"
                 >
                   <span class="font-bold">{{
@@ -2955,6 +3023,7 @@ defineExpose({
                 <div
                   v-if="props.subTables && props.subTables.length > 0"
                   v-show="activeSections.includes('subTableButtons')"
+                  class="property-section-content"
                 >
                   <div class="text-muted-foreground mb-2 text-xs">
                     {{ $t('form-manager.listDesign.subTableButtonsTip') }}
@@ -3270,7 +3339,8 @@ defineExpose({
 
                 <!-- 自定义按钮 -->
                 <div
-                  class="group-title border-border text-muted-foreground hover:text-primary mb-2 mt-4 flex cursor-pointer select-none items-center justify-between border-b pb-2 text-xs"
+                  class="property-section-header"
+                  :class="{ 'is-expanded': activeSections.includes('customButtons') }"
                   @click="toggleSection('customButtons')"
                 >
                   <span class="font-bold">{{
@@ -3283,7 +3353,10 @@ defineExpose({
                     <ArrowRight v-else />
                   </ElIcon>
                 </div>
-                <div v-show="activeSections.includes('customButtons')">
+                <div
+                  v-show="activeSections.includes('customButtons')"
+                  class="property-section-content"
+                >
                   <div class="mb-2 flex gap-2">
                     <ElButton plain size="small" @click="addCustomButton">
                       {{ $t('form-manager.listDesign.addCustomButton') }}
@@ -5614,6 +5687,100 @@ defineExpose({
 
 :deep(.el-tabs__nav) {
   float: none;
+}
+
+/* 列表属性分组 */
+.property-settings-form {
+  --property-section-border: var(--el-border-color-lighter);
+}
+
+.property-section {
+  margin: 12px 0 0;
+}
+
+.property-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--property-section-border);
+  border-radius: 10px;
+  background: var(--el-fill-color-blank);
+  color: var(--el-text-color-regular);
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.property-section .property-section-header {
+  margin-top: 0;
+}
+
+.property-section-header:hover,
+.property-section-header.is-expanded {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+}
+
+.property-section-header.is-expanded {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.property-section-title {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.property-section-header :deep(.el-icon) {
+  order: -1;
+  flex: 0 0 auto;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.property-section-content {
+  padding: 14px 14px 2px;
+  border: 1px solid var(--property-section-border);
+  border-top: 0;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  background: var(--el-fill-color-blank);
+}
+
+.property-settings-form :deep(.el-form-item) {
+  margin-bottom: 14px;
+}
+
+.property-settings-form :deep(.el-form-item__label) {
+  height: auto;
+  padding-bottom: 6px;
+  color: var(--el-text-color-regular);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: normal;
+}
+
+.property-settings-form :deep(.el-radio-group) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.property-settings-form :deep(.el-radio) {
+  margin-right: 0;
+  white-space: normal;
 }
 
 /* 列表类型切换样式 */

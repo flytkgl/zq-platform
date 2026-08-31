@@ -368,6 +368,7 @@
     "unitHour": "小時",
     "noListFields": "暫無列表字段",
     "selectListTip": "請在右側勾選需要顯示的字段",
+    "defaultRules": "預設排序與篩選",
     "defaultSortField": "預設排序欄位",
     "selectSortField": "請選擇排序欄位",
     "sortOrder": "排序方向",
