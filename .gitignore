@@ -100,6 +100,7 @@ node_modules/
 # Build output
 web/dist/
 web/dist-ssr/
+web/apps/web-ele/dist.zip
 web/dist.zip
 web/dist.tar
 web/dist.war

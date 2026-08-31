@@ -5,8 +5,9 @@ import type {
   PublishedFormSimple,
   WriteBackEvent,
 } from '#/api/online-dev/form-manager';
+import type { ShallowRef } from 'vue';
 
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 
 import {
   ElButton,
@@ -19,7 +20,6 @@ import {
   ElOption,
   ElSelect,
   ElSwitch,
-  ElTag,
 } from 'element-plus';
 
 import {
@@ -29,6 +29,20 @@ import {
   getPublishedFormsSimpleApi,
   updateFormWriteBackRuleApi,
 } from '#/api/online-dev/form-manager';
+
+import WriteBackFieldSelect from './WriteBackFieldSelect.vue';
+
+interface WriteBackField {
+  name: string;
+  comment?: string;
+  label?: string;
+  type?: string;
+}
+
+interface ExpressionToken {
+  label: string;
+  expression: string;
+}
 
 const props = defineProps<{
   formId?: string;
@@ -53,12 +67,18 @@ const eventOptions: Array<{ label: string; value: WriteBackEvent }> = [
   { label: '反审后', value: 'after_unapprove' },
 ];
 const forms = ref<PublishedFormSimple[]>([]);
-const targetTables = ref<Array<{ key: string; label: string; fields: any[] }>>(
+const targetTables = ref<
+  Array<{ key: string; label: string; fields: WriteBackField[] }>
+>(
   [],
 );
 const saving = ref(false);
 const loading = ref(false);
 const customName = ref(false);
+const expressionInputRef = ref<{
+  textarea?: ShallowRef<HTMLTextAreaElement | undefined>;
+}>();
+const expressionSelection = ref({ start: 0, end: 0 });
 
 const emptyRule = (): FormWriteBackRule => ({
   target_form_id: '',
@@ -87,7 +107,7 @@ const sourceTables = computed(() =>
       item.type === 'main'
         ? `${item.tableName}（主表）`
         : item.alias || item.tableName,
-    fields: item.fields || [],
+    fields: (item.fields || []) as WriteBackField[],
   })),
 );
 const sourceTable = computed(() =>
@@ -96,8 +116,15 @@ const sourceTable = computed(() =>
 const targetTable = computed(() =>
   targetTables.value.find((item) => item.key === rule.target_table_key),
 );
-const sourceFields = computed(() => sourceTable.value?.fields || []);
-const targetFields = computed(() => targetTable.value?.fields || []);
+const sourceFields = computed<WriteBackField[]>(
+  () => sourceTable.value?.fields || [],
+);
+const targetFields = computed<WriteBackField[]>(
+  () => targetTable.value?.fields || [],
+);
+const numericSourceFields = computed(() =>
+  sourceFields.value.filter((field) => isNumericField(field)),
+);
 const autoName = computed(() => {
   const labels = rule.trigger_events
     .map(
@@ -115,8 +142,54 @@ const displayName = computed({
 });
 
 function fieldsOf(table: any) {
-  return (table?.fields || []).filter((field: any) => field.name);
+  return (table?.fields || []).filter((field: WriteBackField) => field.name);
 }
+
+function getFieldLabel(field: WriteBackField) {
+  return field.comment?.trim() || field.label?.trim() || field.name;
+}
+
+function getFieldType(field: WriteBackField) {
+  return field.type?.trim().toLowerCase() || '';
+}
+
+function isNumericField(field: WriteBackField) {
+  return /int|number|decimal|numeric|float|double|real|money/.test(
+    getFieldType(field),
+  );
+}
+
+function createFieldToken(scope: 'newData' | 'oldData', field: WriteBackField) {
+  return {
+    label: `${getFieldLabel(field)} · ${field.name}`,
+    expression: `${scope}.${field.name}`,
+  } satisfies ExpressionToken;
+}
+
+const newDataTokens = computed<ExpressionToken[]>(() =>
+  sourceFields.value.map((field) => createFieldToken('newData', field)),
+);
+const oldDataTokens = computed<ExpressionToken[]>(() =>
+  sourceFields.value.map((field) => createFieldToken('oldData', field)),
+);
+
+function createAggregateTokens(scope: 'newRows' | 'oldRows') {
+  return [
+    {
+      label: '记录数',
+      expression: `count(${scope})`,
+    },
+    ...numericSourceFields.value.flatMap((field) =>
+      ['sum', 'max', 'min', 'avg'].map((fn) => ({
+        label: `${fn} · ${getFieldLabel(field)} · ${field.name}`,
+        expression: `${fn}(${scope}.${field.name})`,
+      })),
+    ),
+  ] satisfies ExpressionToken[];
+}
+
+const newRowsTokens = computed(() => createAggregateTokens('newRows'));
+const oldRowsTokens = computed(() => createAggregateTokens('oldRows'));
 
 function normalizeTables(form: any) {
   const configs = Array.isArray(form.form_config?.tableConfigs)
@@ -235,8 +308,38 @@ function removeCondition(
 ) {
   rule[target].splice(index, 1);
 }
-function insertExpression(value: string) {
-  rule.custom_expression = `${rule.custom_expression || ''}${rule.custom_expression ? ' ' : ''}${value}`;
+function captureExpressionSelection() {
+  const textarea = expressionInputRef.value?.textarea?.value;
+  if (!textarea) return;
+  expressionSelection.value = {
+    start: textarea.selectionStart ?? rule.custom_expression.length,
+    end: textarea.selectionEnd ?? rule.custom_expression.length,
+  };
+}
+
+function insertExpression(token: ExpressionToken) {
+  const expression = rule.custom_expression || '';
+  const textarea = expressionInputRef.value?.textarea?.value;
+  const hasSelection =
+    textarea && document.activeElement === textarea
+      ? expressionSelection.value
+      : { start: expression.length, end: expression.length };
+  const before = expression.slice(0, hasSelection.start);
+  const after = expression.slice(hasSelection.end);
+  const prefix = before && !/\s$/.test(before) ? ' ' : '';
+  const suffix = after && !/^\s/.test(after) ? ' ' : '';
+  const inserted = `${prefix}${token.expression}${suffix}`;
+  const cursor = before.length + inserted.length - suffix.length;
+
+  rule.custom_expression = `${before}${inserted}${after}`;
+  expressionSelection.value = { start: cursor, end: cursor };
+
+  nextTick(() => {
+    const input = expressionInputRef.value?.textarea?.value;
+    if (!input || props.readonly) return;
+    input.focus();
+    input.setSelectionRange(cursor, cursor);
+  });
 }
 
 function previewExpression(expression: string) {
@@ -261,7 +364,7 @@ function previewExpression(expression: string) {
 const expressionPreview = computed(() =>
   rule.value_mode === 'custom' && rule.custom_expression
     ? previewExpression(rule.custom_expression)
-    : '请选择“自定义”查看表达式预览',
+    : '',
 );
 
 function validateExpression() {
@@ -435,16 +538,12 @@ onMounted(loadForms);
             :value="item.key" /></ElSelect
       ></ElFormItem>
       <ElFormItem label="目标字段"
-        ><ElSelect
+        ><WriteBackFieldSelect
           v-model="rule.target_field"
-          filterable
-          class="w-full"
+          :fields="targetFields"
           :disabled="readonly"
-          ><ElOption
-            v-for="field in targetFields"
-            :key="field.name"
-            :label="field.comment || field.name"
-            :value="field.name" /></ElSelect
+          clearable
+        />
       ></ElFormItem>
       <ElFormItem label="取值方式"
         ><ElSelect v-model="rule.value_mode" class="w-full" disabled
@@ -460,38 +559,151 @@ onMounted(loadForms);
             value="add" /><ElOption label="减" value="subtract" /></ElSelect
       ></ElFormItem>
       <ElFormItem label="自定义表达式" class="col-span-2"
-        ><ElInput
-          v-model="rule.custom_expression"
-          type="textarea"
-          :rows="3"
-          :disabled="readonly"
-          placeholder="newData.quantity - oldData.quantity"
-        />
-        <div class="mt-2 flex flex-wrap gap-1">
-          <ElTag
-            v-for="token in [
-              'newData.',
-              'oldData.',
-              'sum(newRows.field)',
-              'count(newRows)',
-              'max(newRows.field)',
-              'min(newRows.field)',
-              'avg(newRows.field)',
-            ]"
-            :key="token"
-            class="cursor-pointer"
-            @click="insertExpression(token)"
-            >{{ token }}</ElTag
+        ><div class="expression-editor w-full space-y-3">
+          <ElInput
+            ref="expressionInputRef"
+            v-model="rule.custom_expression"
+            type="textarea"
+            :rows="4"
+            :disabled="readonly"
+            placeholder="例如：newData.quantity - oldData.quantity"
+            @click="captureExpressionSelection"
+            @focus="captureExpressionSelection"
+            @keyup="captureExpressionSelection"
+            @select="captureExpressionSelection"
+            @input="captureExpressionSelection"
+          />
+
+          <div
+            class="rounded border border-[var(--el-border-color-light)] bg-[var(--el-fill-color-lighter)] p-3"
           >
-        </div>
-        <div class="mt-1 text-xs text-[var(--el-text-color-secondary)]">
-          仅支持字段访问、数字运算和 count/sum/max/min/avg；后端保存时会进行安全
-          AST 校验。
-        </div>
-        <div
-          class="col-span-2 -mt-3 mb-2 rounded bg-[var(--el-fill-color-light)] px-2 py-1 text-xs text-[var(--el-text-color-secondary)]"
-        >
-          {{ expressionPreview }}（示例字段按新值 10、旧值 5 代入）
+            <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span class="text-sm font-medium text-[var(--el-text-color-primary)]"
+                >快捷插入</span
+              >
+              <span class="text-xs text-[var(--el-text-color-secondary)]"
+                >点击字段即可插入完整表达式，支持在光标位置插入。</span
+              >
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                  单条数据字段
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <ElButton
+                    v-for="token in newDataTokens"
+                    :key="token.expression"
+                    text
+                    size="small"
+                    class="!m-0 !h-auto !justify-start !px-2 !py-1"
+                    :title="token.expression"
+                    :disabled="readonly"
+                    @click="insertExpression(token)"
+                  >
+                    <span class="mr-1 truncate">{{ token.label }}</span>
+                    <code class="text-xs text-[var(--el-color-primary)]">newData</code>
+                  </ElButton>
+                  <span
+                    v-if="!newDataTokens.length"
+                    class="text-xs text-[var(--el-text-color-placeholder)]"
+                    >暂无可用字段</span
+                  >
+                </div>
+              </div>
+
+              <div>
+                <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                  原始数据字段
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <ElButton
+                    v-for="token in oldDataTokens"
+                    :key="token.expression"
+                    text
+                    size="small"
+                    class="!m-0 !h-auto !justify-start !px-2 !py-1"
+                    :title="token.expression"
+                    :disabled="readonly"
+                    @click="insertExpression(token)"
+                  >
+                    <span class="mr-1 truncate">{{ token.label }}</span>
+                    <code class="text-xs text-[var(--el-color-primary)]">oldData</code>
+                  </ElButton>
+                  <span
+                    v-if="!oldDataTokens.length"
+                    class="text-xs text-[var(--el-text-color-placeholder)]"
+                    >暂无可用字段</span
+                  >
+                </div>
+              </div>
+
+              <div class="grid gap-3 md:grid-cols-2">
+                <div>
+                  <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                    新增明细汇总
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <ElButton
+                      v-for="token in newRowsTokens"
+                      :key="token.expression"
+                      text
+                      size="small"
+                      class="!m-0 !h-auto !justify-start !px-2 !py-1"
+                      :title="token.expression"
+                      :disabled="readonly"
+                      @click="insertExpression(token)"
+                    >
+                      {{ token.label }}
+                    </ElButton>
+                  </div>
+                </div>
+                <div>
+                  <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                    历史明细汇总
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <ElButton
+                      v-for="token in oldRowsTokens"
+                      :key="token.expression"
+                      text
+                      size="small"
+                      class="!m-0 !h-auto !justify-start !px-2 !py-1"
+                      :title="token.expression"
+                      :disabled="readonly"
+                      @click="insertExpression(token)"
+                    >
+                      {{ token.label }}
+                    </ElButton>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="flex items-start gap-2 rounded border border-[var(--el-color-info-light-5)] bg-[var(--el-color-info-light-9)] px-3 py-2 text-xs leading-5 text-[var(--el-text-color-secondary)]"
+          >
+            <span class="shrink-0 font-medium text-[var(--el-color-info)]">说明</span>
+            <span
+              >支持字段访问、数字运算和 count/sum/max/min/avg；仅聚合数值字段，保存时后端会进行安全 AST 校验。</span
+            >
+          </div>
+
+          <div
+            class="rounded border border-[var(--el-border-color-light)] bg-[var(--el-fill-color-light)] px-3 py-2 text-xs text-[var(--el-text-color-secondary)]"
+          >
+            <div class="mb-1 font-medium text-[var(--el-text-color-regular)]">
+              表达式预览
+            </div>
+            <code v-if="expressionPreview" class="block break-all whitespace-pre-wrap leading-5"
+              >{{ expressionPreview }}（示例字段按新值 10、旧值 5 代入）</code
+            >
+            <span v-else class="text-[var(--el-text-color-placeholder)]"
+              >输入表达式后显示示例结果</span
+            >
+          </div>
         </div>
       </ElFormItem>
       <ElFormItem label="关联条件" class="col-span-2"
@@ -501,26 +713,18 @@ onMounted(loadForms);
             :key="index"
             class="condition-row grid grid-cols-[minmax(220px,1fr)_120px_minmax(220px,1fr)_48px] items-center gap-2"
           >
-            <ElSelect
+            <WriteBackFieldSelect
               v-model="condition.source_field"
-              class="w-full min-w-0"
+              :fields="sourceFields"
               :disabled="readonly"
-              ><ElOption
-                v-for="field in sourceFields"
-                :key="field.name"
-                :label="field.comment || field.name"
-                :value="field.name" /></ElSelect
-            ><span class="pt-2">=</span
-            ><ElSelect
+            />
+            <span class="pt-2">=</span
+            ><WriteBackFieldSelect
               v-model="condition.target_field"
-              class="w-full min-w-0"
+              :fields="targetFields"
               :disabled="readonly"
-              ><ElOption
-                v-for="field in targetFields"
-                :key="field.name"
-                :label="field.comment || field.name"
-                :value="field.name" /></ElSelect
-            ><ElButton
+            />
+            <ElButton
               link
               type="danger"
               :disabled="readonly"
@@ -540,16 +744,12 @@ onMounted(loadForms);
             :key="index"
             class="condition-row grid grid-cols-[minmax(220px,1fr)_120px_minmax(220px,1fr)_48px] items-center gap-2"
           >
-            <ElSelect
+            <WriteBackFieldSelect
               v-model="condition.field"
-              class="w-full min-w-0"
+              :fields="sourceFields"
               :disabled="readonly"
-              ><ElOption
-                v-for="field in sourceFields"
-                :key="field.name"
-                :label="field.comment || field.name"
-                :value="field.name" /></ElSelect
-            ><ElSelect
+            />
+            <ElSelect
               v-model="condition.operator"
               class="w-full min-w-0"
               :disabled="readonly"
@@ -591,16 +791,12 @@ onMounted(loadForms);
             :key="index"
             class="condition-row grid grid-cols-[minmax(220px,1fr)_120px_minmax(220px,1fr)_48px] items-center gap-2"
           >
-            <ElSelect
+            <WriteBackFieldSelect
               v-model="condition.field"
-              class="w-full min-w-0"
+              :fields="sourceFields"
               :disabled="readonly"
-              ><ElOption
-                v-for="field in sourceFields"
-                :key="field.name"
-                :label="field.comment || field.name"
-                :value="field.name" /></ElSelect
-            ><ElSelect
+            />
+            <ElSelect
               v-model="condition.operator"
               class="w-full min-w-0"
               :disabled="readonly"
