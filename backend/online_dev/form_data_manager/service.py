@@ -3078,11 +3078,10 @@ class FormDataService:
         table = self.form_meta.main_table
         schema = await self._resolve_schema(db, self.form_meta.main_table_schema) or None
         database = self.form_meta.main_table_database or None
-        now = datetime.now()
         update_data = {
             "sys_audit_status": next_status,
             "sys_audit_user_id": operator_id if action == "approve" else None,
-            "sys_audit_datetime": now if action == "approve" else None,
+            "sys_audit_datetime": datetime.now() if action == "approve" else None,
         }
         sql, params = self.sql_builder.build_update(
             table=table,

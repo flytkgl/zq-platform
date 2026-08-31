@@ -483,7 +483,8 @@ function generateAddAuditFieldsSQL(
   const fullTableName = getQuotedTableName(tableName, type, schema);
   const statusType = type === 'sqlserver' ? 'NVARCHAR(20)' : 'VARCHAR(20)';
   const userType = type === 'sqlserver' ? 'NVARCHAR(36)' : 'VARCHAR(36)';
-  const datetimeType = type === 'mysql' ? 'DATETIME' : 'TIMESTAMP';
+  const datetimeType =
+    type === 'mysql' ? 'DATETIME' : type === 'sqlserver' ? 'DATETIME2' : 'TIMESTAMP';
   const statements: string[] = [];
 
   for (const fieldName of missingFields) {
