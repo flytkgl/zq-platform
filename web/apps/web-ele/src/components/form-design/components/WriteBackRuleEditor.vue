@@ -29,6 +29,8 @@ import {
   getPublishedFormsSimpleApi,
   updateFormWriteBackRuleApi,
 } from '#/api/online-dev/form-manager';
+import { getTableColumnsApi } from '#/api/core/database-manager';
+import { normalizeDbType } from '#/utils/database-types';
 
 import WriteBackFieldSelect from './WriteBackFieldSelect.vue';
 
@@ -37,6 +39,8 @@ interface WriteBackField {
   comment?: string;
   label?: string;
   type?: string;
+  data_type?: string;
+  dbType?: string;
 }
 
 interface ExpressionToken {
@@ -69,9 +73,7 @@ const eventOptions: Array<{ label: string; value: WriteBackEvent }> = [
 const forms = ref<PublishedFormSimple[]>([]);
 const targetTables = ref<
   Array<{ key: string; label: string; fields: WriteBackField[] }>
->(
-  [],
-);
+>([]);
 const saving = ref(false);
 const loading = ref(false);
 const customName = ref(false);
@@ -79,6 +81,8 @@ const expressionInputRef = ref<{
   textarea?: ShallowRef<HTMLTextAreaElement | undefined>;
 }>();
 const expressionSelection = ref({ start: 0, end: 0 });
+const liveSourceFields = ref<Record<string, WriteBackField[]>>({});
+let liveSourceRefreshId = 0;
 
 const emptyRule = (): FormWriteBackRule => ({
   target_form_id: '',
@@ -107,7 +111,9 @@ const sourceTables = computed(() =>
       item.type === 'main'
         ? `${item.tableName}（主表）`
         : item.alias || item.tableName,
-    fields: (item.fields || []) as WriteBackField[],
+    fields: (liveSourceFields.value[item.tableName] ||
+      item.fields ||
+      []) as WriteBackField[],
   })),
 );
 const sourceTable = computed(() =>
@@ -150,12 +156,14 @@ function getFieldLabel(field: WriteBackField) {
 }
 
 function getFieldType(field: WriteBackField) {
-  return field.type?.trim().toLowerCase() || '';
+  const rawType = field.type || field.data_type || field.dbType || '';
+  return normalizeDbType(String(rawType));
 }
 
 function isNumericField(field: WriteBackField) {
-  return /int|number|decimal|numeric|float|double|real|money/.test(
-    getFieldType(field),
+  const type = getFieldType(field);
+  return /^(smallint|int|integer|bigint|decimal|numeric|float|double|real|money)(?:\b|\()/i.test(
+    type,
   );
 }
 
@@ -190,6 +198,38 @@ function createAggregateTokens(scope: 'newRows' | 'oldRows') {
 
 const newRowsTokens = computed(() => createAggregateTokens('newRows'));
 const oldRowsTokens = computed(() => createAggregateTokens('oldRows'));
+
+async function refreshLiveSourceFields() {
+  const refreshId = ++liveSourceRefreshId;
+  const refreshed: Record<string, WriteBackField[]> = {};
+
+  await Promise.all(
+    props.tableConfigs.map(async (table: any) => {
+      if (!table.tableName || !table.meta?.dbName) return;
+
+      try {
+        const columns = await getTableColumnsApi(
+          table.meta.dbName,
+          table.tableName,
+          table.meta.database,
+          table.meta.schema,
+        );
+        refreshed[table.tableName] = columns.map((column: any) => ({
+          name: column.column_name,
+          type: normalizeDbType(column.data_type),
+          comment: column.description || '',
+        }));
+      } catch (error) {
+        // 实时结构读取失败时继续使用表单配置中的字段快照。
+        console.warn('Failed to refresh writeback source fields:', error);
+      }
+    }),
+  );
+
+  if (refreshId === liveSourceRefreshId) {
+    liveSourceFields.value = refreshed;
+  }
+}
 
 function normalizeTables(form: any) {
   const configs = Array.isArray(form.form_config?.tableConfigs)
@@ -435,6 +475,24 @@ watch(
   },
 );
 watch(
+  () =>
+    props.tableConfigs
+      .map(
+        (table: any) =>
+          `${table.id}:${table.tableName}:${table.meta?.dbName || ''}:${(
+            table.fields || []
+          )
+            .map(
+              (field: any) =>
+                `${field.name}:${field.type || field.data_type || ''}`,
+            )
+            .join(',')}`,
+      )
+      .join('|'),
+  refreshLiveSourceFields,
+  { immediate: true },
+);
+watch(
   () => customName.value,
   (enabled) => {
     rule.is_name_auto = !enabled;
@@ -544,7 +602,7 @@ onMounted(loadForms);
           :disabled="readonly"
           clearable
         />
-      ></ElFormItem>
+      </ElFormItem>
       <ElFormItem label="取值方式"
         ><ElSelect v-model="rule.value_mode" class="w-full" disabled
           ><ElOption label="自定义" value="custom" /></ElSelect
@@ -578,7 +636,8 @@ onMounted(loadForms);
             class="rounded border border-[var(--el-border-color-light)] bg-[var(--el-fill-color-lighter)] p-3"
           >
             <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span class="text-sm font-medium text-[var(--el-text-color-primary)]"
+              <span
+                class="text-sm font-medium text-[var(--el-text-color-primary)]"
                 >快捷插入</span
               >
               <span class="text-xs text-[var(--el-text-color-secondary)]"
@@ -588,7 +647,9 @@ onMounted(loadForms);
 
             <div class="space-y-3">
               <div>
-                <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                <div
+                  class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]"
+                >
                   单条数据字段
                 </div>
                 <div class="flex flex-wrap gap-1.5">
@@ -603,7 +664,9 @@ onMounted(loadForms);
                     @click="insertExpression(token)"
                   >
                     <span class="mr-1 truncate">{{ token.label }}</span>
-                    <code class="text-xs text-[var(--el-color-primary)]">newData</code>
+                    <code class="text-xs text-[var(--el-color-primary)]"
+                      >newData</code
+                    >
                   </ElButton>
                   <span
                     v-if="!newDataTokens.length"
@@ -614,7 +677,9 @@ onMounted(loadForms);
               </div>
 
               <div>
-                <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                <div
+                  class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]"
+                >
                   原始数据字段
                 </div>
                 <div class="flex flex-wrap gap-1.5">
@@ -629,7 +694,9 @@ onMounted(loadForms);
                     @click="insertExpression(token)"
                   >
                     <span class="mr-1 truncate">{{ token.label }}</span>
-                    <code class="text-xs text-[var(--el-color-primary)]">oldData</code>
+                    <code class="text-xs text-[var(--el-color-primary)]"
+                      >oldData</code
+                    >
                   </ElButton>
                   <span
                     v-if="!oldDataTokens.length"
@@ -641,7 +708,9 @@ onMounted(loadForms);
 
               <div class="grid gap-3 md:grid-cols-2">
                 <div>
-                  <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                  <div
+                    class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]"
+                  >
                     新增明细汇总
                   </div>
                   <div class="flex flex-wrap gap-1.5">
@@ -660,7 +729,9 @@ onMounted(loadForms);
                   </div>
                 </div>
                 <div>
-                  <div class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]">
+                  <div
+                    class="mb-1 text-xs font-medium text-[var(--el-text-color-regular)]"
+                  >
                     历史明细汇总
                   </div>
                   <div class="flex flex-wrap gap-1.5">
@@ -685,9 +756,13 @@ onMounted(loadForms);
           <div
             class="flex items-start gap-2 rounded border border-[var(--el-color-info-light-5)] bg-[var(--el-color-info-light-9)] px-3 py-2 text-xs leading-5 text-[var(--el-text-color-secondary)]"
           >
-            <span class="shrink-0 font-medium text-[var(--el-color-info)]">说明</span>
+            <span class="shrink-0 font-medium text-[var(--el-color-info)]"
+              >说明</span
+            >
             <span
-              >支持字段访问、数字运算和 count/sum/max/min/avg；仅聚合数值字段，保存时后端会进行安全 AST 校验。</span
+              >支持字段访问、数字运算和
+              count/sum/max/min/avg；仅聚合数值字段，保存时后端会进行安全 AST
+              校验。</span
             >
           </div>
 
@@ -697,7 +772,9 @@ onMounted(loadForms);
             <div class="mb-1 font-medium text-[var(--el-text-color-regular)]">
               表达式预览
             </div>
-            <code v-if="expressionPreview" class="block break-all whitespace-pre-wrap leading-5"
+            <code
+              v-if="expressionPreview"
+              class="block whitespace-pre-wrap break-all leading-5"
               >{{ expressionPreview }}（示例字段按新值 10、旧值 5 代入）</code
             >
             <span v-else class="text-[var(--el-text-color-placeholder)]"

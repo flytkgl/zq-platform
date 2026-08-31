@@ -463,7 +463,11 @@ const AUDIT_FIELD_COMMENTS: Record<string, string> = {
   sys_audit_datetime: '审核时间',
 };
 
-function getQuotedTableName(tableName: string, dbType: string, schema?: string) {
+function getQuotedTableName(
+  tableName: string,
+  dbType: string,
+  schema?: string,
+) {
   const type = dbType.toLowerCase();
   const quote = type === 'mysql' ? '`' : type === 'sqlserver' ? '[' : '"';
   const endQuote = type === 'sqlserver' ? ']' : quote;
@@ -484,7 +488,11 @@ function generateAddAuditFieldsSQL(
   const statusType = type === 'sqlserver' ? 'NVARCHAR(20)' : 'VARCHAR(20)';
   const userType = type === 'sqlserver' ? 'NVARCHAR(36)' : 'VARCHAR(36)';
   const datetimeType =
-    type === 'mysql' ? 'DATETIME' : type === 'sqlserver' ? 'DATETIME2' : 'TIMESTAMP';
+    type === 'mysql'
+      ? 'DATETIME'
+      : type === 'sqlserver'
+        ? 'DATETIME2'
+        : 'TIMESTAMP';
   const statements: string[] = [];
 
   for (const fieldName of missingFields) {
@@ -521,7 +529,9 @@ async function ensureAuditFields(
   if (!props.auditEnabled) return fields;
 
   const existingNames = new Set(fields.map((field) => field.name));
-  const missingFields = AUDIT_FIELDS.filter((field) => !existingNames.has(field));
+  const missingFields = AUDIT_FIELDS.filter(
+    (field) => !existingNames.has(field),
+  );
   if (missingFields.length === 0) return fields;
 
   try {
@@ -1303,6 +1313,42 @@ async function refreshSelectedTableFields(tableName: string, meta: any) {
     return null;
   }
 }
+
+let configuredFieldsRefreshId = 0;
+
+// 表单重新打开时，表配置中的 fields 可能是上次保存的快照。
+// 以数据库实时字段为准，避免表设计器修改类型后关联配置仍显示旧类型。
+async function refreshConfiguredTableFields(configs: TableConfig[]) {
+  const refreshId = ++configuredFieldsRefreshId;
+  const refreshedConfigs = await Promise.all(
+    configs.map(async (table) => {
+      if (!table.meta?.dbName || !table.tableName) return table;
+
+      const fields = await refreshSelectedTableFields(
+        table.tableName,
+        table.meta,
+      );
+      return fields ? { ...table, fields } : table;
+    }),
+  );
+
+  // 如果期间表配置已经发生变化，丢弃本次旧查询结果。
+  if (refreshId !== configuredFieldsRefreshId) return;
+
+  emit('update:modelValue', refreshedConfigs);
+}
+
+watch(
+  () =>
+    props.modelValue
+      .map(
+        (table) =>
+          `${table.id}:${table.tableName}:${table.meta?.dbName || ''}:${table.meta?.database || ''}:${table.meta?.schema || ''}`,
+      )
+      .join('|'),
+  () => refreshConfiguredTableFields(props.modelValue),
+  { immediate: true },
+);
 
 // 表设计器保存成功回调
 async function handleTableEditorSuccess() {
